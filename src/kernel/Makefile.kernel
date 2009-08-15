@@ -1,0 +1,47 @@
+#
+# Makefile.kernel
+#
+# Custom build settings that apply to all kernel components.  Values here
+# replace or modify the default settings in Makefile.src.  All kernel makefiles
+# should include this one.
+#
+
+
+#
+# Inherit the default settings
+#
+include $(DX_ROOT_DIR)/src/Makefile.src
+
+
+
+#
+# The root of the kernel tree
+#
+DX_KERNEL_DIR	:= $(DX_SRC_DIR)/kernel
+
+
+
+#
+# Kernel-specific tool settings
+#
+ASM_INCLUDES	+= -I$(DX_KERNEL_DIR)/inc
+CXX_FLAGS		+= -ansi -fno-builtin -fno-exceptions \
+				  -fno-implicit-templates -fno-rtti -nostdinc++
+LINK_FLAGS		+= -T $(KERNEL_LINK_SCRIPT)
+
+
+
+#
+# Script for configuring the linker when building the kernel
+#
+KERNEL_LINK_SCRIPT	:= $(DX_KERNEL_DIR)/dx.link
+
+
+
+#
+# Assorted output files
+#
+KERNEL_FILE		:= dx
+DISASM_FILE		:= $(KERNEL_FILE).disasm
+SYMBOL_FILE		:= $(KERNEL_FILE).symbols
+

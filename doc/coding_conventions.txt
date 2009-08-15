@@ -1,0 +1,146 @@
+
+* DX Coding Style + Conventions *
+
+
+
+This document describes the preferred coding conventions + styles used in DX.
+Conventions described here should apply to all languages, except where specific
+languages are called out.
+
+
+
+File and directory names:
+	- Use all lower-case names, with underscores to separate words.  Examples:
+	  foo.asm, one_fish.hpp, two_fish.cpp.  Rationale: readability,
+	  consistency.
+
+	- Assembly code files should have a ".asm" suffix.  Example: foo.asm.
+
+	- Assembly header files should have a ".h" suffix.  Example: foo.h
+
+	- C code files should have a ".c" suffix.  Example: bar.c
+
+	- C header files should have a ".h" suffix.  Example: bar.h
+
+	- C++ code files should have a ".cpp" suffix.  Example: a.cpp.  Each .cpp
+	  file should typically have a corresponding .hpp file that declares its
+	  class interface, etc.
+
+	- C++ header files should have a ".hpp" suffix.  Example: a.hpp.
+
+	- Mixed-language include files should have a ".h" suffix.  Example:
+	  common_constants.h.  In general, these files should contain only C
+	  preprocessor directives, #define's, #include's, etc.
+
+
+Type definitions:
+	- For type names, use all lower-case names, with underscores to separate
+	  multiple words.  Example: thread_id_t.  Rationale: better readability;
+	  consistency.
+
+	- Use suffixes on type names to denote the type:
+		_c		-- class.  Example: message_c
+		_e		-- enumeration.  Example: color_e
+		_fp		-- function pointer.  Example: entry_point_fp
+		_s		-- struct.  Example: file_header_s
+		_t		-- atomic type.  Example: uint32_t
+
+	  Use suffixes to denote indirection:
+		_p		-- pointer to type.  Example: message_cp
+		_pp		-- pointer to pointer to type.  Example: message_cpp
+		_r		-- reference to type.  Example: message_cr
+
+	  Rationale: readability; religion.
+
+
+Variables and constants:
+	- For variables and asm symbols, use all lower-case names, with underscores
+	  to separate multiple words.  Examples: count, entry_point, block_size.
+	  In C++ code, this has the disadvantage of sometimes obscuring the scope
+	  of a symbol (e.g., is this symbol a class member or a local variable?);
+	  in these cases, it is sometimes useful to use the C++ "this" pointer
+	  explicitly to clarify the scope.  Example: this->member_name.  Rationale:
+	  better readability; consistency.
+
+	- For constants, use all upper-case names, with underscores to separate
+	  multiple words.  Example: BYTES_PER_WORD.  Rationale: better readability;
+	  consistency.
+
+	- Use a double-underscore prefix to indicate a variable with external
+	  linkage (global scope).  Example: __kernel_subsystem.  Yes, this
+	  potentially collides with the preprocessor namespace.  Rationale:
+	  clarifies scope and highlights references to (presumably-important)
+	  symbols.
+
+
+Methods/routines/functions:
+	- For routine/method names, use all lower-case names, with underscores
+	  to separate multiple words.  Examples: reboot(), count_words().
+	  Rationale: better readability; consistency.
+
+	- Symbol names visible to multiple languages must not be mangled.
+	  For C++ routines, this can be enforced by adding the ASM_LINKAGE
+	  preprocessor symbol to the routine definition.  Rationale: ASM and
+	  pure C code need not worry about mangled C++ names.
+
+	- Functions visible to multiple languages must use the cdecl calling
+	  convention.  Parameters pushed right-to-left, caller cleans up the stack.
+	  Rationale: one single convention; allows variable number of arguments.
+
+	- Prefer local assembly labels to explicit labels where appropriate.
+	  Rationale: fewer symbols to remember; slightly easier to read and
+	  maintain; fewer symbols in resulting binary.
+
+	- Where explicit assembly labels are useful for readability, use all
+	  lower-case names with underscores.  Example: branch_target.  Rationale:
+	  better readability; consistency.
+
+
+Preprocessor:
+	- All code files are preprocessed (C and C++ obviously, but also ASM) at
+	  compile-time.
+
+	- For macros, use all-uppercase names, with underscores to separate
+	  multiple words.  Example: PAGE_BASE.  Rationale: consistency.
+
+
+Braces:
+	- Places braces at the same indentation as the contained statements, not
+	  at the indentation of the parent control statement (i.e., this is the
+	  "Whitesmith" style).  Example:
+		while (condition)
+			{
+			do_something();
+			do_something_else();
+			}
+	  Rationale: religion.
+
+
+Whitespace:
+	- Prefer tabs to spaces.  One tab = 4 spaces.  Rationale: readability,
+	  religion.
+
+	- Where possible, use whitespace to line up related definitions,
+	  statements, etc.  Example:
+		x	= something();
+		xyz	= something_else();
+	  Rationale: readability.
+
+	- ASM directives and labels should not be indented at all, should
+	  start in the first column.  Actual assembly instructions/code should
+	  be indented one tab (or 4 spaces).  Rationale: helps distinguish
+	  code from meta-data.
+
+
+Comments:
+	- Prefer C++-style comments in all code (ASM, C C++).  This requires
+	  C99 support for C code.  Rationale: consistency, religion.
+
+	- Use doxygen markup where possible.  In particular: in class, method and
+	  global variable definitions.  Rationale: maintenance; easier to
+	  generate/browse documentation.
+
+
+
+
+

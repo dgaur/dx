@@ -1,0 +1,47 @@
+
+* DX Directory Layout *
+
+This is a brief roadmap that describes the layout of the DX
+source tree.
+
+
+/dx
+
+	/doc		- Assorted dx documentation
+		/html	- Doxygen output from kernel + user code
+
+
+	/media		- Files and tools for generating dx images
+		/floppy	- Files and tools for generating floppy images
+		/iso	- Files and tools for generating .ISO images
+
+
+	/src		- All source code (kernel, user, libraries, etc)
+
+		/common	- Common library code shared between the kernel + user
+				  applications.  Currently, this only contains a small C
+				  library
+
+		/inc	- Global #include files shared across the kernel, applications,
+				  libraries, etc
+
+		/kernel	- dx kernel code
+			/boot			- Kernel boot + init logic
+			/device_proxy	- Device proxy subsystem for user mode drivers
+			/drivers		- Builtin kernel drivers
+			/hal			- Hardware Abstraction Layer (HAL)
+			/inc			- Kernel headers
+			/io_manager		- Messages-passing and scheduling
+			/klibk			- Misc kernel library: messages, bitmaps, etc
+			/memory_manager	- Memory management subsystem
+			/thread_manager	- Thread creation + deletion
+
+
+		/user	- User-mode code.
+			/inc			- User headers
+			/keyboard		- Keyboard driver
+			/libdx			- Library of system calls to dx kernel
+			/loader			- Loader for initializing user-space from ramdisk
+			/user_start		- Startup files for all user-mode applications
+			/vga			- VGA driver
+

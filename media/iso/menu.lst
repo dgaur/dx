@@ -1,0 +1,31 @@
+#
+# Boot menu for grub.  This version of menu.lst is intended for CD/ISO images.
+#
+
+
+# DX is the default boot option
+default 0
+timeout 5
+
+
+# Boot dx from floppy
+title	dx
+kernel	/boot/dx
+module	/boot/ramdisk.tgz
+
+
+# Dump memory info
+title Display memory info
+displayapm
+pause Press any key to continue
+displaymem
+pause Press any key to continue
+
+
+# Install GRUB to the local hard drive
+title Install GRUB to local hard drive (hd0, partition0)
+pause	This will overwrite any data on the boot partition of hd0:0!
+root	(hd0, 0)
+setup	(hd0)
+pause Press any key to continue
+

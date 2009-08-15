@@ -1,0 +1,156 @@
+#
+# Makefile.src
+#
+# This file contains basic definitions and default values for all OS
+# components: the kernel, loadable drivers, applications, user libraries, etc.
+# Customization of these settings (additions, mostly) should be handled further
+# down the tree as necessary
+#
+# Environment variables that affect the processing of this makefile:
+#	* "DEBUG" may be set to produce a debug build.  By default, the build
+#	   process will produce a production/release build if this value is not
+#	   set.  Typically, this value should be set on the command-line (e.g.,
+#	   "make DEBUG=1").
+#
+#	* "DX_CROSS_COMPILE_PREFIX" should be set to the prefix of the
+#	   cross-compilation tools, if necessary.  If used, this value
+#	   will usually be something like "i386-elf".  Typically, this
+#	   should be declared in the local environment (e.g., "export
+#	   DX_CROSS_COMPILE_PREFIX=i386-elf-").
+#
+#	* "DX_ROOT_DIR" should point to the root of the source tree;
+#	   typically, this should be declared in the local environment
+#	   (e.g., "export DX_ROOT_DIR=~/src/dx").  This value must be set
+#	   before building.
+#
+
+
+#
+# Inherit the global OS build settings
+#
+include $(DX_ROOT_DIR)/Makefile.dx
+
+
+
+#
+# Tools.  See doc/tools.txt for specific version requirements
+#
+AR			:= $(DX_CROSS_COMPILE_PREFIX)ar
+ASM			:= $(DX_CROSS_COMPILE_PREFIX)gcc
+CC			:= $(DX_CROSS_COMPILE_PREFIX)gcc
+CXX			:= $(DX_CROSS_COMPILE_PREFIX)gcc
+LINK		:= $(DX_CROSS_COMPILE_PREFIX)ld
+NM			:= $(DX_CROSS_COMPILE_PREFIX)nm
+OBJCOPY		:= $(DX_CROSS_COMPILE_PREFIX)objcopy
+OBJDUMP		:= $(DX_CROSS_COMPILE_PREFIX)objdump
+SHELL		:= /bin/sh
+STRIP		:= $(DX_CROSS_COMPILE_PREFIX)strip
+
+
+
+#
+# Default tool settings
+#
+AR_FLAGS		= -rcs
+ASM_DEFINES		=
+ASM_FLAGS		= -c -o $@ -xassembler-with-cpp
+ASM_INCLUDES	= -I. -I$(DX_SRC_DIR)/inc
+CC_DEFINES		= $(ASM_DEFINES)
+CC_FLAGS		= -c -march=i586 -nostdinc -o $@ -pipe -W -Wall -Wshadow
+CC_INCLUDES		= $(ASM_INCLUDES)
+CXX_DEFINES		= $(CC_DEFINES)
+CXX_FLAGS		= $(CC_FLAGS)
+CXX_INCLUDES	= $(CC_INCLUDES)
+LINK_FLAGS		= -nostdlib -o $@
+NM_FLAGS		= -C -n
+OBJDUMP_FLAGS	= -C -d
+STRIP_FLAGS		=
+
+
+
+#
+# Production or debug build?
+#
+ifdef DEBUG
+	CC_DEFINES  += -DDEBUG -O0
+	CXX_DEFINES += -DDEBUG -O0
+else
+	CC_FLAGS  += -O2 -fomit-frame-pointer
+	CXX_FLAGS += -O2 -fomit-frame-pointer
+endif
+
+
+
+#
+# Common library code, shared between kernel + user space
+#
+LINK_LIBC			:= $(DX_SRC_DIR)/common/libc/libc.a
+LINK_LIBGCC			:= $(shell $(CC) $(CC_FLAGS) --print-libgcc-file-name)
+LINK_COMMON_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
+
+
+
+#
+# The dx runtime library must be linked with all user-mode executables
+#
+LINK_LIBDX			:= $(DX_SRC_DIR)/user/libdx/libdx.a
+LINK_USER_LIBS		:= $(LINK_LIBDX)
+
+
+
+#
+# The default entry point for all user-mode executables
+#
+LINK_START_FILE		:= $(DX_SRC_DIR)/user/user_start/user_start.o
+
+
+
+#
+# As a nicety, rebuild any of the well-known libraries from anywhere in the
+# tree; this is mainly useful when building individual subdirectories
+#
+$(LINK_COMMON_LIBS) $(LINK_USER_LIBS) $(LINK_START_FILE):
+	@echo "Automatically rebuilding: $@"
+	@$(MAKE) -C $(dir $@)
+
+
+
+#
+# Inference rules
+#
+%.o: %.asm $(MAKEFILE_LIST)
+	@echo Assembling $< ...
+	@$(ASM) $(ASM_INCLUDES) $(ASM_FLAGS) $(ASM_DEFINES) $<
+
+%.o: %.cpp $(MAKEFILE_LIST)
+	@echo Compiling $< ...
+	@$(CXX) $(CXX_INCLUDES) $(CXX_FLAGS) $(CXX_DEFINES) $<
+
+%.o: %.c $(MAKEFILE_LIST)
+	@echo Compiling $< ...
+	@$(CC) $(CC_INCLUDES) $(CC_FLAGS) $(CC_DEFINES) $<
+
+%.a: %.o $(MAKEFILE_LIST)
+	@echo Archiving $@ ...
+	@$(AR) $(AR_FLAGS) $@ $(filter-out $(MAKEFILE_LIST), $^)
+
+%.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(LINK_COMMON_LIBS) $(MAKEFILE_LIST)
+	@echo Linking $@ ...
+	@$(LINK) $(LINK_FLAGS) $(LINK_TEXT_SECTION) \
+		$(filter-out $(MAKEFILE_LIST), $^) \
+		$(LINK_USER_LIBS) $(LINK_COMMON_LIBS)
+
+%.dep: %.asm $(MAKEFILE_LIST)
+	@echo Generating dependencies for $< ...
+	@$(ASM) -xassembler-with-cpp $(ASM_INCLUDES) $(ASM_DEFINES) \
+		-M -MT '$*.o $*.dep' $< > $@
+
+%.dep: %.c $(MAKEFILE_LIST)
+	@echo Generating dependencies for $< ...
+	@$(CC) $(CC_INCLUDES) $(CC_DEFINES) -M -MT '$*.o $*.dep' $< > $@
+
+%.dep: %.cpp $(MAKEFILE_LIST)
+	@echo Generating dependencies for $< ...
+	@$(CXX) $(CXX_INCLUDES) $(CXX_DEFINES) -M -MT '$*.o $*.dep' $< > $@
+
+

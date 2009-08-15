@@ -1,0 +1,70 @@
+
+* Cross-compiling DX under Cygwin *
+
+
+This document describes how to configure + build the GNU toolchain under
+cygwin.  Typically this is necessary because the default tools are
+configured to produce PE object files (the Windows native format), whereas
+DX requires ELF object files.  If you are building natively under Linux
+or *BSD, this probably is not necessary.
+
+These instructions are known to work with binutils-20060817-1 and gcc-3.4.4-3.
+
+
+* Determining if the cross-compiler is necessary:
+	- Run "objdump -i".  If the first supported target is not "elf32-i386",
+	  the you need to build the cross-compiler.
+	@@perhaps: objdump -i | head -2 | tail -1
+
+* Building the tools:
+	- Fetch the tarballs for binutils, gcc-core and gcc-g++.  If you
+	  install them via the Cygwin setup.exe tools, they are typically
+	  installed under /usr/src.
+	- cd /usr/src
+	- tar xvzf binutils.tar.gz
+	- tar xvzf gcc-core.tar.gz
+	- tar xvzf gcc-g++.tar.gz [This should unpack into the same directory
+	  as gcc-core.tar.gz]
+
+	- cd /tmp
+	- mkdir binutils
+	- cd binutils
+	- /usr/src/binutils/configure --target=i386-elf
+	- make
+	- make install
+	- Verify that you now have /bin/i386-elf-as, /bin/i386-elf-ld,
+	  /bin/i386-elf-nm and /bin/i386-elf-objdump
+	- Run "/bin/i386-elf-objdump -i" and verify that it lists "elf32-i386"
+	  as the first supported target.
+
+
+	[The binutils-20060817-1 package only seems to build properly in the
+	directory where it's unpacked, /usr/src/binutils in this case]
+	- cd /usr/src/binutils
+	- configure --target=i386-elf
+	- make
+	- make install
+	- Verify that you now have i386-elf-as, i386-elf-ld, i386-elf-nm and
+	  i386-elf-objdump all in /usr/local/bin
+	- Run "/usr/local/bin/i386-elf-objdump -i" and verify that it lists
+	  "elf32-i386" as the first supported target.
+
+
+	- cd /tmp
+	- mkdir gcc
+	- cd gcc
+	- /usr/src/gcc/configure --target=i386-elf --enable-languages="c,c++"
+	  --with-gnu-as --with-gnu-ld
+	- make
+		Compilation errors in libstdc++ are not fatal and can be ignored.
+		The error will be something like:
+		configure: error: No support for this host/target combination.
+		make: *** [configure-target-libstdc++-v3] Error 1
+	- make install
+		Again, this may fail in the libstdc++ compilation; and again, this
+		is ok.
+	- Verify that you now have i386-elf-gcc and i386-elf-g++ in /usr/local/bin
+
+	- In your build environment, set DX_CROSS_COMPILE_PREFIX to "i386-elf-"
+
+

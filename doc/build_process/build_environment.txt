@@ -1,0 +1,85 @@
+
+* DX Build Environment *
+
+
+
+This document provides a brief overview of the DX build environment.  See also
+directory_layout.txt for a brief description of the source tree layout.
+
+
+
+* Building the code:
+	Define the environment variable DX_ROOT_DIR; it should point to the root
+	of the DX source tree.
+	Example:
+		% export DX_ROOT_DIR=~/src/dx
+
+	If you are using a cross-compiler (e.g., under cygwin), define another
+	environment varible DX_CROSS_COMPILE_PREFIX; set it to the prefix string
+	of the cross compilation tools.  See cross_compiling.txt as well.
+	Example:
+		% export DX_CROSS_COMPILE_PREFIX="i386-elf-"
+
+	Use "make all" in the dx root directory to build the entire dx tree: the
+	kernel, applications, libraries, media images, doxygen documentation, etc.
+	Example:
+		% cd $DX_ROOT_DIR
+		% make all
+
+	"make help" will provide a brief list of build targets/options.
+	Example:
+		% cd $DX_ROOT_DIR
+		% make help
+
+
+
+* Makefile.dx:
+	Makefile.dx (in $DX_ROOT_DIR) contains common defintions used throughout
+	the entire DX source tree.  All other makefiles should include this one.
+
+	DX_ROOT_DIR should be set in the local environment; it should
+	point to the root of the DX source tree.  Once this is done,
+	makefiles can include $(DX_ROOT_DIR)/Makefile.dx to inherit the
+	global build options.
+
+
+
+* Makefile.src:
+	Makefile.src (in $DX_ROOT_DIR/src) contains common build definitions used
+	throughout the source tree.  All makefiles under $DX_ROOT_DIR/src should
+	include this one.
+
+
+
+* Makefile.common, Makefile.kernel, Makefile.user:
+	These makefiles contain common build definitions for the common library
+	code; the kernel code; and user code; respectively.  These makefiles live
+	in the corresponding subdirectories beneath $DX_ROOT_DIR/src.
+
+	In general,	these makefiles inherit all of the settings from Makefile.src
+	and simply add any additional flags or settings as needed.
+
+
+
+* Makefile.inc:
+	Every kernel subdirectory contains a file named Makefile.inc, which
+	describes the dependencies for the code in that directory.  Adding or
+	deleting a file in a directory typically only requires updating
+	Makefile.inc.
+
+	Makefile.inc is included by multiple makefiles: the Makefile in the
+	same directory; and the Makefile in parent kernel directory.
+
+	The local directory name is encoded within each Makefile.inc, so moving
+	or renaming directories will require editing Makefile.inc.
+
+
+
+* dx.link:
+	This is the script for controlling the kernel link and layout of the
+	kernel image.  This file dictates the location of the initial kernel
+	image and the location of the initial boot thread context.  Invoked from
+	$(DX_KERNEL_DIR)/Makefile at link-time.
+
+
+

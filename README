@@ -1,0 +1,35 @@
+
+This is the dx operating system
+
+
+
+* CURRENT STATUS
+	Still under active development.  Not useful yet.  Basic micro kernel,
+	some user mode libraries, couple of user executables.  Nothing else.
+
+
+
+* BUILD INSTRUCTIONS
+	See the documentation under dx/doc/build.
+
+
+
+* RELEASE NOTES and CHANGES FROM PREVIOUS VERSIONS
+	See dx/doc/release-notes.txt
+
+
+
+* ONLINE
+	This code is officially hosted at kenai.com@@@@@
+
+
+
+* COPYRIGHT + LICENSE
+	This code is distributed under the standard two-clause BSD license.  See
+	dx/doc/license.txt
+
+	All code is copyright (c) 2005 - 2009, Dan Gaur, except where noted.
+
+	Includes Doug Lea's (public domain) malloc.c implementation.
+	See dx/src/common/libc/malloc.c
+

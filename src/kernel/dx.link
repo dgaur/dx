@@ -1,0 +1,116 @@
+/*
+ * dx.link
+ *
+ * Script for controlling kernel linkage.  Defines the layout of the final
+ * kernel binary image + some basic link-time configuration
+ *
+ * This file isn't strictly required -- most of the functionality added
+ * here could be accomplished with smart Makefiles + kernel code -- but it
+ * makes the resulting code a little cleaner and eliminates some
+ * dependencies/assumptions about the linker + its behavior.
+ */
+
+
+
+/*
+ * Initial entry point into kernel; GRUB jumps here after loading the kernel
+ */
+ENTRY(boot_kernel)
+
+
+
+/*
+ * Output file is a 32b x86 ELF image
+ */
+OUTPUT_ARCH(i386)
+OUTPUT_FORMAT("elf32-i386")
+
+
+
+/*
+ * Layout of the actual kernel binary
+ */
+SECTIONS
+	{
+	/*
+	 * Kernel load address (2MB).  GRUB places the kernel at this physical
+	 * address when booting; and the ramdisk immediately after it.
+	 */
+	. = 0x200000 ;
+	KERNEL_LOAD_ADDRESS = . ;
+	KERNEL_IMAGE_START = . ;
+
+
+	/*
+	 * Code ("text") section.  Contains the actual kernel code.  This section
+	 * is executable, read-only
+	 */
+	.text : ALIGN(0x100)
+		{
+		*(.multiboot)	/* Multiboot data must be within first 8K of image */
+		*(.text)
+		*(.gnu.linkonce.t*)
+		}
+
+
+	/*
+	 * Initialized, read-only (constant) data.  This section is read-only.
+	 */
+	.rodata : ALIGN(0x100)
+		{
+		*(.gnu.linkonce.r*)
+		*(.rodata)
+		}
+
+
+	/*
+	 * Initialized, read-write data
+	 */
+	.data : ALIGN(0x100)
+		{
+		*(.data)
+		*(.gnu.linkonce.d*)
+		}
+
+
+	/*
+	 * Uninitialized data.  Section is read-write.  The early stages of the
+	 * kernel initialization process will zero this section for safety
+	 */
+	.bss : ALIGN(0x100)
+		{
+		KERNEL_BSS_START = ABSOLUTE(.) ;
+
+		*(.bss)
+		*(COMMON)
+		*(.gnu.linkonce.b*)
+
+		/* Easier to clear this section if it ends neatly on a 32B boundary */
+		. = ALIGN(32) ;
+		KERNEL_BSS_END = ABSOLUTE(.) ;
+		}
+
+
+	/*
+	 * Commonly-emitted but unnecessary (for the kernel) sections
+	 */
+	/DISCARD/ :
+		{
+		*(.comment*)
+		*(.ctors)			/* Kernel does not use any global ctor/dtors */
+		*(.dtors)
+		*(.eh_frame*)		/* Kernel does not throw exceptions */
+		*(.gnu*)
+		*(.note*)
+		*(.rel*)			/* Kernel is not relocatable */
+							/*@@@what about loadable drivers/modules? */
+		}
+
+
+	/*
+	 * The end of the kernel image
+	 */
+	. = ALIGN(32) ;
+	KERNEL_IMAGE_END = . ;
+	}
+

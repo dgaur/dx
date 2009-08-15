@@ -1,0 +1,34 @@
+#
+# Makefile.dx
+#
+# Global settings for the entire dx tree + build process.  All makefiles
+# should include this one
+#
+
+
+
+#
+# Various subtrees
+#
+DX_DOC_DIR		:= $(DX_ROOT_DIR)/doc
+DX_ETC_DIR		:= $(DX_ROOT_DIR)/etc
+DX_MEDIA_DIR	:= $(DX_ROOT_DIR)/media
+DX_SRC_DIR		:= $(DX_ROOT_DIR)/src
+
+
+
+#
+# All build rules + variables must be explicitly defined.  Minimize the amount
+# of extraneous build output
+#
+MAKEFLAGS += --no-builtin-variables --no-print-directory
+
+
+
+#
+# The default target is always "all", if no explicit target is given on the
+# command-line
+#
+.PHONY: default_target
+default_target: all
+

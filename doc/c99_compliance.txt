@@ -1,0 +1,65 @@
+
+*** Compliance with C99 ***
+
+
+In general, the libc implementation here is minimal and only provides partial
+support for C99; it is not a full implementation at all.
+
+Note that the libc is *SHARED* between the kernel and user applications.  The
+kernel uses some of the standalone library routines (e.g., memcpy, memset,
+etc).
+
+
+assert.h		-- Provides partial/incomplete definition of assert().
+
+complex.h		-- Not provided.
+
+ctype.h			-- Not provided.
+
+errno.h			-- Defines errno, EDOM, EILSEQ and ERANGE.  Also defines the
+					standard POSIX error codes as well.
+
+fenv.h			-- Not provided.
+
+float.h			-- Not provided.
+
+inttypes.h		-- Not provided.
+
+iso646.h		-- Not provided.
+
+limits.h		-- All limits defined.
+
+locale.h		-- Not provided.
+
+math.h			-- Not provided.
+
+setjmp.h		-- Not provided.
+
+signal.h		-- Not provided.
+
+stdarg.h		-- Defines all va_* macros, but relies on GCC implementation
+					due to optimization errors.
+
+stdbool.h		-- Defines bool, _Bool, true and false.
+
+stddef.h		-- Defines only size_t and NULL.
+
+stdint.h		-- intN_t, uintN_t, intptr_t and uintptr_t types defined.
+
+stdio.h			-- All routines defined, but not all implemented.  I/O
+					structures are incomplete.
+
+stdlib.h		-- All routines defined, but not all implemented.  Includes
+					itoa() and uitoa() as extensions.  abs(), min(), max() are
+					all defined as macros.
+
+string.h		-- All routines defined, but not all implemented.  Includes
+					strrev() as an extension.
+
+tgmath.h		-- Not provided.
+
+time.h			-- Not provided.
+
+wchar.h			-- Not provided.
+
+wctype.h		-- Not provided.

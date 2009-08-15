@@ -1,0 +1,471 @@
+//
+// keyboard.c
+//
+
+#include "assert.h"
+#include "dx/delete_message.h"
+#include "dx/hal/io_port.h"
+#include "dx/map_device.h"
+#include "dx/receive_message.h"
+#include "dx/register_interrupt_handler.h"
+#include "dx/send_message.h"
+#include "dx/status.h"
+#include "dx/unmap_device.h"
+#include "dx/unregister_interrupt_handler.h"
+#include "keyboard_context.h"
+#include "keyboard_scan_code.h"
+#include "stdlib.h"
+#include "string.h"
+
+
+static void_t handle_make_code(	keyboard_context_sp	keyboard,
+								uint8_t				scan_code);
+
+static char8_t translate_scan_code(	const keyboard_context_s*	keyboard,
+									uint8_t						scan_code);
+
+static void_t wait_for_messages(keyboard_context_sp keyboard);
+
+
+
+
+///
+/// I/O port addresses for configuring the keyboard controller
+///
+static
+const
+uint16_t KEYBOARD_PORT[] =
+	{
+	KEYBOARD_OUTPUT_BUFFER,
+	KEYBOARD_STATUS_REGISTER
+	};
+
+static
+const
+size_t KEYBOARD_PORT_COUNT = sizeof(KEYBOARD_PORT)/sizeof(KEYBOARD_PORT[0]);
+
+
+
+///
+/// Driver cleanup on exit.  Releases any resources allocated during init.
+/// If an error occurred during initialization, then some expected resources
+/// may not have been allocated; must check each item before freeing/releasing
+/// it here.
+///
+/// @param keyboard -- driver context
+///
+static
+void_t
+cleanup(keyboard_context_sp keyboard)
+	{
+	if (keyboard)
+		{
+		// Halt the interrupt handler
+		if (keyboard->interrupt_handler_thread != THREAD_ID_INVALID)
+			{
+			unregister_interrupt_handler(	KEYBOARD_INTERRUPT_VECTOR,
+											keyboard->interrupt_handler_thread);
+			}
+
+		// Release the allocated I/O ports, if any
+		for (unsigned i = 0; i < KEYBOARD_PORT_COUNT; i++)
+			{ unmap_device(KEYBOARD_PORT[i], DEVICE_TYPE_IO_PORT, 1); }
+
+		// Release the driver context itself
+		free(keyboard);
+		}
+
+	return;
+	}
+
+
+///
+/// Complete a previous request to read from the keyboard.  Send the next
+/// input character back to the requestor
+///
+/// @param request		-- the request to be answered
+/// @param character	-- the next pending character, to be sent to the
+///							original requestor
+///
+static
+void_t
+finish_read_request(const message_s*	request,
+					char8_t				character)
+	{
+	message_s reply;
+
+	assert(request);
+
+	// Send this character to the caller
+	reply.u.destination			= request->u.source;
+	reply.type					= MESSAGE_TYPE_READ_COMPLETE;
+	reply.id					= request->id;
+	reply.data					= (void_t*)((uintptr_t)character);
+	reply.data_size				= 0;
+	reply.destination_address	= NULL;
+
+	// Send the key/character back to the original requestor; this wakes
+	// (unblocks) the requesting thread
+	send_message(&reply);
+
+	return;
+	}
+
+
+///
+/// Handle a key-up (key release) event
+///
+/// @param keyboard		-- driver context
+/// @param scan_code	-- break-code retrieved from keyboard controller
+///
+static
+void_t
+handle_break_code(	keyboard_context_sp	keyboard,
+					uint8_t				scan_code)
+	{
+	// Discard the high bit, to produce the corresponding make-code (and
+	// index into the scan-code table)
+	scan_code &= ~KEYBOARD_CODE_BREAK;
+
+	//@only need to deal with silent keys: shift, control, alt, etc; ignore
+	//@all others?
+
+	return;
+	}
+
+
+///
+/// Handler for processing (deferred) keyboard interrupts.  This is the second
+/// (deferred) portion of handle_interrupt.  Runs in the context of the main
+/// keyboard thread, outside interrupt context.
+///
+static
+void_t
+handle_deferred_interrupt(	keyboard_context_sp	keyboard,
+							const message_s*	message)
+	{
+	// Scan code is embedded in message payload
+	uint8_t scan_code = (uintptr_t)(message->data);
+
+	// Key down?
+	if (IS_SIMPLE_MAKE_CODE(scan_code))
+		{ handle_make_code(keyboard, scan_code); }
+
+	// Key up?
+	else if (IS_SIMPLE_BREAK_CODE(scan_code))
+		{ handle_break_code(keyboard, scan_code); }
+
+	// Some kind of control byte/reply
+	//@else handle_control_code()
+
+	return;
+	}
+
+
+///
+/// Keyboard interrupt handler.  Runs in interrupt context, within the
+/// dedicated interrupt handler thread for the keyboard driver.  Consume the
+/// next pending data or error from the keyboard, pass it back to the main
+/// keyboard thread
+///
+/// @see handle_deferred_interrupt()
+///
+static
+bool_t
+handle_interrupt(	void_tp		context,
+					uintptr_tp	defer_message_data)
+	{
+	uint8_t		keyboard_status;
+	bool_t		send_defer_message = FALSE;
+
+
+	//
+	// Determine the current keyboard state; typically, it will interrupt to
+	// signal a key up/down event
+	//
+	keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+
+	if (keyboard_status & KEYBOARD_STATUS_OUTPUT_BUFFER_READY)
+		{
+		// Consume the next scan code from the keyboard.  Delegate all further
+		// processing + scan code translation to the main keyboard thread
+		*defer_message_data	= io_port_read8(KEYBOARD_OUTPUT_BUFFER);
+		send_defer_message	= TRUE;
+		}
+
+	//@if (timeout or parity error), send RESEND command?
+
+	return(send_defer_message);
+	}
+
+
+///
+/// Handle a key-down (key press) event
+///
+/// @param keyboard		-- driver context
+/// @param scan_code	-- make-code retrieved from keyboard controller
+///
+static
+void_t
+handle_make_code(	keyboard_context_sp	keyboard,
+					uint8_t				scan_code)
+	{
+	char8_t character = translate_scan_code(keyboard, scan_code);
+
+	if (character != 0)	//@nonprinting chars
+		{
+		//
+		// If a thread is already waiting, then wake it here
+		//
+		if (keyboard->pending_request)
+			{
+			// If a thread is already waiting, then the keyboard buffer/queue
+			// should be empty by definition
+			assert(keyboard->queue_head == keyboard->queue_tail);
+			finish_read_request(keyboard->pending_request, character);
+
+			// This request is now satisfied, so discard it
+			free(keyboard->pending_request);
+			keyboard->pending_request = NULL;
+			}
+
+		else
+			{
+			// No threads are waiting for input, so just record this input key
+			// for later consumption
+			keyboard->queue[ keyboard->queue_tail ] = character;
+			keyboard->queue_tail =
+				(keyboard->queue_tail+1) % KEYBOARD_QUEUE_SIZE;
+			}
+		}
+
+	return;
+	}
+
+
+///
+/// Handle a request to read from the keyboard.  Dequeue the next pending
+/// keystroke, if any, and send it back to the requestor; block the requestor
+/// if no keyboard data is currently available
+///
+/// @param keyboard	-- driver context
+/// @param request	-- the incoming request message
+///
+static
+void_t
+handle_read_request(keyboard_context_sp	keyboard,
+					const message_s*	request)
+	{
+	//
+	// If at least one keystroke is pending, then dequeue it here and
+	// immediately return it to the caller
+	//
+	if (keyboard->queue_tail != keyboard->queue_head)
+		{
+		char8_t character = keyboard->queue[keyboard->queue_head];
+		keyboard->queue_head =
+			(keyboard->queue_head+1) % KEYBOARD_QUEUE_SIZE;
+
+		finish_read_request(request, character);
+		}
+	else
+		{
+		// No keyboard input is pending, so block the caller until the request
+		// can be satisfied
+		assert(keyboard->pending_request == NULL);
+		keyboard->pending_request = malloc(sizeof(*request));
+		if (keyboard->pending_request)
+			{ memcpy(keyboard->pending_request, request, sizeof(*request)); }
+
+		//@else, caller is stuck
+		}
+
+	return;
+	}
+
+
+///
+/// Driver initialization.  Runs once, at load time.  Allocates or initializes
+/// all runtime resources.  All resources allocated here must later be freed
+/// via cleanup().
+///
+/// @return a pointer to the driver context structure; or NULL on error
+///
+static
+keyboard_context_sp
+initialize()
+	{
+	keyboard_context_sp		keyboard	= NULL;
+	status_t				status;
+
+
+	do
+		{
+		//
+		// Allocate the actual device context
+		//
+		keyboard = malloc(sizeof(*keyboard));
+		if (!keyboard)
+			{
+			status = STATUS_INSUFFICIENT_MEMORY;
+			break;
+			}
+		memset(keyboard, 0, sizeof(*keyboard));
+
+
+		//
+		// Map the necessary I/O ports for configuring the device
+		//
+		for (unsigned i = 0; i < KEYBOARD_PORT_COUNT; i++)
+			{
+			status = map_device(KEYBOARD_PORT[i], DEVICE_TYPE_IO_PORT, 1,NULL);
+			if (status != STATUS_SUCCESS)
+				{ break; }
+			}
+
+
+		//
+		// Initially, no input queue/backlog
+		//
+		keyboard->queue_head = 0;
+		keyboard->queue_tail = 0;
+
+
+		//
+		// Register the interrupt handler
+		//
+		keyboard->interrupt_handler_thread =
+			register_interrupt_handler(	KEYBOARD_INTERRUPT_VECTOR,
+										handle_interrupt,
+										keyboard);
+		if (keyboard->interrupt_handler_thread == THREAD_ID_INVALID)
+			{
+			status = STATUS_RESOURCE_CONFLICT;
+			break;
+			}
+
+
+		//
+		// Done
+		//
+
+		} while(0);
+
+
+	// Clean up on error
+	if (status != STATUS_SUCCESS && keyboard)
+		{
+		cleanup(keyboard);
+		keyboard = NULL;
+		}
+
+
+	return(keyboard);
+	}
+
+
+///
+/// Driver entry point
+///
+int
+main()
+	{
+	status_t			status;
+	keyboard_context_sp	keyboard;
+
+	keyboard = initialize();
+	if (keyboard)
+		{
+		//@configure_hardware(keyboard);
+		//@identify keyboard type: AT/XT/MF2
+		//@maybe set repeat rate/delay?
+
+		wait_for_messages(keyboard);
+
+		cleanup(keyboard);
+
+		status = STATUS_SUCCESS;
+		}
+	else
+		{
+		status = STATUS_RESOURCE_CONFLICT;
+		}
+
+	return(status);
+	}
+
+
+///
+/// Translate a scan code (read from the keyboard) into a character (for
+/// display on the console)
+///
+/// No side effects
+///
+/// @param scan_code -- scan code read from the keyboard
+///
+/// @return character equivalent to the scan_code, if any
+///
+static
+char8_t
+translate_scan_code(const keyboard_context_s*	keyboard,
+					uint8_t						scan_code)
+	{
+	char8_t character;
+
+	//@should account for SHIFT, CTRL, different key maps, etc
+	character = scan_code_map_unshifted[scan_code];
+
+	return(character);
+	}
+
+
+///
+/// Main message loop.  Wait for incoming messages + dispatch them as
+/// appropriate.  The driver spends the majority of its execution time in
+/// this loop
+///
+/// @param keyboard	-- driver context
+///
+static
+void_t
+wait_for_messages(keyboard_context_sp keyboard)
+	{
+	message_s		message;
+	status_t		status;
+
+
+	//
+	// Message loop.  Listen for incoming messages + dispatch them as
+	// appropriate
+	//
+	for(;;)
+		{
+		// Wait for the next request
+		status = receive_message(&message, WAIT_FOR_MESSAGE);
+		if (status != STATUS_SUCCESS)
+			continue;
+
+
+		// Dispatch the request as needed
+		switch(message.type)
+			{
+			case MESSAGE_TYPE_DEFER_INTERRUPT:
+				handle_deferred_interrupt(keyboard, &message);
+				break;
+
+			case MESSAGE_TYPE_READ:
+				handle_read_request(keyboard, &message);
+				break;
+
+			case MESSAGE_TYPE_NULL:
+			default:
+				break;
+			}
+
+
+		// Done with this request
+		delete_message(&message);
+		}
+
+	return;
+	}

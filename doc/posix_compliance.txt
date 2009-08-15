@@ -1,0 +1,15 @@
+
+*** Compliance with POSIX (IEEE 2003.1), Single Unix Specification (v3) ***
+
+
+In general, POSIX support is minimal.  Only enough to support Doug Lea's
+malloc().
+
+
+errno.h			-- Defines C99 errno and all standard error values.
+
+sys/types.h		-- Provides size_t.  Nothing else.
+
+unistd.h		-- Provides sbrk(), which isn't part of the POSIX standard.
+					Nothing else.
+

@@ -1,0 +1,95 @@
+//
+// interrupt_vectors.h
+//
+// List of PIC interrupt vectors, x86 CPU traps, exceptions + aborts
+//
+
+#ifndef _INTERRUPT_VECTORS_H
+#define _INTERRUPT_VECTORS_H
+
+
+//
+// The total range of valid interrupt vectors
+//
+#define		INTERRUPT_VECTOR_FIRST		0
+#define		INTERRUPT_VECTOR_LAST		256
+#define		INTERRUPT_VECTOR_COUNT		(INTERRUPT_VECTOR_LAST - \
+											INTERRUPT_VECTOR_FIRST)
+
+
+//
+// Different processor exceptions.  See the Intel processor manuals
+// for more details.
+//
+#define		INTERRUPT_VECTOR_DIVIDE_ERROR			0
+#define		INTERRUPT_VECTOR_DEBUG					1
+#define		INTERRUPT_VECTOR_NON_MASKABLE_INTERRUPT	2
+#define		INTERRUPT_VECTOR_BREAKPOINT				3
+#define		INTERRUPT_VECTOR_OVERFLOW				4
+#define		INTERRUPT_VECTOR_BOUND_RANGE_EXCEEDED	5
+#define		INTERRUPT_VECTOR_INVALID_OPCODE			6
+#define		INTERRUPT_VECTOR_DEVICE_NOT_AVAILABLE	7
+#define		INTERRUPT_VECTOR_DOUBLE_FAULT			8
+#define		INTERRUPT_VECTOR_COPROCESSOR_OVERRUN	9	// 386 only
+#define		INTERRUPT_VECTOR_INVALID_TSS			10
+#define		INTERRUPT_VECTOR_SEGMENT_NOT_PRESENT	11
+#define		INTERRUPT_VECTOR_STACK_SEGMENT_FAULT	12
+#define		INTERRUPT_VECTOR_GENERAL_PROTECTION		13
+#define		INTERRUPT_VECTOR_PAGE_FAULT				14
+#define		INTERRUPT_VECTOR_FLOATING_POINT_ERROR	16
+#define		INTERRUPT_VECTOR_ALIGNMENT_CHECK		17
+#define		INTERRUPT_VECTOR_MACHINE_CHECK			18	// Pentium and later
+
+// The range of valid processor exceptions
+#define		INTERRUPT_VECTOR_FIRST_PROCESSOR_EXCEPTION \
+				INTERRUPT_VECTOR_DIVIDE_ERROR
+#define		INTERRUPT_VECTOR_LAST_PROCESSOR_EXCEPTION \
+				INTERRUPT_VECTOR_MACHINE_CHECK
+
+
+
+//
+// Different device interrupts.  These correspond to the interrupts
+// received from the PIC.  IRQ 0-7 are on the master PIC; IRQ 8-15 are
+// on the slave PIC. Intel reserves the first 32 vectors for
+// processor-detected exceptions, so these must at vector 32 or
+// higher.
+//
+#define		INTERRUPT_VECTOR_PIC_IRQ0			32
+#define		INTERRUPT_VECTOR_PIC_IRQ1			33
+#define		INTERRUPT_VECTOR_PIC_IRQ2			34
+#define		INTERRUPT_VECTOR_PIC_IRQ3			35
+#define		INTERRUPT_VECTOR_PIC_IRQ4			36
+#define		INTERRUPT_VECTOR_PIC_IRQ5			37
+#define		INTERRUPT_VECTOR_PIC_IRQ6			38
+#define		INTERRUPT_VECTOR_PIC_IRQ7			39
+#define		INTERRUPT_VECTOR_PIC_IRQ8			40
+#define		INTERRUPT_VECTOR_PIC_IRQ9			41
+#define		INTERRUPT_VECTOR_PIC_IRQ10			42
+#define		INTERRUPT_VECTOR_PIC_IRQ11			43
+#define		INTERRUPT_VECTOR_PIC_IRQ12			44
+#define		INTERRUPT_VECTOR_PIC_IRQ13			45
+#define		INTERRUPT_VECTOR_PIC_IRQ14			46
+#define		INTERRUPT_VECTOR_PIC_IRQ15			47
+
+// The range of valid PIC interrupts
+#define		INTERRUPT_VECTOR_FIRST_PIC_IRQ			INTERRUPT_VECTOR_PIC_IRQ0
+#define		INTERRUPT_VECTOR_FIRST_MASTER_PIC_IRQ	INTERRUPT_VECTOR_PIC_IRQ0
+#define		INTERRUPT_VECTOR_LAST_MASTER_PIC_IRQ	INTERRUPT_VECTOR_PIC_IRQ7
+#define		INTERRUPT_VECTOR_FIRST_SLAVE_PIC_IRQ	INTERRUPT_VECTOR_PIC_IRQ8
+#define		INTERRUPT_VECTOR_LAST_SLAVE_PIC_IRQ		INTERRUPT_VECTOR_PIC_IRQ15
+#define		INTERRUPT_VECTOR_LAST_PIC_IRQ			INTERRUPT_VECTOR_PIC_IRQ15
+
+#define		INTERRUPT_VECTOR_PIC_COUNT					\
+				(INTERRUPT_VECTOR_LAST_PIC_IRQ -		\
+					INTERRUPT_VECTOR_FIRST_PIC_IRQ + 1)
+
+
+//
+// Internal (kernel-only) soft interrupts.  These are not system calls, and
+// not available to usermode threads
+//
+#define		INTERRUPT_VECTOR_YIELD				64
+
+
+#endif

@@ -1,0 +1,20 @@
+
+* DX Tools *
+
+The following tools were used in the development of DX.  Other
+tools or tool versions may also work, but are probably untested.
+
+
+* GNU bash version 3.1.17(6)-release
+
+* gcc version 3.4.4
+
+* GNU ld version 2.17.50 20060817
+
+* GNU Make version 3.81
+
+* debugfs 1.35 (28-Feb-2004)
+
+* genisoimage 1.1.7.1 (CYGWIN)
+
+

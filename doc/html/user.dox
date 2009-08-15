@@ -1,0 +1,33 @@
+#
+# Doxygen configuration file for dx user source
+#
+# Usage is just:
+#	% doxygen user.dox
+#
+# And then browse from:
+#	$(DX_ROOT_DIR)/doc/html/user/index.html
+#
+
+
+
+ALPHABETICAL_INDEX		= YES
+EXTRACT_ALL				= YES
+EXTRACT_PRIVATE			= YES
+EXTRACT_STATIC			= YES
+INPUT					= $(DX_ROOT_DIR)/src/user $(DX_ROOT_DIR)/src/inc
+FILE_PATTERNS			= *.c *.h		# No support for .asm code
+GENERATE_LATEX			= NO
+GENERATE_MAN			= NO
+GENERATE_RTF			= NO
+GENERATE_XML			= NO
+HTML_OUTPUT				= $(DX_ROOT_DIR)/doc/html/user
+PROJECT_NAME			= dx-user
+QUIET					= YES
+RECURSIVE				= YES
+REFERENCED_BY_RELATION	= YES
+REFERENCES_RELATION		= YES
+SEARCHENGINE			= NO
+SHOW_DIRECTORIES		= YES
+TAB_SIZE				= 4
+WARNINGS				= YES
+

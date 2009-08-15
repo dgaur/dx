@@ -1,0 +1,14 @@
+
+* DX RELEASE NOTES *
+
+
+
+* PENDING-RELEASE:
+	Initial public release on kenai.com.  Basic micro kernel; some user mode
+	libraries; couple of user mode executables.  Sole interface is a very
+	simple shell.  No other functionality.  Not useful yet.
+
+	Appears to be stable(?) on basic 32-bit x86 UP platforms.  Includes support
+	for basic VGA (text mode only); and (incomplete, very limited) support for
+	PS/2 keyboards.  The debug kernel writes output to COM1, 9600 8N1.
+
