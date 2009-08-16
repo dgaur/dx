@@ -1,0 +1,18 @@
+syntax: glob
+
+*.a
+*.bin
+*.dep
+*.disasm
+*.iso
+*.exe
+*.lst
+*.o
+*.symbols
+*.tgz
+*.vfd
+
+archive
+html
+media/*/root
+releases
