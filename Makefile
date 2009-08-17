@@ -36,6 +36,17 @@ all: $(ROOT_SUBDIRS)
 
 
 #
+# As a nicety, build a clean copy (archive) of the entire project tree; this
+# is typically useful for building release packages or posting tarballs, etc
+#
+archive:
+	@echo "Generating archive directory ..."
+	@hg archive $(DX_ARCHIVE_DIR)
+	@$(MAKE) -C $(DX_ARCHIVE_DIR)/doc/html
+
+
+	
+#
 # Build the child subdirectories individually
 #
 .PHONY: $(ROOT_SUBDIRS)
@@ -53,6 +64,7 @@ clean:
 	@for dir in $(ROOT_SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
+	@rm -rf archive
 
 
 
@@ -64,12 +76,13 @@ help:
 	@echo
 	@echo "Building the dx operating system --"
 	@echo "* \"make all\" builds the entire tree"
+	@echo "* \"make archive\" builds a clean project archive"
 	@echo "* \"make clean\" cleans the entire tree"
 	@echo "* \"make doc\" builds the doxygen (HTML) documentation"
 	@echo "* \"make help\" displays this message"
 	@echo "* \"make src\" builds the source tree"
 	@echo
-	@echo "Add \"DEBUG=1\" to generate a debug builds, e.g., \"make all DEBUG=1\""
+	@echo "Add \"DEBUG=1\" to generate a debug build, e.g., \"make all DEBUG=1\""
 	@echo
 
 

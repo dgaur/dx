@@ -27,8 +27,10 @@ function build_image
 	# Clean the entire tree, even the debug files
 	make clean DEBUG=1
 
-	# Build everything
-	make media INCLUDE_ARCHIVE=1 $3
+	# Build everything.  Include a clean copy (archive) of the current project
+	# tree + documentation, so that these may be included in the release
+	# package
+	make archive media $3
 	if [ $? -ne 0 ]; then
 		echo "Build failed (options $3)"
 		exit 1

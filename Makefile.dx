@@ -10,6 +10,7 @@
 #
 # Various subtrees
 #
+DX_ARCHIVE_DIR	:= $(DX_ROOT_DIR)/archive
 DX_DOC_DIR		:= $(DX_ROOT_DIR)/doc
 DX_ETC_DIR		:= $(DX_ROOT_DIR)/etc
 DX_MEDIA_DIR	:= $(DX_ROOT_DIR)/media

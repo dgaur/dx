@@ -28,13 +28,15 @@ build-tree: $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE)
 	@cp $(GRUB_STAGE2_FILE)					$(ISO_TREE)/boot/grub
 	@cp $(DX_SRC_DIR)/kernel/dx				$(ISO_TREE)/boot
 	@cp $(DX_SRC_DIR)/user/ramdisk.tgz		$(ISO_TREE)/boot
-	@ln -s $(DX_MEDIA_DIR)/dx.archive		$(ISO_TREE)/dx.archive
+	@if [ -e $(DX_ARCHIVE_DIR) ]; then \
+		ln -f -s $(DX_ARCHIVE_DIR) $(ISO_TREE); \
+	fi
 
 
 
 # Build the .iso image
 $(DX_ISO_IMAGE): build-tree Makefile
-	$(MKISOFS) -b boot/grub/$(GRUB_STAGE2_FILE) --boot-info-table \
+	@$(MKISOFS) -b boot/grub/$(GRUB_STAGE2_FILE) --boot-info-table \
 		--boot-load-size 4 -f --no-emul -o $@ -r $(ISO_TREE)
 
 
