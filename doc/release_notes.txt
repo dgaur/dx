@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.1, released 2009-08-16:
 	Initial public release on kenai.com.  Basic micro kernel; some user mode
 	libraries; couple of user mode executables.  Sole interface is a very
 	simple shell.  No other functionality.  Not useful yet.
