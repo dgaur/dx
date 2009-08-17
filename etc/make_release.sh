@@ -29,7 +29,7 @@ function build_image
 
 	# Build everything.  Include a clean copy (archive) of the current project
 	# tree + documentation, so that these may be included in the release
-	# package
+	# package  @@doxygen is reading the hg tree here, not the archive tree
 	make archive media $3
 	if [ $? -ne 0 ]; then
 		echo "Build failed (options $3)"
@@ -161,9 +161,9 @@ update_version_h		${NEW_VERSION} ${RELEASE_DATE}
 # Commit these changes so that they are properly reflected/reported in the
 # release build
 if [ -n "${ENABLE_COMMITS}" ]; then
-	echo
-	#@commit -m "Automatic update for version ${NEW_VERSION}"
-	#@tag ...
+	hg commit -m "Automatic update for version ${NEW_VERSION}"
+	hg tag -m "Automatic tag for version ${NEW_VERSION}" \
+		"version-${NEW_VERSION}"
 fi
 
 
@@ -177,7 +177,7 @@ build_image ${NEW_VERSION} "debug" "DEBUG=1"
 if [ -n "${ENABLE_COMMITS}" ]; then
 	# Avoid overwriting the prior (uncommitted) changes
 	update_version "post-${NEW_VERSION}" "unreleased"
-	#@commit
+	hg commit -m "Automatic update after committing version ${NEW_VERSION}"
 fi
 
 
