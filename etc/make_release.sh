@@ -18,11 +18,10 @@
 #
 function build_image
 	{
-	output_dir=releases/$1/$2	# releases/<version>/<retail-or-debug>
+	saved_image=releases/dx-$1-$2		# dx-<version>-<retail-or-debug>
 
-	# Clean/create the output directory
-	rm -rf ${output_dir}
-	mkdir -p ${output_dir}
+	# Create the output directory
+	mkdir -p `dirname ${saved_image}`
 
 	# Clean the entire tree, even the debug files
 	make clean DEBUG=1
@@ -36,16 +35,23 @@ function build_image
 		exit 1
 	fi
 
-	# Save the media images
+	# Save the floppy image
 	floppy_image="${DX_ROOT_DIR}/media/floppy/dx.vfd"
+	cp -f ${floppy_image} ${saved_image}.vfd
+	if [ $? -ne 0 ]; then
+		echo "Missing ${floppy_image}"
+		exit 1
+	fi
+
+	# Save the .iso image
 	iso_image="${DX_ROOT_DIR}/media/iso/dx.iso"
-	for image in ${floppy_image} ${iso_image}; do
-		cp ${image} ${output_dir}
-		if [ $? -ne 0 ]; then
-			echo "Missing ${image}"
-			exit 1
-		fi
-	done
+	cp -f ${iso_image} ${saved_image}.iso
+	if [ $? -ne 0 ]; then
+		echo "Missing ${iso_image}"
+		exit 1
+	fi
+
+	return
 	}
 
 
@@ -148,8 +154,9 @@ fi
 RELEASE_DATE=`date +%Y-%m-%d`
 
 
-# Build from the root of the tree
-cd ${DX_ROOT_DIR}
+# Build from the root of the current tree
+local_tree=`dirname $0`
+pushd ${local_tree}/..
 
 
 # Insert the new version information into the appropriate places
@@ -176,7 +183,7 @@ build_image ${NEW_VERSION} "debug" "DEBUG=1"
 # placeholder value
 if [ -n "${ENABLE_COMMITS}" ]; then
 	# Avoid overwriting the prior (uncommitted) changes
-	update_version "post-${NEW_VERSION}" "unreleased"
+	update_version_h "post-${NEW_VERSION}" "unreleased"
 	hg commit -m "Automatic update after committing version ${NEW_VERSION}"
 fi
 
@@ -193,7 +200,7 @@ echo
 
 
 # Done
-cd -
+popd
 
 
 

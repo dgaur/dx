@@ -38,7 +38,7 @@ build-tree: $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE)
 # Build the .iso image
 $(DX_ISO_IMAGE): build-tree Makefile
 	@$(MKISOFS) -A $(DX_ISO_TAG) -b boot/grub/$(GRUB_STAGE2_FILE) \
-		--boot-info-table --boot-load-size 4 -f --no-emul -o $@ -r \
+		--boot-info-table --boot-load-size 4 -f -J --no-emul -o $@ -r \
 		-sysid $(DX_ISO_TAG) -V $(DX_ISO_TAG) $(ISO_TREE)
 
 

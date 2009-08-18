@@ -11,6 +11,7 @@ directory_layout.txt for a brief description of the source tree layout.
 * Building the code:
 	Define the environment variable DX_ROOT_DIR; it should point to the root
 	of the DX source tree.
+	@@@this does not work well when cloning multiple hg trees
 	Example:
 		% export DX_ROOT_DIR=~/src/dx
 

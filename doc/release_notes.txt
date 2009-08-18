@@ -4,6 +4,9 @@
 
 
 * PENDING-RELEASE:
+	Minor fixes to the release process itself.  No actual changes to the OS
+	logic.
+
 
 * Version 0.0.1, released 2009-08-16:
 	Initial public release on kenai.com.  Basic micro kernel; some user mode
