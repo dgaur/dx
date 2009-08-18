@@ -8,6 +8,7 @@ include $(DX_ROOT_DIR)/Makefile.dx
 
 
 DX_ISO_IMAGE		:= dx.iso
+DX_ISO_TAG			:= "dx operating system"
 GRUB_MENU_FILE		:= menu.lst
 GRUB_STAGE2_FILE	:= stage2_eltorito
 ISO_TREE			:= root
@@ -36,8 +37,9 @@ build-tree: $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE)
 
 # Build the .iso image
 $(DX_ISO_IMAGE): build-tree Makefile
-	@$(MKISOFS) -b boot/grub/$(GRUB_STAGE2_FILE) --boot-info-table \
-		--boot-load-size 4 -f --no-emul -o $@ -r $(ISO_TREE)
+	@$(MKISOFS) -A $(DX_ISO_TAG) -b boot/grub/$(GRUB_STAGE2_FILE) \
+		--boot-info-table --boot-load-size 4 -f --no-emul -o $@ -r \
+		-sysid $(DX_ISO_TAG) -V $(DX_ISO_TAG) $(ISO_TREE)
 
 
 
