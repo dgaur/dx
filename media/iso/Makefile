@@ -9,6 +9,8 @@ include $(DX_ROOT_DIR)/Makefile.dx
 
 DX_ISO_IMAGE		:= dx.iso
 DX_ISO_TAG			:= "dx operating system"
+DX_KERNEL_FILE		:= $(DX_SRC_DIR)/kernel/dx
+DX_RAMDISK_FILE		:= $(DX_SRC_DIR)/user/ramdisk.tgz
 GRUB_MENU_FILE		:= menu.lst
 GRUB_STAGE2_FILE	:= stage2_eltorito
 ISO_TREE			:= root
@@ -22,21 +24,23 @@ all: $(DX_ISO_IMAGE)
 # Build a directory tree that mimics the layout of the .iso; install
 # the necessary files in the appropriate places in this tree.  Include the
 # project archive, if any, along with the actual binaries
-.PHONY: build-tree
-build-tree: $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE)
+$(ISO_TREE): $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE) $(DX_KERNEL_FILE) \
+	$(DX_RAMDISK_FILE)
+	@echo Rebuilding ISO tree ...
 	@mkdir -p $(ISO_TREE)/boot/grub/
-	@cp $(GRUB_MENU_FILE)					$(ISO_TREE)/boot/grub
-	@cp $(GRUB_STAGE2_FILE)					$(ISO_TREE)/boot/grub
-	@cp $(DX_SRC_DIR)/kernel/dx				$(ISO_TREE)/boot
-	@cp $(DX_SRC_DIR)/user/ramdisk.tgz		$(ISO_TREE)/boot
+	@cp $(GRUB_MENU_FILE)		$(ISO_TREE)/boot/grub
+	@cp $(GRUB_STAGE2_FILE)		$(ISO_TREE)/boot/grub
+	@cp $(DX_KERNEL_FILE)		$(ISO_TREE)/boot
+	@cp $(DX_RAMDISK_FILE)		$(ISO_TREE)/boot
 	@if [ -e $(DX_ARCHIVE_DIR) ]; then \
 		ln -f -s $(DX_ARCHIVE_DIR) $(ISO_TREE); \
 	fi
+	@touch $(ISO_TREE)		# Always rebuild .iso after updating the tree
 
 
 
-# Build the .iso image
-$(DX_ISO_IMAGE): build-tree Makefile
+# Build the .iso image based on the contents of the $(ISO_TREE)
+$(DX_ISO_IMAGE): $(ISO_TREE) Makefile
 	@$(MKISOFS) -A $(DX_ISO_TAG) -b boot/grub/$(GRUB_STAGE2_FILE) \
 		--boot-info-table --boot-load-size 4 -f -J --no-emul -o $@ -r \
 		-sysid $(DX_ISO_TAG) -V $(DX_ISO_TAG) $(ISO_TREE)
@@ -44,6 +48,7 @@ $(DX_ISO_IMAGE): build-tree Makefile
 
 
 # Clean the local tree
+.PHONY: clean
 clean:
 	@rm -f $(DX_ISO_IMAGE)
 	@rm -rf $(ISO_TREE)
