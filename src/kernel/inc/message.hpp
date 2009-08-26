@@ -64,10 +64,10 @@ class	message_c
 		///
 		/// Default constructor
 		///
-		message_c(	thread_cr		source,
-					thread_cr		destination,
-					message_type_t	type,
-					uintptr_t		id);
+		message_c(	thread_cr		message_source,
+					thread_cr		message_destination,
+					message_type_t	message_type,
+					uintptr_t		message_id);
 
 
 		///

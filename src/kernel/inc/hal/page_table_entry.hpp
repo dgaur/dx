@@ -223,7 +223,7 @@ class   page_table_entry_c
 		/// Mark this page as swapped out
 		///
 		///@@@see addr_space::alloc_med_payload() -- distinguish between (not
-		///@@@present) and (never allocated)
+		/// present) and (never allocated)
 		inline
 		void_t
 			swap_frame(const void_tp page)

@@ -401,6 +401,7 @@ main()
 ///
 /// No side effects
 ///
+/// @param keyboard  -- driver context
 /// @param scan_code -- scan code read from the keyboard
 ///
 /// @return character equivalent to the scan_code, if any

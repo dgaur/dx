@@ -193,7 +193,7 @@ put_response(	const message_cr	request,
 /// calling thread must not hold a reference to the victim thread here;
 /// otherwise, it will never wakeup (never return here).
 ///
-/// @param victim -- id of the victim thread.  May be the id of the
+/// @param victim_id -- id of the victim thread.  May be the id of the
 /// current/calling thread if it is exiting gracefully
 ///
 /// @return STATUS_SUCCESS if the thread was destroyed successfully; nonzero

@@ -49,6 +49,10 @@ static status_t			send_stack(	address_space_id_t	address_space,
 ///
 /// @param image		-- pointer to the executable image to start
 /// @param image_size	-- size of the image, in bytes
+/// @param default_capability_mask
+///						-- default bitmask of capabilities assigned to all
+///						   threads in this address space
+///
 ///
 /// @return STATUS_SUCCESS if the process is successfully started.
 ///

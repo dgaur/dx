@@ -15,9 +15,9 @@
 
 
 
-//
-// Global pointer to the Memory Manager itself
-//
+///
+/// Global pointer to the Memory Manager itself
+///
 memory_manager_cp	__memory_manager = NULL;
 
 

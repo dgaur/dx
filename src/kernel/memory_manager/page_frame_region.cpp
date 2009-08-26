@@ -14,8 +14,8 @@
 /// Constructor.  Initialize the bitmaps describing the pools of physical
 /// blocks within the region
 ///
-/// @param base -- the physical base address of this region; must be aligned
-/// on a region boundary
+/// @param region_base -- the physical base address of this region; must be
+/// aligned on a region boundary
 ///
 page_frame_region_c::
 page_frame_region_c(physical_address_t region_base):

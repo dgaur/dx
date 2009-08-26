@@ -23,9 +23,9 @@
 
 
 
-//
-// The HAL itself
-//
+///
+/// The HAL subsystem
+///
 class   x86_hardware_abstraction_layer_c;
 typedef x86_hardware_abstraction_layer_c *	x86_hardware_abstraction_layer_cp;
 typedef x86_hardware_abstraction_layer_cp *	x86_hardware_abstraction_layer_cpp;

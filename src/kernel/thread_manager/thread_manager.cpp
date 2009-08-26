@@ -26,7 +26,10 @@ thread_manager_cp	__thread_manager = NULL;
 
 
 
-
+///
+/// Constructor.  Initialize the hash table of threads; and allocate the
+/// initial system threads
+///
 thread_manager_c::
 thread_manager_c():
 	next_thread_id(0),

@@ -21,19 +21,19 @@
 
 
 
-//
-// Function pointer for the thread entry routine.  The parent thread must
-// specify this entry point when creating the new thread.  A common kernel
-// method (hal::run_thread) will initialize the new thread context, but this
-// entry point is where the thread-specific code starts executing.
-//
+///
+/// Function pointer for the thread entry routine.  The parent thread must
+/// specify this entry point when creating the new thread.  A common kernel
+/// method (hal::run_thread) will initialize the new thread context, but this
+/// entry point is where the thread-specific code starts executing.
+///
 typedef void_t (*thread_start_fp)();
 
 
 
-//
-// Thread states
-//
+///
+/// Thread states
+///
 typedef enum
 	{
 	THREAD_STATE_READY,
@@ -53,10 +53,10 @@ thread_yield();
 
 
 
-//
-// Thread descriptor.  Contains the entire context/state for a
-// single thread.
-//
+///
+/// Thread descriptor.  Contains the entire context/state for a
+/// single thread.
+///
 class   thread_c;
 typedef thread_c *    thread_cp;
 typedef thread_cp *   thread_cpp;

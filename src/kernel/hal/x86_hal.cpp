@@ -297,6 +297,11 @@ dispatch_interrupt(	uint32_t	vector,
 //
 ///////////////////////////////////////////////////////////////////////////
 
+
+///
+/// Constructor.  Initialize the GDT, IDT and TSS.  Initialize the PIC + PIT
+/// hardware.
+///
 x86_hardware_abstraction_layer_c::
 x86_hardware_abstraction_layer_c()
 	{
@@ -330,12 +335,12 @@ x86_hardware_abstraction_layer_c()
 	}
 
 
-//
-// enable_paging()
-//
-// Enables paging + virtual-to-physical memory translation.  On return, the
-// processor is executing with paging enabled, using the given address space
-//
+///
+/// Enables paging + virtual-to-physical memory translation.  On return, the
+/// processor is executing with paging enabled, using the given address space
+///
+/// @param address_space -- the initial address space (page directory)
+///
 void_t x86_hardware_abstraction_layer_c::
 enable_paging(address_space_cr address_space)
 	{
@@ -377,12 +382,12 @@ enable_paging(address_space_cr address_space)
 	}
 
 
-//
-// handle_interrupt()
-//
-// This is the interrupt handler for some of the low-level processor
-// exceptions.  The HAL handles these errors directly.
-//
+///
+/// Interrupt handler for some of the low-level processor exceptions.  The HAL
+/// handles these errors directly.
+///
+/// @param interrupt -- interrupt context
+///
 void_t x86_hardware_abstraction_layer_c::
 handle_interrupt(interrupt_cr interrupt)
 	{
@@ -423,12 +428,9 @@ handle_interrupt(interrupt_cr interrupt)
 	}
 
 
-//
-// initialize_processor()
-//
-// Enables the CPU caches.  Enables interrupts.  Estimates the processor
-// speed + infers the delay factor.
-//
+///
+/// Processor initialization.  Enables the CPU caches.  Enables interrupts.
+///
 void_t x86_hardware_abstraction_layer_c::
 initialize_processor()
 	{
@@ -455,13 +457,13 @@ initialize_processor()
 	}
 
 
-//
-// initialize_thread_context()
-//
-// Pushes the initial execution context for a new thread onto its kernel
-// stack.  This allows the I/O Manager to dispatch the thread as it were
-// already running + suspended.
-//
+///
+/// Pushes the initial execution context for a new thread onto its kernel
+/// stack.  This allows the I/O Manager to dispatch the thread as it were
+/// already running + suspended.
+///
+/// @param thread -- the new thread
+///
 void_t x86_hardware_abstraction_layer_c::
 initialize_thread_context(thread_cr thread)
 	{
@@ -532,11 +534,9 @@ jump_to_user(	void_tp start_address,
 	}
 
 
-//
-// read_current_thread()
-//
-// Returns a reference to the currently-executing thread.  No side effects.
-//
+///
+/// Returns a reference to the currently-executing thread.  No side effects.
+///
 thread_cr x86_hardware_abstraction_layer_c::
 read_current_thread()
 	{
@@ -775,12 +775,10 @@ switch_thread(thread_cr new_thread)
 	}
 
 
-//
-// system_halt()
-//
-// Halts the processor, presumably in response to some fatal system
-// error or shutdown.  Never returns.
-//
+///
+/// Halts the processor, presumably in response to some fatal system
+/// error or shutdown.  Never returns.
+///
 void_t x86_hardware_abstraction_layer_c::
 system_halt()
 	{
@@ -797,11 +795,9 @@ system_halt()
 	}
 
 
-//
-// system_reboot()
-//
-// Reboots the system, or at least halts the processor.  Never returns.
-//
+///
+/// Reboots the system, or at least halts the processor.  Never returns.
+///
 void_t x86_hardware_abstraction_layer_c::
 system_reboot()
 	{

@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+	Support for recent versions of gcc + binutils.  Cleaned up doxygen output.
+
 
 * Version 0.0.1a, released 2009-08-17:
 	Minor fixes to the release process itself.  No actual changes to the OS
