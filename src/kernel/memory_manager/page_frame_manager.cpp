@@ -73,32 +73,6 @@ page_frame_manager_c()
 	region_map.set(last_region, region_map.size - last_region);
 
 
-#if 0
-	physical_address_t f[16];
-	allocate_frames(f, 4, MEMORY_DMA32);
-	printf("f[0] = %#x\n", f[0]);
-	allocate_frames(f, 4, 0);
-	printf("f[0] = %#x\n", f[0]);
-	ASSERT(0);
-
-	page_frame_region_cp b = new page_frame_region_c(KERNEL_PAGED_BOUNDARY);
-	//b->allocate_frames(3);
-	//b->allocate_frames(0);
-	//b->allocate_frames(1);
-	physical_address_t f;
-	f = b->allocate_frames(1);
-	b->free_frames(f, 1);
-
-	f = b->allocate_frames(16);
-	b->free_frames(f, 16);
-
-	f = b->allocate_frames(3);
-	b->allocate_frames(1);
-	b->free_frames(f, 3);
-
-	ASSERT(0);
-#endif
-
 	return;
 	}
 
