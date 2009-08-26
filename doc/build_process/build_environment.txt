@@ -6,6 +6,17 @@
 This document provides a brief overview of the DX build environment.  See also
 directory_layout.txt for a brief description of the source tree layout.
 
+In general, DX requires a Unix-ish build environment: bash, gcc, binutils, etc.
+Building in cygwin is supported, but requires a cross-compiler.  Building in
+Linux/Unix is supported, with native tools @@@but not tested recently.
+
+
+
+* Executive summary:
+	% export DX_ROOT_DIR=/path/to/dx/tree
+	% cd ${DX_ROOT_DIR}
+	% make all
+
 
 
 * Building the code:
@@ -24,18 +35,19 @@ directory_layout.txt for a brief description of the source tree layout.
 	Use "make all" in the dx root directory to build the entire dx tree: the
 	kernel, applications, libraries, media images, doxygen documentation, etc.
 	Example:
-		% cd $DX_ROOT_DIR
+		% cd ${DX_ROOT_DIR}
 		% make all
 
-	"make help" will provide a brief list of build targets/options.
+	In addition, "make help" will provide a brief list of all other build
+	targets and options.
 	Example:
-		% cd $DX_ROOT_DIR
+		% cd ${DX_ROOT_DIR}
 		% make help
 
 
 
 * Makefile.dx:
-	Makefile.dx (in $DX_ROOT_DIR) contains common defintions used throughout
+	${DX_ROOT_DIR}/Makefile.dx contains common defintions used throughout
 	the entire DX source tree.  All other makefiles should include this one.
 
 	DX_ROOT_DIR should be set in the local environment; it should
@@ -46,8 +58,8 @@ directory_layout.txt for a brief description of the source tree layout.
 
 
 * Makefile.src:
-	Makefile.src (in $DX_ROOT_DIR/src) contains common build definitions used
-	throughout the source tree.  All makefiles under $DX_ROOT_DIR/src should
+	${DX_ROOT_DIR}/src/Makefile.src contains common build definitions used
+	throughout the source tree.  All makefiles under ${DX_ROOT_DIR}/src should
 	include this one.
 
 
@@ -55,7 +67,7 @@ directory_layout.txt for a brief description of the source tree layout.
 * Makefile.common, Makefile.kernel, Makefile.user:
 	These makefiles contain common build definitions for the common library
 	code; the kernel code; and user code; respectively.  These makefiles live
-	in the corresponding subdirectories beneath $DX_ROOT_DIR/src.
+	in the corresponding subdirectories beneath ${DX_ROOT_DIR}/src.
 
 	In general,	these makefiles inherit all of the settings from Makefile.src
 	and simply add any additional flags or settings as needed.

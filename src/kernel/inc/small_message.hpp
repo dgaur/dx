@@ -49,7 +49,6 @@ class   small_message_c:
 		///
 		/// Constructor for response/reply messages
 		///
-		small_message_c::
 		small_message_c(message_cr		request,
 						message_type_t	message_type,
 						uintptr_t		message_payload = 0xFFFFFFFF):

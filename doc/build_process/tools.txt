@@ -5,11 +5,11 @@ The following tools were used in the development of DX.  Other
 tools or tool versions may also work, but are probably untested.
 
 
-* GNU bash version 3.1.17(6)-release
+* GNU bash, version 3.2.49(22)-release-(i686-pc-cygwin)
 
-* gcc version 3.4.4
+* gcc version 4.4.1 (with gmp 4.3.1 and mpfr 2.4.1)
 
-* GNU ld version 2.17.50 20060817
+* GNU ld (GNU Binutils) 2.19.1
 
 * GNU Make version 3.81
 
@@ -17,4 +17,4 @@ tools or tool versions may also work, but are probably untested.
 
 * genisoimage 1.1.7.1 (CYGWIN)
 
-
+* Doxygen version 1.5.5

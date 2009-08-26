@@ -146,7 +146,7 @@ free_frames(const physical_address_t*	frame,
 void_t memory_manager_c::
 handle_interrupt(interrupt_cr interrupt)
 	{
-	const thread_cr				thread		= __hal->read_current_thread();
+	const thread_cr				thread = __hal->read_current_thread();
 	volatile syscall_data_s*	syscall;
 
 	ASSERT(__memory_manager);
@@ -163,9 +163,10 @@ handle_interrupt(interrupt_cr interrupt)
 			break;
 
 		case INTERRUPT_VECTOR_PAGE_FAULT:
-			const void_tp	faulting_address= __hal->read_page_fault_address();
-			bool_t			success;
+			void_tp	faulting_address;
+			bool_t	success;
 
+			faulting_address = __hal->read_page_fault_address();
 			TRACE(ALL, "Page fault at %p (data %#x) in thread %p (%#x)\n",
 				faulting_address, interrupt.data,
 				&thread, thread.id);

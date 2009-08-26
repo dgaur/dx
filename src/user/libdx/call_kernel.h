@@ -18,7 +18,7 @@
 					"int  %1"								\
 			:												\
 			: "g"(syscall_data), "i"(syscall_vector)		\
-			: "cc", "memory");
+			: "eax", "cc", "memory");
 
 
 #endif

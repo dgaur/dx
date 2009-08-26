@@ -9,6 +9,7 @@
 
 
 
+static
 inline
 uint8_t
 io_port_read8(uint16_t port_address)
@@ -27,6 +28,7 @@ io_port_read8(uint16_t port_address)
 	}
 
 
+static
 inline
 uint16_t
 io_port_read16(uint16_t port_address)
@@ -45,6 +47,7 @@ io_port_read16(uint16_t port_address)
 	}
 
 
+static
 inline
 uint32_t
 io_port_read32(uint16_t port_address)
@@ -63,6 +66,7 @@ io_port_read32(uint16_t port_address)
 	}
 
 
+static
 inline
 void_t
 io_port_write8(uint16_t port_address, uint8_t data)
@@ -79,6 +83,7 @@ io_port_write8(uint16_t port_address, uint8_t data)
 	}
 
 
+static
 inline
 void_t
 write16(uint16_t port_address, uint16_t data)
@@ -95,6 +100,7 @@ write16(uint16_t port_address, uint16_t data)
 	}
 
 
+static
 inline
 void_t
 write32(uint16_t port_address, uint32_t data)

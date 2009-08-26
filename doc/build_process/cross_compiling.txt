@@ -8,63 +8,102 @@ configured to produce PE object files (the Windows native format), whereas
 DX requires ELF object files.  If you are building natively under Linux
 or *BSD, this probably is not necessary.
 
-These instructions are known to work with binutils-20060817-1 and gcc-3.4.4-3.
 
 
-* Determining if the cross-compiler is necessary:
-	- Run "objdump -i".  If the first supported target is not "elf32-i386",
-	  the you need to build the cross-compiler.
-	@@perhaps: objdump -i | head -2 | tail -1
+* Building binutils:
+	- The instructions here are known to work with binutils-2.19.1.
+	- Fetch and unpack the source tarball for binutils:
+		% tar xvzf binutils-<version>.tar.gz
 
-* Building the tools:
-	- Fetch the tarballs for binutils, gcc-core and gcc-g++.  If you
-	  install them via the Cygwin setup.exe tools, they are typically
-	  installed under /usr/src.
-	- cd /usr/src
-	- tar xvzf binutils.tar.gz
-	- tar xvzf gcc-core.tar.gz
-	- tar xvzf gcc-g++.tar.gz [This should unpack into the same directory
-	  as gcc-core.tar.gz]
+	- The binutils documentation suggests building in separate directory, not
+	  in the same directory as the source:
+		% mkdir /path/to/output/dir
+		% cd /path/to/output/dir
 
-	- cd /tmp
-	- mkdir binutils
-	- cd binutils
-	- /usr/src/binutils/configure --target=i386-elf
-	- make
-	- make install
-	- Verify that you now have /bin/i386-elf-as, /bin/i386-elf-ld,
-	  /bin/i386-elf-nm and /bin/i386-elf-objdump
-	- Run "/bin/i386-elf-objdump -i" and verify that it lists "elf32-i386"
-	  as the first supported target.
+	- Configure the binutils tree.  The --target setting is the key
+	  configuration item; the whole point of this effort is to build ELF tools:
+		% /path/to/binutils-<version>/configure --target=i386-elf
+		% make
 
+	- Install and build the new binutils
+		% make
+		% make install
 
-	[The binutils-20060817-1 package only seems to build properly in the
-	directory where it's unpacked, /usr/src/binutils in this case]
-	- cd /usr/src/binutils
-	- configure --target=i386-elf
-	- make
-	- make install
 	- Verify that you now have i386-elf-as, i386-elf-ld, i386-elf-nm and
-	  i386-elf-objdump all in /usr/local/bin
-	- Run "/usr/local/bin/i386-elf-objdump -i" and verify that it lists
-	  "elf32-i386" as the first supported target.
+	  i386-elf-objdump.  Typically, these will be installed under
+	  /usr/local/bin, but may be elsewhere depending on your configure options.
+	  Ensure that "elf32-i386" is a supported target.
+		% which i386-elf-objdump
+			> /usr/local/bin/i386-elf-objdump
+
+		% i386-elf-objdump.exe -i | head -4
+			> BFD header file version (GNU Binutils) 2.19.1
+			> elf32-i386
+			>  (header little endian, data little endian)
+			>   i386
 
 
-	- cd /tmp
-	- mkdir gcc
-	- cd gcc
-	- /usr/src/gcc/configure --target=i386-elf --enable-languages="c,c++"
-	  --with-gnu-as --with-gnu-ld
-	- make
-		Compilation errors in libstdc++ are not fatal and can be ignored.
-		The error will be something like:
-		configure: error: No support for this host/target combination.
-		make: *** [configure-target-libstdc++-v3] Error 1
-	- make install
-		Again, this may fail in the libstdc++ compilation; and again, this
-		is ok.
-	- Verify that you now have i386-elf-gcc and i386-elf-g++ in /usr/local/bin
+* Building GMP
+	- Recent releases of gcc require GMP (GNU multiprecision math library).
+	- Fetch and unpack the gmp tarball.
+	- This is the usual installation process:
+		% tar xvzf gmp-<version>.tar.gz
+		% cd gmp-<version>
+		% configure
+		% make
+		% make check
+		% make install
+
+
+* Building MPFR
+	- Recent releases of gcc require GNU MPFR (GNU multiprecision floating
+	  point library).
+	- Fetch and unpack the mpfr tarball.
+	- This is the usual installation process:
+		% tar xvzf mpfr-<version>.tar.gz
+		% cd mpfr-<version>
+		% configure
+		% make
+		% make check
+		% make install
+
+
+* Building gcc and g++
+	- The instructions here are known to work with gcc 4.4.1.
+	- Fetch and unpack the source tarballs for gcc-core and gcc-g++.  The
+	  gcc-core and gcc-g++ tarballs should both unpack into the same output
+	  directory, usually gcc-<version>:
+		% tar xvzf gcc-core-<version>.tar.gz
+		% tar xvzf gcc-g++-<version>.tar.gz
+
+	- The GCC documentation suggests building in separate directory, not
+	  in the same directory as the source:
+		% mkdir /path/to/output/dir
+		% cd /path/to/output/dir
+
+	- Configure the gcc tree.  Use the same --target value that you used with
+	  the binutils configuration.  Enable support for at least C and C++
+	  compilation:
+		% /path/to/gcc-<version>/configure --target=i386-elf
+		   --enable-languages="c,c++" --with-gnu-as --with-gnu-ld
+
+	- Build and install gcc.  Compilation errors in libstdc++ (typically "No
+	  support for this host/target combination" or "Link tests are not allowed
+	  after GCC_NO_EXECUTABLES") are not usually fatal and can usually be
+	  ignored.  None of the dx code relies on libstdc++ anyway.
+		% make
+		% make install
+
+	- Verify that you now have i386-elf-gcc and i386-elf-g++.  Typically, these
+	  will be installed under /usr/local/bin, but may be elsewhere depending on
+	  your configure options.
+		% which i386-elf-gcc
+			> /usr/local/bin/i386-elf-gcc
+
+	- Ensure that your cross-compiler knows where to find its personalized
+	  libgcc.a.  @@"make install-target-libgcc" might fix this if necessary
+		% i386-elf-gcc --print-libgcc-file-name
+			> /usr/local/lib/gcc/i386-elf/3.4.4/libgcc.a
 
 	- In your build environment, set DX_CROSS_COMPILE_PREFIX to "i386-elf-"
-
 

@@ -66,7 +66,7 @@ initialize_environment()
 		//
 		// Allocate enough pages to span the initial heap
 		//
-		heap_size = 16 * PAGE_SIZE;		//@is this enough?
+		heap_size = 32 * PAGE_SIZE;		//@is this enough?
 		status = expand_address_space(ADDRESS_SPACE_ID_USER_LOADER, heap,
 			heap_size);
 		if (status != STATUS_SUCCESS)

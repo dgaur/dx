@@ -11,7 +11,7 @@
 
 
 static uint32_t	read_file_size(const tar_header_sp tar_size);
-static void_t	unpack_ramdisk(const char8_t* ramdisk);
+static void_t	unpack_ramdisk(const uint8_t* ramdisk);
 
 
 
@@ -87,7 +87,7 @@ read_file_size(const tar_header_sp header)
 ///
 static
 void_t
-unpack_ramdisk(const char8_t* ramdisk)
+unpack_ramdisk(const uint8_t* ramdisk)
 	{
 	uint32_t		block_count;
 	uint8_tp		file;
