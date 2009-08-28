@@ -40,8 +40,15 @@ fi
 DEBUGFS="/usr/sbin/debugfs"
 E2FSCK="/usr/sbin/e2fsck"
 
-IMAGE_FILE=`realpath $1`
-echo "Copying `realpath $2` to filesystem image $IMAGE_FILE ..."
+
+#
+# Determine the absolute path to the image/output file
+#
+pushd `dirname $1` > /dev/null
+IMAGE_PATH=`pwd`
+popd > /dev/null
+IMAGE_FILE=${IMAGE_PATH}/`basename $1`
+echo "Copying $2 to filesystem image ${IMAGE_FILE} ..."
 
 
 #
@@ -58,15 +65,15 @@ fi
 # First recreate the directory tree, without any files
 #
 DIRS=`find . -type d`
-for dir in $DIRS; do
+for dir in ${DIRS}; do
 	# Skip the current/root directory, since it's created automatically when
 	# the filesystem is created
-	if [ "$dir" == "." ]; then
+	if [ "${dir}" == "." ]; then
 		continue
 	fi
 
 	# Create this directory in the image
-	$DEBUGFS -R "mkdir $dir" -w $IMAGE_FILE
+	${DEBUGFS} -R "mkdir ${dir}" -w ${IMAGE_FILE}
 done
 
 
@@ -74,17 +81,17 @@ done
 # Now install any files
 #
 FILES=`find . -type f`
-for file in $FILES; do
+for file in ${FILES}; do
 	# Write the file creation commands to a temporary file
 	COMMAND_FILE=`mktemp`
-	echo "cd `dirname $file`" > $COMMAND_FILE
-	echo "write $file `basename $file`" >> $COMMAND_FILE
+	echo "cd `dirname $file`" > ${COMMAND_FILE}
+	echo "write $file `basename $file`" >> ${COMMAND_FILE}
 
 	# Write this input file to the image
-	$DEBUGFS -f $COMMAND_FILE -w $IMAGE_FILE
+	${DEBUGFS} -f ${COMMAND_FILE} -w ${IMAGE_FILE}
 
 	# Clean up
-	rm -f $COMMAND_FILE
+	rm -f ${COMMAND_FILE}
 done
 
 popd > /dev/null
@@ -93,4 +100,4 @@ popd > /dev/null
 #
 # Examine the resulting image for any errors
 #
-$E2FSCK -f -n $IMAGE_FILE
+${E2FSCK} -f -n ${IMAGE_FILE}
