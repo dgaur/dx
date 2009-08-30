@@ -1,0 +1,142 @@
+#!/bin/sh
+#
+# Pseudo-configure script for locating dx build tools
+#
+
+
+function find_tool
+	{
+	echo -n "Looking for $1 ... "
+
+	TOOL=`which $1 2>/dev/null`
+	if [ -n "${TOOL}" ]; then
+		# Found tool in current PATH
+		echo ${TOOL}
+		return 0
+
+	elif [ -e $1 ]; then
+		# Not in PATH, but user provided explicit path on command line
+		TOOL=$1
+		echo ${TOOL}
+		return 0
+
+	elif [ -n "$2" ]; then
+		# Unable to find required tool.  Fatal.
+		echo "Error: Unable to find $1 (required)"
+		exit 1
+
+	else
+		# Unable to find optional tool.  OK to proceed, but some functionality
+		# may be lost, etc
+		echo "Warning: Unable to find $1 (optional)"
+		TOOL="/no/path/to/$1"
+		return 1
+	fi
+	}
+
+
+function help
+	{
+	exit 0
+	}
+
+
+
+
+
+#
+# main() #################################################################
+#
+
+
+#
+# The 'which' tool is required; this script cannot proceed without it
+#
+WHICH=`which which 2>/dev/null`
+if [ -z "${WHICH}" ]; then
+	echo "Unable to find 'which' tool, required for configure operation"
+	exit 2
+fi
+
+
+#
+# Parse the command line arguments, if any
+#
+for argument in $*; do
+	case ${argument} in
+		-d|--debug)
+			# Enable debug support
+			set -x
+			;;
+
+
+		-h|-?|--help)
+			help
+			;;
+
+
+		--host*)
+			# Assume the --host value is the prefix on the cross-tools (e.g.,
+			# i386-elf-gcc)
+			CROSS_COMPILE_PREFIX=`echo ${argument} | \
+				sed 's/--host=\(.*\)/\1-/' -`
+
+			if [ ${CROSS_COMPILE_PREFIX} != "-" ]; then
+				echo "OK, will look for cross-tools (${CROSS_COMPILE_PREFIX})"
+			else
+				echo "Bad --host value"
+				help
+			fi
+			;;
+
+
+		*=*)
+			# Assume this is an explicit definition or path to some tool (e.g,
+			# CC=gcc, etc), so automatically include this definition locally
+			# to override the defaults below
+			eval ${argument}
+			;;
+
+
+		*)
+			echo "Unrecognized argument: ${argument}"
+			help
+			;;
+	esac
+done
+
+
+#
+# Fixup the PATH used by 'which'.  This is mainly required for cygwin, which
+# can omit some useful directories by default
+#
+PATH=${PATH}:/usr/sbin:/sbin
+
+
+#
+# Establish the basic tool definitions.  Values provided on the command line
+# override the defaults provided here
+#
+AR=${AR:-${CROSS_COMPILE_PREFIX}ar}
+CC=${CC:-${CROSS_COMPILE_PREFIX}gcc}
+DEBUGFS=${DEBUGFS:-debugfs}
+DOXYGEN=${DOXYGEN:-doxygen}
+E2FSCK=${E2FSCK:-e2fsck}
+MKISOFS=${MKISOFS:-mkisofs}
+NM=${NM:-${CROSS_COMPILE_PREFIX}nm}
+
+
+#
+# Now infer any tool paths that were not specified explicitly on the command
+# line
+#
+find_tool ${AR}			required
+find_tool ${CC}			required
+find_tool ${DEBUGFS}
+find_tool ${DOXYGEN}
+find_tool ${E2FSCK}
+find_tool ${MKISOFS}
+find_tool ${NM}			required
+
+
+
