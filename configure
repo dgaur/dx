@@ -4,16 +4,20 @@
 #
 # This is intended to look like and mimic the behavior of a normal
 # autoconf/configure script; but is really just a simple shell script for
-# locating build tools on the local host.  It searches the current PATH for
-# necessary tools; and inserts those tool paths into the necessary Makefiles.
+# locating build tools on the local host.  As such, it's probably slower,
+# buggier and less portable than the usual autoconf/configure tools.  On the
+# other hand, it's more flexible in terms of cross-compiling, avoids some
+# unnecessary (for dx) test and probably(?) simpler.
 #
-# The goal here is to provide some measure of build portability across
-# different platforms.  At a minimum, this script should work on Linux and
-# cygwin.  Should probably work under *BSD, too, but not tested.
+# This script searches the current PATH for necessary tools; and inserts
+# those tool paths into the necessary Makefiles.  The goal here is to provide
+# some measure of build portability across different platforms.  At a
+# minimum, this script should work on Linux and cygwin.  Should probably work
+# under *BSD, too, but not tested.  Other OS/environments are not supported.
 #
 # The script assumes that it can find 'which' and 'sed' in the current PATH.
-# It (probably?) relies on some 'bash' features.  All other dependencies should
-# be resolved by the script itself.
+# It (probably?) relies on some specific 'bash' features.  All other
+# dependencies should be resolved by the script itself.
 #
 # Usage:
 #	% configure [options] [tool-definitions]
@@ -21,39 +25,42 @@
 
 
 
+#
+# Tools used by the dx build process.  Some are required (e.g., for actually
+# compiling the code); others are optional (e.g., only used for generating
+# documentation)
+#
+OPTIONAL_TOOLS="DEBUGFS DOXYGEN E2FSCK MKISOFS"
+REQUIRED_TOOLS="AR ASM CC CP NM OBJCOPY OBJDUMP SED SHELL TAR"
+
+
 
 #
-# Find the absolute path to the specified tool.  If found, set TOOL to this
-# path value
+# Ensure this tool is available, either via the PATH or via absolute path
 #
 function find_tool
 	{
+	local status=0
+
 	echo -n "Looking for $1 ... "
 
-	TOOL=`which $1 2>/dev/null`
-	if [ -n "${TOOL}" ]; then
+	local tool=`which $1 2>/dev/null`
+	if [ -n "${tool}" ]; then
 		# Found tool in current PATH
-		echo ${TOOL}
-		return 0
+		echo ${tool}
+		status=0
 
 	elif [ -e $1 ]; then
 		# Not in PATH, but user provided explicit path on command line
-		TOOL=$1
-		echo ${TOOL}
-		return 0
-
-	elif [ -n "$2" ]; then
-		# Unable to find required tool.  Fatal.
-		echo "Error: Unable to find $1 (required)"
-		exit 1
+		echo $1
+		status=0
 
 	else
-		# Unable to find optional tool.  OK to proceed, but some functionality
-		# may be lost, etc
-		echo "Warning: Unable to find $1 (optional)"
-		TOOL="/no/path/to/$1"
-		return 1
+		echo "Not found!"
+		status=1
 	fi
+
+	return $status
 	}
 
 
@@ -83,10 +90,13 @@ Usage:
       /non/standard/path/to/my-gcc then add CC=/non/standard/path/to/my-gcc
       to the command line.
 
-      This script recognizes these definitions on the command line or in the
-      environment:
-        AR ASM CC CXX DEBUGFS DOXYGEN E2FSCK LD MKISOFS NM OBJCOPY OBJDUMP
-        SHELL TAR
+      These tools are required (in the PATH, in the environment or on the
+      command-line):
+        ${REQUIRED_TOOLS}
+
+      These tools are optional.  If not present, some build features may be
+      unavailable:
+        ${OPTIONAL_TOOLS}
 
 END_OF_HELP
 
@@ -103,13 +113,6 @@ END_OF_HELP
 
 
 #
-# Fixup the PATH used by 'which'.  This is mainly required for cygwin, which
-# can omit some useful directories by default
-#
-PATH=${PATH}:/usr/sbin:/sbin
-
-
-#
 # The 'which' tool is required; this script cannot proceed without it
 #
 WHICH=`which which 2>/dev/null`
@@ -119,11 +122,13 @@ if [ -z "${WHICH}" ]; then
 fi
 
 
+
 #
 # Attempt to locate 'sed', for parsing --host values.  If not found, user can
 # still override with SED=/path/to/sed on command line before --host value.
 #
 SED=`which sed 2>/dev/null`
+
 
 
 #
@@ -180,6 +185,7 @@ for argument in $*; do
 done
 
 
+
 #
 # Establish the basic tool definitions.  Values provided on the command line
 # override the defaults provided here
@@ -187,6 +193,7 @@ done
 AR=${AR:-ar}
 ASM=${ASM:-${CROSS_COMPILE_PREFIX}as}
 CC=${CC:-${CROSS_COMPILE_PREFIX}gcc}
+CP=${CP:-cp}
 DEBUGFS=${DEBUGFS:-debugfs}
 DOXYGEN=${DOXYGEN:-doxygen}
 E2FSCK=${E2FSCK:-e2fsck}
@@ -194,29 +201,80 @@ MKISOFS=${MKISOFS:-mkisofs}
 NM=${NM:-nm}
 OBJCOPY=${OBJCOPY:-objcopy}
 OBJDUMP=${OBJDUMP:-objdump}
+SED=${SED:-sed}
 SHELL=${SHELL:-bash}
 TAR=${TAR:-tar}
 
 
+
 #
-# Now infer any tool paths that were not specified explicitly on the command
-# line
+# Ensure the tools actually exist, either in the PATH or via the values given
+# on the command line.  This does not actually invoke or validate the tools
+# themselves -- a significant departure from the usual autoconf/configure
+# behavior
 #
-REQUIRED="required"
-OPTIONAL=
+for tool in ${REQUIRED_TOOLS}; do
+	eval "find_tool \$${tool}"
+	if [ $? -ne 0 ]; then
+		echo "Error: Unable to find required tool: ${tool}"
+		exit 1
+	fi
+done
 
-find_tool ${AR}			${REQUIRED}
-find_tool ${ASM}		${REQUIRED}
-find_tool ${CC}			${REQUIRED}
-find_tool ${DEBUGFS}	${OPTIONAL}
-find_tool ${DOXYGEN}	${OPTIONAL}
-find_tool ${E2FSCK}		${OPTIONAL}
-find_tool ${MKISOFS}	${OPTIONAL}
-find_tool ${NM}			${REQUIRED}
-find_tool ${OBJCOPY}	${REQUIRED}
-find_tool ${OBJDUMP}	${REQUIRED}
-find_tool ${SHELL}		${REQUIRED}
-find_tool ${TAR}		${REQUIRED}
+for tool in ${OPTIONAL_TOOLS}; do
+	eval "find_tool \$${tool}"
+	if [ $? -ne 0 ]; then
+		echo "Warning: Unable to find optional tool: ${tool}"
+	fi
+done
 
 
+
+#
+# Generate a sed script to insert the various tool definitions
+#
+SED_PROGRAM="$0.sed.$$"
+echo > ${SED_PROGRAM}
+for tool in ${REQUIRED_TOOLS} ${OPTIONAL_TOOLS}; do
+	# The script is a series of "s/tool-pattern/tool-path/" commands
+	eval "echo \"s,@${tool}@,\$${tool},g\" >> ${SED_PROGRAM}"
+done
+
+if [ ! -e ${SED_PROGRAM} ]; then
+	echo "Unable to generate 'sed' program!"
+	exit 1
+fi
+
+
+
+#
+# Now generate the various makefiles, inserting these tool definitions where
+# necessary
+#
+echo
+echo "Generating output files ..."
+
+OUTPUT_FILES="media/iso/Makefile \
+			  media/floppy/load-image.sh \
+			  src/Makefile.src"
+
+for file in ${OUTPUT_FILES}; do
+	if [ ! -e ${file}.in ]; then
+		echo "Skipping missing input file: ${file}"
+		continue
+	fi
+
+	# Create + fixup the output file with the detected tool settings
+	${SED} -f ${SED_PROGRAM} --posix ${file}.in > ${file}
+done
+
+
+
+#
+# Done.  Cleanup + exit
+#
+rm ${SED_PROGRAM}
+echo "Done!"
+echo
+exit 0
 
