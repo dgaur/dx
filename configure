@@ -16,9 +16,7 @@
 # be resolved by the script itself.
 #
 # Usage:
-#	% configure [--debug] [--host=<CROSS-COMPILE-PREFIX>] [TOOL-DEFINITIONS]
-#		where TOOL-DEFINITIONS are zero or more variable definitions for
-#		specifying tool preferences + locations (e.g., CC=gcc)
+#	% configure [options] [tool-definitions]
 #
 
 
@@ -76,7 +74,7 @@ Usage:
 
     --host=<HOST-SPEC> enables cross-compilation support.  Required for
       platforms that do not natively support ELF file format (typically, only
-      cygwin?).  HOST-SPEC should be the usual cpu-arch-os triplet.  For
+      cygwin?).  HOST-SPEC should be the usual "cpu-vendor-os" triplet.  For
       example, if your cross compiler is i686-pc-elf-gcc, then use
       --host=i686-pc-elf
 
@@ -85,7 +83,8 @@ Usage:
       /non/standard/path/to/my-gcc then add CC=/non/standard/path/to/my-gcc
       to the command line.
 
-      This script recognizes these definitions on the command line:
+      This script recognizes these definitions on the command line or in the
+      environment:
         AR ASM CC CXX DEBUGFS DOXYGEN E2FSCK LD MKISOFS NM OBJCOPY OBJDUMP
         SHELL TAR
 
