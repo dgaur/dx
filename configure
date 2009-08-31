@@ -2,8 +2,32 @@
 #
 # Pseudo-configure script for locating dx build tools
 #
+# This is intended to look like and mimic the behavior of a normal
+# autoconf/configure script; but is really just a simple shell script for
+# locating build tools on the local host.  It searches the current PATH for
+# necessary tools; and inserts those tool paths into the necessary Makefiles.
+#
+# The goal here is to provide some measure of build portability across
+# different platforms.  At a minimum, this script should work on Linux and
+# cygwin.  Should probably work under *BSD, too, but not tested.
+#
+# The script assumes that it can find 'which' and 'sed' in the current PATH.
+# It (probably?) relies on some 'bash' features.  All other dependencies should
+# be resolved by the script itself.
+#
+# Usage:
+#	% configure [--debug] [--host=<CROSS-COMPILE-PREFIX>] [TOOL-DEFINITIONS]
+#		where TOOL-DEFINITIONS are zero or more variable definitions for
+#		specifying tool preferences + locations (e.g., CC=gcc)
+#
 
 
+
+
+#
+# Find the absolute path to the specified tool.  If found, set TOOL to this
+# path value
+#
 function find_tool
 	{
 	echo -n "Looking for $1 ... "
@@ -35,9 +59,39 @@ function find_tool
 	}
 
 
+
+#
+# Show supported options + exit
+#
 function help
 	{
-	exit 0
+	cat <<-END_OF_HELP
+
+DX pseudo-configure script
+
+Usage:
+    $0 [-h|--help] [--host=<HOST-SPEC>] [TOOL-DEFINITIONS]
+
+    -h, --help displays this help message
+
+    --host=<HOST-SPEC> enables cross-compilation support.  Required for
+      platforms that do not natively support ELF file format (typically, only
+      cygwin?).  HOST-SPEC should be the usual cpu-arch-os triplet.  For
+      example, if your cross compiler is i686-pc-elf-gcc, then use
+      --host=i686-pc-elf
+
+    TOOL-DEFINITIONS are paths + overrides for specifying tools and tool
+      locations.  For example, if you have gcc installed under
+      /non/standard/path/to/my-gcc then add CC=/non/standard/path/to/my-gcc
+      to the command line.
+
+      This script recognizes these definitions on the command line:
+        AR ASM CC CXX DEBUGFS DOXYGEN E2FSCK LD MKISOFS NM OBJCOPY OBJDUMP
+        SHELL TAR
+
+END_OF_HELP
+
+	exit 1
 	}
 
 
@@ -50,6 +104,13 @@ function help
 
 
 #
+# Fixup the PATH used by 'which'.  This is mainly required for cygwin, which
+# can omit some useful directories by default
+#
+PATH=${PATH}:/usr/sbin:/sbin
+
+
+#
 # The 'which' tool is required; this script cannot proceed without it
 #
 WHICH=`which which 2>/dev/null`
@@ -57,6 +118,13 @@ if [ -z "${WHICH}" ]; then
 	echo "Unable to find 'which' tool, required for configure operation"
 	exit 2
 fi
+
+
+#
+# Attempt to locate 'sed', for parsing --host values.  If not found, user can
+# still override with SED=/path/to/sed on command line before --host value.
+#
+SED=`which sed 2>/dev/null`
 
 
 #
@@ -75,11 +143,18 @@ for argument in $*; do
 			;;
 
 
-		--host*)
+		--host=*)
+			# Ensure sed is available first
+			if [ -z "${SED}" ]; then
+				echo "Error: Cannot process --host without 'sed'"
+				echo "Try adding 'SED=/path/to/sed' definition to command line"
+				exit 1
+			fi
+
 			# Assume the --host value is the prefix on the cross-tools (e.g.,
 			# i386-elf-gcc)
 			CROSS_COMPILE_PREFIX=`echo ${argument} | \
-				sed 's/--host=\(.*\)/\1-/' -`
+				${SED} 's/--host=\(.*\)/\1-/' -`
 
 			if [ ${CROSS_COMPILE_PREFIX} != "-" ]; then
 				echo "OK, will look for cross-tools (${CROSS_COMPILE_PREFIX})"
@@ -107,36 +182,42 @@ done
 
 
 #
-# Fixup the PATH used by 'which'.  This is mainly required for cygwin, which
-# can omit some useful directories by default
-#
-PATH=${PATH}:/usr/sbin:/sbin
-
-
-#
 # Establish the basic tool definitions.  Values provided on the command line
 # override the defaults provided here
 #
-AR=${AR:-${CROSS_COMPILE_PREFIX}ar}
+AR=${AR:-ar}
+ASM=${ASM:-${CROSS_COMPILE_PREFIX}as}
 CC=${CC:-${CROSS_COMPILE_PREFIX}gcc}
 DEBUGFS=${DEBUGFS:-debugfs}
 DOXYGEN=${DOXYGEN:-doxygen}
 E2FSCK=${E2FSCK:-e2fsck}
 MKISOFS=${MKISOFS:-mkisofs}
-NM=${NM:-${CROSS_COMPILE_PREFIX}nm}
+NM=${NM:-nm}
+OBJCOPY=${OBJCOPY:-objcopy}
+OBJDUMP=${OBJDUMP:-objdump}
+SHELL=${SHELL:-bash}
+TAR=${TAR:-tar}
 
 
 #
 # Now infer any tool paths that were not specified explicitly on the command
 # line
 #
-find_tool ${AR}			required
-find_tool ${CC}			required
-find_tool ${DEBUGFS}
-find_tool ${DOXYGEN}
-find_tool ${E2FSCK}
-find_tool ${MKISOFS}
-find_tool ${NM}			required
+REQUIRED="required"
+OPTIONAL=
+
+find_tool ${AR}			${REQUIRED}
+find_tool ${ASM}		${REQUIRED}
+find_tool ${CC}			${REQUIRED}
+find_tool ${DEBUGFS}	${OPTIONAL}
+find_tool ${DOXYGEN}	${OPTIONAL}
+find_tool ${E2FSCK}		${OPTIONAL}
+find_tool ${MKISOFS}	${OPTIONAL}
+find_tool ${NM}			${REQUIRED}
+find_tool ${OBJCOPY}	${REQUIRED}
+find_tool ${OBJDUMP}	${REQUIRED}
+find_tool ${SHELL}		${REQUIRED}
+find_tool ${TAR}		${REQUIRED}
 
 
 
