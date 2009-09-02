@@ -26,7 +26,7 @@ all: $(DOXYGEN_TARGETS)
 # Kernel documentation
 #
 kernel: kernel.dox
-	@doxygen $<
+	@@DOXYGEN@ $<
 
 
 
@@ -34,7 +34,7 @@ kernel: kernel.dox
 # User documentation
 #
 user: user.dox
-	@doxygen $<
+	@@DOXYGEN@ $<
 
 
 

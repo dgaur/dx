@@ -12,12 +12,6 @@
 #	   set.  Typically, this value should be set on the command-line (e.g.,
 #	   "make DEBUG=1").
 #
-#	* "DX_CROSS_COMPILE_PREFIX" should be set to the prefix of the
-#	   cross-compilation tools, if necessary.  If used, this value
-#	   will usually be something like "i386-elf".  Typically, this
-#	   should be declared in the local environment (e.g., "export
-#	   DX_CROSS_COMPILE_PREFIX=i386-elf-").
-#
 #	* "DX_ROOT_DIR" should point to the root of the source tree;
 #	   typically, this should be declared in the local environment
 #	   (e.g., "export DX_ROOT_DIR=~/src/dx").  This value must be set
@@ -35,16 +29,16 @@ include $(DX_ROOT_DIR)/Makefile.dx
 #
 # Tools.  See doc/tools.txt for specific version requirements
 #
-AR			:= $(DX_CROSS_COMPILE_PREFIX)ar
-ASM			:= $(DX_CROSS_COMPILE_PREFIX)gcc
-CC			:= $(DX_CROSS_COMPILE_PREFIX)gcc
-CXX			:= $(DX_CROSS_COMPILE_PREFIX)gcc
-LINK		:= $(DX_CROSS_COMPILE_PREFIX)ld
-NM			:= $(DX_CROSS_COMPILE_PREFIX)nm
-OBJCOPY		:= $(DX_CROSS_COMPILE_PREFIX)objcopy
-OBJDUMP		:= $(DX_CROSS_COMPILE_PREFIX)objdump
-SHELL		:= /bin/sh
-STRIP		:= $(DX_CROSS_COMPILE_PREFIX)strip
+AR			:= @AR@
+ASM			:= @ASM@
+CC			:= @CC@
+CXX			:= @CXX@
+LINK		:= @LD@
+NM			:= @NM@
+OBJCOPY		:= @OBJCOPY@
+OBJDUMP		:= @OBJDUMP@
+SHELL		:= @SHELL@
+STRIP		:= @STRIP@
 
 
 

@@ -7,7 +7,7 @@
 # locating build tools on the local host.  As such, it's probably slower,
 # buggier and less portable than the usual autoconf/configure tools.  On the
 # other hand, it's more flexible in terms of cross-compiling, avoids some
-# unnecessary (for dx) test and probably(?) simpler.
+# unnecessary (for dx) tests and probably(?) simpler.
 #
 # This script searches the current PATH for necessary tools; and inserts
 # those tool paths into the necessary Makefiles.  The goal here is to provide
@@ -31,7 +31,17 @@
 # documentation)
 #
 OPTIONAL_TOOLS="DEBUGFS DOXYGEN E2FSCK MKISOFS"
-REQUIRED_TOOLS="AR ASM CC CP NM OBJCOPY OBJDUMP SED SHELL TAR"
+REQUIRED_TOOLS="AR ASM CC CP CXX LD NM OBJCOPY OBJDUMP SED SHELL STRIP TAR"
+
+
+
+#
+# These are the makefiles written/updated by this script
+#
+OUTPUT_FILES="doc/html/Makefile \
+			  media/iso/Makefile \
+			  media/floppy/load-image.sh \
+			  src/Makefile.src"
 
 
 
@@ -191,18 +201,21 @@ done
 # override the defaults provided here
 #
 AR=${AR:-ar}
-ASM=${ASM:-${CROSS_COMPILE_PREFIX}as}
+ASM=${ASM:-${CROSS_COMPILE_PREFIX}gcc}		# Use gcc front-end by default
 CC=${CC:-${CROSS_COMPILE_PREFIX}gcc}
 CP=${CP:-cp}
+CXX=${CXX:-${CROSS_COMPILE_PREFIX}gcc}		# Use gcc front-end by default
 DEBUGFS=${DEBUGFS:-debugfs}
 DOXYGEN=${DOXYGEN:-doxygen}
 E2FSCK=${E2FSCK:-e2fsck}
+LD=${LD:-${CROSS_COMPILE_PREFIX}ld}
 MKISOFS=${MKISOFS:-mkisofs}
 NM=${NM:-nm}
 OBJCOPY=${OBJCOPY:-objcopy}
 OBJDUMP=${OBJDUMP:-objdump}
 SED=${SED:-sed}
 SHELL=${SHELL:-bash}
+STRIP=${STRIP:-strip}
 TAR=${TAR:-tar}
 
 
@@ -233,6 +246,9 @@ done
 #
 # Generate a sed script to insert the various tool definitions
 #
+echo
+echo "Generating translation script ..."
+
 SED_PROGRAM="$0.sed.$$"
 echo > ${SED_PROGRAM}
 for tool in ${REQUIRED_TOOLS} ${OPTIONAL_TOOLS}; do
@@ -251,21 +267,17 @@ fi
 # Now generate the various makefiles, inserting these tool definitions where
 # necessary
 #
-echo
-echo "Generating output files ..."
+for output_file in ${OUTPUT_FILES}; do
+	input_file="${output_file}.in"
 
-OUTPUT_FILES="media/iso/Makefile \
-			  media/floppy/load-image.sh \
-			  src/Makefile.src"
-
-for file in ${OUTPUT_FILES}; do
-	if [ ! -e ${file}.in ]; then
-		echo "Skipping missing input file: ${file}"
+	if [ ! -e ${input_file} ]; then
+		echo "Skipping missing input file: ${input_file}"
 		continue
 	fi
 
 	# Create + fixup the output file with the detected tool settings
-	${SED} -f ${SED_PROGRAM} --posix ${file}.in > ${file}
+	echo "Generating: ${output_file}"
+	${SED} -f ${SED_PROGRAM} --posix ${input_file} > ${output_file}
 done
 
 
@@ -274,6 +286,8 @@ done
 # Done.  Cleanup + exit
 #
 rm ${SED_PROGRAM}
+
+echo
 echo "Done!"
 echo
 exit 0

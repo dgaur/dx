@@ -14,7 +14,6 @@ DX_RAMDISK_FILE		:= $(DX_SRC_DIR)/user/ramdisk.tgz
 GRUB_MENU_FILE		:= menu.lst
 GRUB_STAGE2_FILE	:= stage2_eltorito
 ISO_TREE			:= root
-MKISOFS				:= mkisofs  # Normally in /usr/bin
 
 
 
@@ -41,7 +40,7 @@ $(ISO_TREE): $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE) $(DX_KERNEL_FILE) \
 
 # Build the .iso image based on the contents of the $(ISO_TREE)
 $(DX_ISO_IMAGE): $(ISO_TREE) Makefile
-	@$(MKISOFS) -A $(DX_ISO_TAG) -b boot/grub/$(GRUB_STAGE2_FILE) \
+	@@MKISOFS@ -A $(DX_ISO_TAG) -b boot/grub/$(GRUB_STAGE2_FILE) \
 		--boot-info-table --boot-load-size 4 -f -J --no-emul -o $@ -r \
 		-sysid $(DX_ISO_TAG) -V $(DX_ISO_TAG) $(ISO_TREE)
 

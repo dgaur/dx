@@ -34,14 +34,6 @@ fi
 
 
 #
-# Required ext2 tools, included with the e2fsprogs package.  The exact
-# installation path here varies depending on the OS/environment
-#
-DEBUGFS="/usr/sbin/debugfs"
-E2FSCK="/usr/sbin/e2fsck"
-
-
-#
 # Determine the absolute path to the image/output file
 #
 pushd `dirname $1` > /dev/null
@@ -73,7 +65,7 @@ for dir in ${DIRS}; do
 	fi
 
 	# Create this directory in the image
-	${DEBUGFS} -R "mkdir ${dir}" -w ${IMAGE_FILE}
+	@DEBUGFS@ -R "mkdir ${dir}" -w ${IMAGE_FILE}
 done
 
 
@@ -88,7 +80,7 @@ for file in ${FILES}; do
 	echo "write $file `basename $file`" >> ${COMMAND_FILE}
 
 	# Write this input file to the image
-	${DEBUGFS} -f ${COMMAND_FILE} -w ${IMAGE_FILE}
+	@DEBUGFS@ -f ${COMMAND_FILE} -w ${IMAGE_FILE}
 
 	# Clean up
 	rm -f ${COMMAND_FILE}
@@ -100,4 +92,4 @@ popd > /dev/null
 #
 # Examine the resulting image for any errors
 #
-${E2FSCK} -f -n ${IMAGE_FILE}
+@E2FSCK@ -f -n ${IMAGE_FILE}
