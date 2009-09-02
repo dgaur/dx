@@ -105,5 +105,9 @@ or *BSD, this probably is not necessary.
 		% i386-elf-gcc --print-libgcc-file-name
 			> /usr/local/lib/gcc/i386-elf/3.4.4/libgcc.a
 
-	- In your build environment, set DX_CROSS_COMPILE_PREFIX to "i386-elf-"
+	- Configure your build environment to use the new cross-tools.
+		% cd /path/to/dx/source/tree
+		% configure --host=i386-elf
+
+
 
