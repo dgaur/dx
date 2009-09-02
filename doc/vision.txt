@@ -1,0 +1,29 @@
+
+* General Project Vision *
+
+
+This is the basic project "vision" that I've been pursuing.  It's not
+terribly radical or innovative; but I deliberately chose this path to make
+the project more interesting/educational and to explore some different
+technologies.
+
+	A small, vaguely desktop- or workstation-oriented operating system.
+	Liberally borrow ideas from Linux, Windows, L4, others; but there is no
+	specific intent or goal to mimic any of those systems in particular.
+	Support for basic desktop or workstation hardware.
+
+	A small, simple microkernel.  Kernel stability is highest priority, even
+	at the expense of system performance or user features.  Make the basic
+	system services available to user space applications/drivers; but
+	otherwise stay out of the way.
+
+	Applications in user space.  The common tongue, in user space, should be a
+	single HLL/VM: Python or possibly Parrot.  Drivers in user space, too,
+	where possible (although these probably still in C).
+
+	User space logic is inherently untrusted, even drivers.  For this reason,
+	minimize (avoid) any kernel dependencies on user space features or drivers.
+
+
+	-- Dan, September '09
+

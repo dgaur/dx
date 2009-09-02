@@ -3,6 +3,11 @@ This is the dx operating system, version 0.0.1a, released 2009-08-17
 
 
 
+* WHAT IS THIS?
+	See dx/doc/vision.txt.
+
+
+
 * CURRENT STATUS
 	Still under active development.  Not useful yet.  Basic micro kernel,
 	some user mode libraries, couple of user executables.  Nothing else.
