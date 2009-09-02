@@ -56,7 +56,7 @@ $(ROOT_SUBDIRS):
 
 
 #
-# Clean the tree
+# Clean the source tree.  Leave "configure" output + releases as is.
 #
 .PHONY: clean
 clean:
@@ -64,7 +64,18 @@ clean:
 	@for dir in $(ROOT_SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
-	@rm -rf archive
+	@rm -rf $(DX_ARCHIVE_DIR)
+
+
+
+#
+# Full clean.  Clean the source tree.  Delete "configure" output + any archived
+# release images
+#
+.PHONY: distclean
+distclean: clean
+	@./configure --distclean
+	@rm -rf releases
 
 
 
@@ -77,7 +88,8 @@ help:
 	@echo "Building the dx operating system --"
 	@echo "* \"make all\" builds the entire tree"
 	@echo "* \"make archive\" builds a clean project archive"
-	@echo "* \"make clean\" cleans the entire tree"
+	@echo "* \"make clean\" cleans the source tree"
+	@echo "* \"make distclean\" cleans the source tree, releases, config files"
 	@echo "* \"make doc\" builds the doxygen (HTML) documentation"
 	@echo "* \"make help\" displays this message"
 	@echo "* \"make src\" builds the source tree"
