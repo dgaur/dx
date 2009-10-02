@@ -4,7 +4,7 @@ This is the dx operating system, version 0.0.1a, released 2009-08-17
 
 
 * WHAT IS THIS?
-	See dx/doc/vision.txt.
+	A small OS for the x86.  See dx/doc/vision.txt.
 
 
 
@@ -20,7 +20,12 @@ This is the dx operating system, version 0.0.1a, released 2009-08-17
 
 
 * RELEASE NOTES and CHANGES FROM PREVIOUS VERSIONS
-	See dx/doc/release-notes.txt
+	See dx/doc/release_notes.txt
+
+
+
+* HARDWARE REQUIREMENTS
+	See dx/doc/hardware_support.txt
 
 
 

@@ -1,0 +1,29 @@
+
+* DX Hardware Support *
+
+This document describes the current list of required + supported hardware.
+
+
+
+Required:
+	- An Intel Pentium Pro (P6) or later CPU
+	- An Intel 8259 Programmable Interrupt Controller (PIC)
+	- An Intel 8254 Programmable Interrupt Timer (PIT)
+	- At least 64 MB of RAM.  Currently, this is an artificial restriction,
+	  since the entire OS image (kernel image, kernel heap, user image, etc)
+	  will easily fit within 8MB.
+	- A 8042 (or 8741/8742/compatible) keyboard controller
+	- An MF-II US keyboard
+	- A VGA-compatible video controller
+
+
+
+Optional:
+	- A 16550-compatible UART on COM1.  This is only necessary in the kernel
+	  debug build (when the kernel serial console is enabled).
+
+
+
+Other:
+	- Uni-processor only.  Should run normally on an SMP machine, but will
+	  only take advantage of one processor.  @@this is untested
