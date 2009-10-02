@@ -19,7 +19,11 @@
 #
 function build_image
 	{
-	local saved_image=releases/dx-$1-$2		# dx-<version>-<retail-or-debug>
+	local version=$1
+	local flavor=$2		# Retail or debug
+	local options=$3
+
+	local saved_image=releases/dx-${version}-${flavor}
 
 	# Create the output directory
 	mkdir -p `dirname ${saved_image}`
@@ -27,12 +31,17 @@ function build_image
 	# Clean the entire tree, even the debug files
 	make clean DEBUG=1
 
-	# Build everything.  Include a clean copy (archive) of the current project
-	# tree + documentation, so that these may be included in the release
-	# package  @@doxygen is reading the hg tree here, not the archive tree
-	make archive media $3
+	# Generate a clean copy (archive) of the current project tree, so that it
+	# may be included in the release package.  If commits are enabled (-c),
+	# then this archive should contain the exact source tree from which the
+	# release was built
+	echo "Archiving source tree ..."
+	hg archive -t tgz -p dx-${version} dx.tgz
+
+	# Build everything
+	make media ${options}
 	if [ $? -ne 0 ]; then
-		echo "Build failed (options $3)"
+		echo "Build failed (options ${options})"
 		exit 1
 	fi
 
