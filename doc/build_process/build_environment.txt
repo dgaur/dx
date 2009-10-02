@@ -35,11 +35,12 @@ in Linux/BSD is supported, with native tools @@@but not tested recently.
 		% ./configure
 
 	If you are cross-compiling (e.g., under cygwin), then pass the appropriate
-	--host option to "configure".  You may also need to add /usr/bin to your
+	--host option to "configure".  You may also need to add /usr/sbin to your
 	cygwin PATH; or else provide explicit paths to the file-system tools if
 	you intend to build media images.
 	Example:
-		% ./configure --host=i386-elf DEBUGFS=/usr/sbin/debugfs E2FSCK=/usr/bin/e2fsck
+		% ./configure --host=i386-elf DEBUGFS=/usr/sbin/debugfs \
+			E2FSCK=/usr/sbin/e2fsck
 
 	Use "make all" in the dx root directory to build the entire dx tree: the
 	kernel, applications, libraries, media images, doxygen documentation, etc.
