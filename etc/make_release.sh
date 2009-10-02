@@ -10,15 +10,16 @@
 #		-c			Enables commits to the local repository
 #		-d			Enables debug output
 #		<version>	The new version string, must be a single token
+#
 
 
 
 #
-# Build the actual media images
+# Build the actual media images from source
 #
 function build_image
 	{
-	saved_image=releases/dx-$1-$2		# dx-<version>-<retail-or-debug>
+	local saved_image=releases/dx-$1-$2		# dx-<version>-<retail-or-debug>
 
 	# Create the output directory
 	mkdir -p `dirname ${saved_image}`
@@ -36,20 +37,37 @@ function build_image
 	fi
 
 	# Save the floppy image
-	floppy_image="${DX_ROOT_DIR}/media/floppy/dx.vfd"
-	cp -f ${floppy_image} ${saved_image}.vfd
+	built_floppy_image="${DX_ROOT_DIR}/media/floppy/dx.vfd"
+	saved_floppy_image="${saved_image}.vfd"
+	save_image ${built_floppy_image} ${saved_floppy_image}
+
+	# Save the .iso image
+	built_iso_image="${DX_ROOT_DIR}/media/iso/dx.iso"
+	saved_iso_image="${saved_image}.iso"
+	save_image ${built_iso_image} ${saved_iso_image}
+
+	return
+	}
+
+
+#
+# Save a copy of a release image.  This is mainly useful for archiving old
+# releases; and for posting release images online
+#
+function save_image
+	{
+	local built_image=$1
+	local saved_image=$2
+
+	# Save the image to the release directory
+	cp -f ${built_image} ${saved_image}
 	if [ $? -ne 0 ]; then
-		echo "Missing ${floppy_image}"
+		echo "Missing ${built_image}"
 		exit 1
 	fi
 
-	# Save the .iso image
-	iso_image="${DX_ROOT_DIR}/media/iso/dx.iso"
-	cp -f ${iso_image} ${saved_image}.iso
-	if [ $? -ne 0 ]; then
-		echo "Missing ${iso_image}"
-		exit 1
-	fi
+	# Generate an MD5 signature for the image
+	md5sum ${saved_image} > ${saved_image}.md5
 
 	return
 	}
@@ -91,14 +109,17 @@ function update_version_h
 #
 function usage
 	{
-	echo
-	echo "Build and package a new OS release"
-	echo
-	echo "Usage: $0 [-c] [-d] <version>"
-	echo "    -c        Commit version changes back to local repository"
-	echo "    -d        Enable debug output"
-	echo "    version   New version number (e.g., x.y.z), must be single token"
-	echo
+	cat <<-END_OF_USAGE
+
+Build and package a new OS release
+
+Usage: $0 [-c] [-d] <version>
+    -c        Commit version changes back to local repository
+    -d        Enable debug output
+    version   New version number (e.g., x.y.z), must be single token
+
+END_OF_USAGE
+
 	exit 1
 	}
 
@@ -144,19 +165,33 @@ if [ -z "${NEW_VERSION}" ]; then
 	usage
 fi
 
-# Makefiles all depend on DX_ROOT_DIR
+
+# The various Makefiles all depend on DX_ROOT_DIR
 if [ -z "${DX_ROOT_DIR}" ]; then
 	echo "Cannot build when DX_ROOT_DIR is not set"
 	exit 1
 fi
 
 
-RELEASE_DATE=`date +%Y-%m-%d`
-
-
 # Build from the root of the current tree
 local_tree=`dirname $0`
 pushd ${local_tree}/..
+
+
+# This should now be the DX_ROOT_DIR.  If not, then the current source tree
+# is not the DX_ROOT_DIR tree; and thus the links will be incorrect, the
+# include files will be incorrect; etc.
+tempfile="tmp.$$"
+touch ${tempfile}
+if [ ! -e ${DX_ROOT_DIR}/${tempfile} ]; then
+	echo "DX_ROOT_DIR mismatch"
+	exit 1
+fi
+rm ${tempfile}
+
+
+# Automatically infer the release date
+RELEASE_DATE=`date +%Y-%m-%d`
 
 
 # Insert the new version information into the appropriate places
@@ -188,7 +223,7 @@ if [ -n "${ENABLE_COMMITS}" ]; then
 fi
 
 
-# Brief summary
+# Brief summary of results
 echo
 echo "Built new release, version ${NEW_VERSION}, release date ${RELEASE_DATE}"
 if [ -n "${ENABLE_COMMITS}" ]; then
