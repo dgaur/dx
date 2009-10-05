@@ -61,7 +61,7 @@ function find_tool
 	{
 	local status=0
 
-	echo -n "Looking for $1 ... "
+	log -n "Looking for $1 ... "
 
 	local tool=`which $1 2>/dev/null`
 	if [ -n "${tool}" ]; then
@@ -129,8 +129,8 @@ END_OF_HELP
 #
 function log
 	{
-	echo "$1"
-	echo "$1" >> ${CONFIGURE_LOG}
+	echo $*
+	echo $* >> ${CONFIGURE_LOG}
 	return
 	}
 
