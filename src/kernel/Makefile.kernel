@@ -25,9 +25,11 @@ DX_KERNEL_DIR	:= $(DX_SRC_DIR)/kernel
 # Kernel-specific tool settings
 #
 ASM_INCLUDES	+= -I$(DX_KERNEL_DIR)/inc
-CXX_FLAGS		+= -ansi -fno-builtin -fno-exceptions \
-				  -fno-implicit-templates -fno-rtti -nostdinc++
-LINK_FLAGS		+= -T $(KERNEL_LINK_SCRIPT)
+CXX_FLAGS		+= -ansi -fdata-sections -ffunction-sections \
+				   -fno-builtin -fno-exceptions \
+				   -fno-implicit-templates -fno-rtti -nostdinc++ \
+
+LINK_FLAGS		+= -T $(KERNEL_LINK_SCRIPT) --gc-sections
 
 
 
