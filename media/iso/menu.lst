@@ -8,7 +8,7 @@ default 0
 timeout 5
 
 
-# Boot dx from floppy
+# Boot dx from the .iso
 title	dx
 kernel	/boot/dx
 module	/boot/ramdisk.tgz
