@@ -23,9 +23,9 @@ all: $(DX_FLOPPY_IMAGE)
 
 # Build a directory tree that mimics the layout of the floppy disk; install
 # the necessary files in the appropriate places in this tree.  Unlike the
-# .iso image, do *not* include the project archive here: floppy images are
-# mainly useful for testing in a VM environment; and the full project tree
-# may not fit on a floppy anyway
+# .iso image, do *not* include the project archive or kernel symbols here:
+# floppy images are mainly useful for testing in a VM environment; and the
+# full project tree may not fit on a floppy anyway
 $(FLOPPY_TREE): $(GRUB_MENU_FILE) $(DX_KERNEL_FILE) $(DX_RAMDISK_FILE)
 	@echo Rebuilding floppy tree ...
 	@mkdir -p $(FLOPPY_TREE)/boot/grub/

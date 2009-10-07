@@ -27,10 +27,12 @@ $(ISO_TREE): $(GRUB_MENU_FILE) $(GRUB_STAGE2_FILE) $(DX_KERNEL_FILE) \
 	$(DX_RAMDISK_FILE)
 	@echo Rebuilding ISO tree ...
 	@mkdir -p $(ISO_TREE)/boot/grub/
-	@cp $(GRUB_MENU_FILE)		$(ISO_TREE)/boot/grub
-	@cp $(GRUB_STAGE2_FILE)		$(ISO_TREE)/boot/grub
-	@cp $(DX_KERNEL_FILE)		$(ISO_TREE)/boot
-	@cp $(DX_RAMDISK_FILE)		$(ISO_TREE)/boot
+	@cp $(GRUB_MENU_FILE)			$(ISO_TREE)/boot/grub
+	@cp $(GRUB_STAGE2_FILE)			$(ISO_TREE)/boot/grub
+	@cp $(DX_KERNEL_FILE)			$(ISO_TREE)/boot
+	@cp $(DX_KERNEL_FILE).disasm	$(ISO_TREE)/boot
+	@cp $(DX_KERNEL_FILE).symbols	$(ISO_TREE)/boot
+	@cp $(DX_RAMDISK_FILE)			$(ISO_TREE)/boot
 	@if [ -e $(DX_ARCHIVE_FILE) ]; then \
 		cp $(DX_ARCHIVE_FILE) $(ISO_TREE); \
 	fi
