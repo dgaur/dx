@@ -69,8 +69,8 @@ ifdef DEBUG
 	CC_DEFINES  += -DDEBUG -O0
 	CXX_DEFINES += -DDEBUG -O0
 else
-	CC_FLAGS  += -O2 -fomit-frame-pointer
-	CXX_FLAGS += -O2 -fomit-frame-pointer
+	CC_FLAGS  += -O2 -fomit-frame-pointer -DNDEBUG
+	CXX_FLAGS += -O2 -fomit-frame-pointer -DNDEBUG
 endif
 
 

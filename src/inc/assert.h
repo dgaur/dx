@@ -6,6 +6,10 @@
 #define _ASSERT_H
 
 
+//
+// Per the C99 spec, assert() is only useful when NDEBUG is *not* defined
+//
+
 #ifdef NDEBUG
 
 #define assert(expression)	((void)0)

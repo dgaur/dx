@@ -3,6 +3,7 @@
 //
 
 #include "assert.h"
+#include "stdlib.h"
 #include "dx/address_space_environment.h"
 #include "dx/capability.h"
 #include "dx/create_thread.h"
