@@ -22,21 +22,20 @@ or *BSD, this probably is not necessary.
 
 	- Configure the binutils tree.  The --target setting is the key
 	  configuration item; the whole point of this effort is to build ELF tools:
-		% /path/to/binutils-<version>/configure --target=i386-elf
-		% make
+		% /path/to/binutils-<version>/configure --target=i686-elf
 
 	- Install and build the new binutils
 		% make
 		% make install
 
-	- Verify that you now have i386-elf-as, i386-elf-ld, i386-elf-nm and
-	  i386-elf-objdump.  Typically, these will be installed under
+	- Verify that you now have i686-elf-as, i686-elf-ld, i686-elf-nm and
+	  i686-elf-objdump.  Typically, these will be installed under
 	  /usr/local/bin, but may be elsewhere depending on your configure options.
 	  Ensure that "elf32-i386" is a supported target.
-		% which i386-elf-objdump
-			> /usr/local/bin/i386-elf-objdump
+		% which i686-elf-objdump
+			> /usr/local/bin/i686-elf-objdump
 
-		% i386-elf-objdump.exe -i | head -4
+		% i686-elf-objdump.exe -i | head -4
 			> BFD header file version (GNU Binutils) 2.19.1
 			> elf32-i386
 			>  (header little endian, data little endian)
@@ -84,30 +83,32 @@ or *BSD, this probably is not necessary.
 	- Configure the gcc tree.  Use the same --target value that you used with
 	  the binutils configuration.  Enable support for at least C and C++
 	  compilation:
-		% /path/to/gcc-<version>/configure --target=i386-elf
+		% /path/to/gcc-<version>/configure --target=i686-elf
 		   --enable-languages="c,c++" --with-gnu-as --with-gnu-ld
 
 	- Build and install gcc.  Compilation errors in libstdc++ (typically "No
 	  support for this host/target combination" or "Link tests are not allowed
 	  after GCC_NO_EXECUTABLES") are not usually fatal and can usually be
-	  ignored.  None of the dx code relies on libstdc++ anyway.
+	  ignored.  None of the dx code relies on libstdc++ anyway.  See, e.g.,
+	  this thread: http://gcc.gnu.org/ml/gcc/2008-03/msg00510.html
 		% make
 		% make install
 
-	- Verify that you now have i386-elf-gcc and i386-elf-g++.  Typically, these
+	- Verify that you now have i686-elf-gcc and i686-elf-g++.  Typically, these
 	  will be installed under /usr/local/bin, but may be elsewhere depending on
 	  your configure options.
-		% which i386-elf-gcc
-			> /usr/local/bin/i386-elf-gcc
+		% which i686-elf-gcc
+			> /usr/local/bin/i686-elf-gcc
 
-	- Ensure that your cross-compiler knows where to find its personalized
-	  libgcc.a.  @@"make install-target-libgcc" might fix this if necessary
-		% i386-elf-gcc --print-libgcc-file-name
-			> /usr/local/lib/gcc/i386-elf/3.4.4/libgcc.a
+	- Build and install the personalized libgcc.a for your cross-compiler
+		% make all-target-libgcc
+		% make install-target-libgcc
+		% i686-elf-gcc --print-libgcc-file-name
+			> /usr/local/lib/gcc/i686-elf/4.4.1/libgcc.a
 
 	- Configure your build environment to use the new cross-tools.
 		% cd /path/to/dx/source/tree
-		% configure --host=i386-elf
+		% configure --host=i686-elf
 
 
 

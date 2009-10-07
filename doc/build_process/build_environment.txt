@@ -39,7 +39,7 @@ in Linux/BSD is supported, with native tools @@@but not tested recently.
 	cygwin PATH; or else provide explicit paths to the file-system tools if
 	you intend to build media images.
 	Example:
-		% ./configure --host=i386-elf DEBUGFS=/usr/sbin/debugfs \
+		% ./configure --host=i586-elf DEBUGFS=/usr/sbin/debugfs \
 			E2FSCK=/usr/sbin/e2fsck
 
 	Use "make all" in the dx root directory to build the entire dx tree: the
