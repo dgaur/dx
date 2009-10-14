@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.2, released 2009-10-14:
 	Maintenance release.  Various build improvements + fixes.  Added support
 	for recent versions of gcc + binutils.  Cleaned up doxygen output.
 	Various updates to the build documentation.  No major code changes.
