@@ -198,21 +198,8 @@ switch_thread:
 
 
 	//
-	// Reload the address space associated with the new thread; if this is a
-	// context switch between threads in the same address space, then leave
-	// the current page directory as is, to avoid unnecessary TLB misses.
-	// Note that EBP still refers to the old stack here
-	//
-	movl	%cr3, %eax
-	movl	16(%ebp), %ebx	// page directory of new thread
-	cmpl	%ebx, %eax
-	jz		1f
-	movl	%ebx, %cr3
-1:
-
-
-	//
-	// Switch to the stack of the new thread
+	// Switch to the stack of the new thread.  	Note that EBP still refers to
+	// the old stack here
 	//
 	movl	12(%ebp), %eax	// stack of the new thread
 	movl	%eax, %esp
@@ -229,8 +216,34 @@ switch_thread:
 
 
 	//
-	// If this thread has a customized I/O bitmap, then load it into the TSS;
-	// if not, then just mark the TSS bitmap as invalid
+	// Is this a context switch between threads in the same address space?  If
+	// so, then leave the page directory + the I/O bitmap as is, to avoid
+	// unnecessary TLB misses (page directory) and unnecessary memory
+	// cycles (bitmap)
+	//
+	movl	%cr3, %eax
+	movl	16(%ebp), %ebx	// page directory of new thread
+	cmpl	%ebx, %eax
+	jz		2f
+
+
+	//
+	// Here, the current/suspended thread and the new thread belong to
+	// different address spacees, so reload the address space and TSS context
+	// of the new thread
+	//
+
+
+	//
+	// Reload the page directory of the new thread/address space
+	//
+	movl	%ebx, %cr3
+
+
+	//
+	// If this new thread has a customized I/O bitmap, then load it into the
+	// TSS; if not, then just mark the TSS bitmap as invalid.  Note that EDI
+	// still points to the TSS here
 	//
 	movl	20(%ebp), %esi	// I/O bitmap of new thread
 	test	$0xFFFFFFFF, %esi
@@ -241,9 +254,8 @@ switch_thread:
 1:
 	TSS_RELOAD_BITMAP
 
+
 2:
-
-
 	//
 	// Finally, restore the context of the new thread; this represents its
 	// exact register state when it was last suspended
