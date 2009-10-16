@@ -9,6 +9,7 @@
 #ifndef _IO_MAPPED_REGISTER_HPP
 #define _IO_MAPPED_REGISTER_HPP
 
+#include "dx/hal/io_port.h"
 #include "dx/types.h"
 #include "hardware_register.hpp"
 
@@ -32,18 +33,24 @@ class   io_mapped_register_c: public hardware_register_c
 			{ return; }
 
 		uint8_t
-			read8();
+			read8()
+				{ return(io_port_read8(port_address)); }
 		uint16_t
-			read16();
+			read16()
+				{ return(io_port_read16(port_address)); }
 		uint32_t
-			read32();
+			read32()
+				{ return(io_port_read32(port_address)); }
 
 		void_t
-			write8(uint8_t data);
+			write8(uint8_t data)
+				{ io_port_write8(port_address, data); return; }
 		void_t
-			write16(uint16_t data);
+			write16(uint16_t data)
+				{ io_port_write16(port_address, data); return; }
 		void_t
-			write32(uint32_t data);
+			write32(uint32_t data)
+				{ io_port_write32(port_address, data); return; }
 
 
 		inline

@@ -1,6 +1,8 @@
 //
 // io_port.h
 //
+// Access to the I/O ports.  Specific to x86 architecture
+//
 
 #ifndef _IO_PORT_H
 #define _IO_PORT_H
@@ -9,6 +11,9 @@
 
 
 
+///
+/// Read data (8 bits) from port
+///
 static
 inline
 uint8_t
@@ -28,6 +33,9 @@ io_port_read8(uint16_t port_address)
 	}
 
 
+///
+/// Read data (16 bits) from port
+///
 static
 inline
 uint16_t
@@ -47,6 +55,9 @@ io_port_read16(uint16_t port_address)
 	}
 
 
+///
+/// Read data (32 bits) from port
+///
 static
 inline
 uint32_t
@@ -66,6 +77,9 @@ io_port_read32(uint16_t port_address)
 	}
 
 
+///
+/// Write data (8 bits) to port
+///
 static
 inline
 void_t
@@ -83,10 +97,13 @@ io_port_write8(uint16_t port_address, uint8_t data)
 	}
 
 
+///
+/// Write data (16 bits) to port
+///
 static
 inline
 void_t
-write16(uint16_t port_address, uint16_t data)
+io_port_write16(uint16_t port_address, uint16_t data)
 	{
 	__asm volatile (
 			"movw	%0, %%dx;"		// Load the port address
@@ -100,10 +117,13 @@ write16(uint16_t port_address, uint16_t data)
 	}
 
 
+///
+/// Write data (32 bits) to port
+///
 static
 inline
 void_t
-write32(uint16_t port_address, uint32_t data)
+io_port_write32(uint16_t port_address, uint32_t data)
 	{
 	__asm volatile (
 			"movw	%0, %%dx;"		// Load the port address

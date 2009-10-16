@@ -12,7 +12,6 @@ LOCAL_OBJECTS	:= atomic_int32.o \
 				   idt.o \
 				   interrupt.o \
 				   interrupt_handler_stub.o \
-				   io_mapped_register.o \
 				   io_port_map.o \
 				   kernel_panic.o \
 				   page_directory.o \
