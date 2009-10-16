@@ -25,7 +25,7 @@
 	pushl	%es;				\
 	pushl	%fs;				\
 	pushl	%gs;				\
-	pushfl;
+	pushfl;		// Required for context switch, not for IRQ
 
 
 

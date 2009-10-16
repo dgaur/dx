@@ -2,7 +2,7 @@
 // interrupt_handler_stub.asm
 //
 // Lowest-layer of interrupt-handling code.  The entries in the Interrupt
-// Descriptor Table point to these routines.  When the processor takes an
+// Descriptor Table (IDT) point to these routines.  When the processor takes an
 // interrupt, it uses the IDT to find the entry points defined below.  These
 // are the initial instructions the processor executes in order to handle the
 // interrupt event.
@@ -71,14 +71,31 @@
 .global INTERRUPT_HANDLER_NAME(vector);							\
 INTERRUPT_HANDLER_NAME(vector):									\
 	SAVE_THREAD_CONTEXT											\
-	RESTORE_KERNEL_CONTEXT										\
 	pushl $0;			/* no error code with this interrupt */	\
 	pushl $vector;		/* the interrupt vector */				\
+	jmp common_stub		/* commmon interrupt processing */
+
+
+
+//
+// MAKE_INTERRUPT_HANDLER_COMMON_STUB
+//
+// Emit handler + cleanup logic common to all stubs (without error
+// codes) and all system calls.  Restores kernel state; invokes kernel
+// interrupt path; restores interrupted/caller state and finally
+// returns to interrupted thread.
+//
+// All handlers defined with MAKE_INTERRUPT_HANDLER_STUB() and
+// MAKE_INTERRUPT_HANDLER_STUB_FOR_SYSCALL() should end here
+//
+#define MAKE_INTERRUPT_HANDLER_COMMON_STUB
+.align 4;														\
+common_stub:													\
+	RESTORE_KERNEL_CONTEXT										\
 	call dispatch_interrupt;									\
 	addl $8, %esp;		/* pop the error code and vector */		\
 	RESTORE_THREAD_CONTEXT										\
 	iret
-
 
 
 
@@ -95,11 +112,28 @@ INTERRUPT_HANDLER_NAME(vector):									\
 .align 4;														\
 .global INTERRUPT_HANDLER_NAME(vector);							\
 INTERRUPT_HANDLER_NAME(vector):									\
-	xchgl %eax, 0(%esp);	/* swap error code with EAX */		\
+	xchgl %eax, 0(%esp);		/* swap error code with EAX */	\
 	SAVE_THREAD_CONTEXT											\
+	pushl %eax;					/* the error code, now in EAX */\
+	pushl $vector;				/* the interrupt vector */		\
+	jmp common_stub_with_error	/* common interrupt processing */
+
+
+
+//
+// MAKE_INTERRUPT_HANDLER_COMMON_STUB_WITH_ERROR
+//
+// Emit handler + cleanup logic common to all stubs with error codes.
+// Restores kernel state; invokes kernel interrupt path; restores
+// interrupted/caller state and finally returns to interrupted thread.
+//
+// All handlers defined with MAKE_INTERRUPT_HANDLER_STUB_WITH_ERROR()
+// should end here
+//
+#define MAKE_INTERRUPT_HANDLER_COMMON_STUB_WITH_ERROR			\
+.align 4;														\
+common_stub_with_error:											\
 	RESTORE_KERNEL_CONTEXT										\
-	pushl %eax;				/* the error code, now in EAX */	\
-	pushl $vector;			/* the interrupt vector */			\
 	call dispatch_interrupt;									\
 	addl $8, %esp;			/* pop the error code and vector */	\
 	RESTORE_THREAD_CONTEXT										\
@@ -124,13 +158,9 @@ INTERRUPT_HANDLER_NAME(vector):									\
 .global INTERRUPT_HANDLER_NAME(vector);							\
 INTERRUPT_HANDLER_NAME(vector):									\
 	SAVE_THREAD_CONTEXT											\
-	RESTORE_KERNEL_CONTEXT										\
 	pushl %eax;			/* pointer to system call arguments */	\
 	pushl $vector;		/* the interrupt vector */				\
-	call dispatch_interrupt;									\
-	addl $8, %esp;		/* pop the pointer and vector */		\
-	RESTORE_THREAD_CONTEXT										\
-	iret
+	jmp common_stub		/* commmon interrupt processing */
 
 
 
@@ -215,4 +245,11 @@ MAKE_INTERRUPT_HANDLER_STUB_FOR_SYSCALL(SYSTEM_CALL_VECTOR_DELETE_THREAD)
 
 MAKE_INTERRUPT_HANDLER_STUB_FOR_SYSCALL(SYSTEM_CALL_VECTOR_MAP_DEVICE)
 MAKE_INTERRUPT_HANDLER_STUB_FOR_SYSCALL(SYSTEM_CALL_VECTOR_UNMAP_DEVICE)
+
+
+//
+// Common/shared cleanup code
+//
+MAKE_INTERRUPT_HANDLER_COMMON_STUB
+MAKE_INTERRUPT_HANDLER_COMMON_STUB_WITH_ERROR
 
