@@ -8,6 +8,7 @@
 #define _IO_MANAGER_HPP
 
 
+#include "debug.hpp"
 #include "dx/status.h"
 #include "dx/system_call.h"
 #include "dx/types.h"
@@ -100,7 +101,16 @@ class   io_manager_c
 							bool_t		wait_for_message = TRUE);
 		status_t
 			send_message(	message_cr	request,
-							message_cpp	response = NULL);
+							message_cpp	response);
+
+		/// Non-blocking message transmission
+		inline
+		status_t
+			send_message(message_cr request)
+				{
+				ASSERT(!request.is_blocking());
+				return(put_message(request));
+				}
 	};
 
 

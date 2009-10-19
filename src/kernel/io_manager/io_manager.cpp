@@ -616,18 +616,20 @@ select_next_thread(thread_cr current_thread)
 
 
 ///
-/// Send the given message to its destination thread.  If a reply or
-/// acknowledgement is expected, then block here until it arrives.
+/// Send the given message to its destination thread.  Block here until a
+/// response arrives.
 ///
 /// On success, the original message belongs to the recipient; and the reply
 /// belongs to the current thread.  See io_manager_c::put_message() and
 /// io_manager_c::get_message().
 ///
-/// May be safely invoked from within a system-call handler, with either the
-/// blocking or nonblocking behavior; if invoked a hardware interrupt handler,
-/// only the nonblocking option should be used.
+/// May be safely invoked from within a system-call handler; may not be
+/// invoked from a hardware interrupt handler.
 ///
-/// Returns STATUS_SUCCESS if the message is successfully sent + acknowledged;
+/// @param request	-- the message/request to send
+/// @param response	-- the response received from the original recipient
+///
+/// @return STATUS_SUCCESS if the message is successfully sent + acknowledged;
 /// or non-zero error otherwise.
 ///
 status_t io_manager_c::
@@ -642,15 +644,14 @@ send_message(	message_cr	request,
 	// Inform the recipient that the current thread is blocked, waiting for
 	// a reply to this message
 	//
-	if (response)
-		{ request.control |= MESSAGE_CONTROL_BLOCKING; }
+	request.control |= MESSAGE_CONTROL_BLOCKING;
 
 
 	//
 	// Attempt to queue this message on the recipient's mailbox
 	//
 	status = put_message(request);
-	if (status == STATUS_SUCCESS && response)
+	if (status == STATUS_SUCCESS)
 		{
 		// Wait for recipient to receive the message + reply
 		thread_yield();
