@@ -55,6 +55,12 @@ class   io_manager_c
 		atomic_int32_c		send_error_count;
 
 
+		message_cp
+			abort_send_message(	thread_cr		current_thread,
+								thread_cr		recipient,
+								message_id_t	request_id,
+								status_t		status);
+
 		thread_cr
 			select_next_thread(thread_cr current_thread);
 

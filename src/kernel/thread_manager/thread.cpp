@@ -676,6 +676,9 @@ maybe_put_null_message()
 /// This logic locks and manipulates the state of two different threads -- the
 /// sending thread (the current thread) and the receiving thread (this thread_c
 /// instance).  It's important to distinguish between the two contexts here.
+/// The current/sending thread is at least manipulating the state of the
+/// recipient thread and possibly waking it; the current thread may also be
+/// preparing itself for suspension if this is a synchronous request
 ///
 /// Returns STATUS_SUCCESS if the message was successfully queued; or
 /// non-zero error otherwise.

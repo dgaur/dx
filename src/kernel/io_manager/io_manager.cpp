@@ -10,9 +10,11 @@
 #include "hal/address_space_layout.h"
 #include "hal/interrupt_vectors.h"
 #include "io_manager.hpp"
+#include "kernel_panic.hpp"
 #include "kernel_subsystems.hpp"
 #include "kernel_threads.hpp"
 #include "medium_message.hpp"
+#include "small_message.hpp"
 
 
 
@@ -51,6 +53,73 @@ io_manager_c():
 	ASSERT(__null_thread);
 
 	return;
+	}
+
+
+///
+/// Handler for broken send_message() transaction.  Cleanup the sender's
+/// (current thread's) context + allocate a bogus reply, which may allow it to
+/// continue executing without violating normal message ownership rules
+///
+/// In general, this should be extremely rare.
+///
+/// @param current_thread	-- Current/sending thread
+/// @param recipient		-- Destination thread
+/// @param request_id		-- Message id of the original request
+/// @param status			-- Error code associated with failed transaction
+///
+/// @return an artificial message_c for the calling thread
+///
+message_cp io_manager_c::
+abort_send_message(	thread_cr		current_thread,
+					thread_cr		recipient,
+					message_id_t	request_id,
+					status_t		status)
+	{
+	small_message_cp	abort_message;
+
+
+	//
+	// Here, the current thread sent a synchronous message to the recipient;
+	// the recipient replied to the original request, waking the current
+	// thread; but the current thread was somehow unable to retrieve the
+	// response.
+	//
+
+
+	//
+	// If it's still pending, discard the message that woke this thread, to
+	// avoid any additional complications on this mailbox
+	//
+	current_thread.delete_wakeup_message();
+	incomplete_count++;
+
+
+	//
+	// Allocate an explicit abort message in place of the expected reply, to
+	// preserve the expected message ownership semantics + to avoid any
+	// ambiguity in the cleanup logic
+	//
+	abort_message = new small_message_c(recipient,
+										current_thread,
+										MESSAGE_TYPE_ABORT,
+										request_id,
+										status);
+
+	if (!abort_message)
+		{
+		// Unable to allocate the abort message.  Panic here to avoid
+		// memory corruption, since the caller cannot properly
+		// determine the message owner
+		//@alternately: let the current thread crash?  or just kill it here?
+		kernel_panic(	KERNEL_PANIC_REASON_MEMORY_ALLOCATION_FAILURE,
+						current_thread.id,
+						request_id,
+						status);
+		}
+
+
+	return(abort_message);
 	}
 
 
@@ -623,14 +692,14 @@ select_next_thread(thread_cr current_thread)
 /// belongs to the current thread.  See io_manager_c::put_message() and
 /// io_manager_c::get_message().
 ///
-/// May be safely invoked from within a system-call handler; may not be
+/// May be safely invoked from within a system-call handler; but should not be
 /// invoked from a hardware interrupt handler.
 ///
 /// @param request	-- the message/request to send
 /// @param response	-- the response received from the original recipient
 ///
-/// @return STATUS_SUCCESS if the message is successfully sent + acknowledged;
-/// or non-zero error otherwise.
+/// @return STATUS_SUCCESS if the message is successfully sent + a reply was
+/// was received; or non-zero error otherwise.
 ///
 status_t io_manager_c::
 send_message(	message_cr	request,
@@ -638,6 +707,16 @@ send_message(	message_cr	request,
 	{
 	thread_cr	current_thread = __hal->read_current_thread();
 	status_t	status;
+
+
+	//
+	// If the request is successfully delivered, then the current thread cannot
+	// safely touch these fields again.  Cache them	here in the event of a
+	// broken transaction
+	//
+	thread_cr		recipient	= request.destination;
+	message_id_t	request_id	= request.id;
+	add_reference(recipient);
 
 
 	//
@@ -653,38 +732,36 @@ send_message(	message_cr	request,
 	status = put_message(request);
 	if (status == STATUS_SUCCESS)
 		{
+		//
 		// Wait for recipient to receive the message + reply
+		//
 		thread_yield();
 
+
+		//
 		// Here, the recipient has received the original message + replied
 		// to it; read the response and return it to the caller
+		//
 		status = get_message(response);
 		if (status != STATUS_SUCCESS)
 			{
-			// This is ugly.  The current thread sent a synchronous message to
-			// the recipient; the recipient replied to the original request,
-			// waking the current thread; but the current thread was somehow
-			// unable to retrieve the response.  Discard the response, if it's
-			// still pending, to avoid additional complications on this
-			// mailbox if the current thread is somehow able to continue
-			// executing.  However, the current thread will likely crash or
-			// misbehave now due to the loss of this reply.  Ultimately, there
-			// is no clean recovery path here; this should hopefully be a rare
-			// event
-			current_thread.delete_wakeup_message();
-			incomplete_count++;
-			status = STATUS_IO_ERROR;
+			// Unable to retrieve the response.  Inject a bogus response to
+			// maintain message ownership rules + to avoid cleanup ambiguity.
+			// Recipient owns the request message; current thread owns the
+			// aborted reply
+			*response = abort_send_message(current_thread, recipient,
+				request_id, status);
+			ASSERT(*response);
+			status = STATUS_SUCCESS;
 			}
 		}
-	else if (response)
-		{
-		// Error while sending the initial request, so invalidate the response
-		*response = NULL;
-		}
+	// else, encountered an error during message delivery; current thread
+	// still owns the original request message
 
-	//@if (!success) then ownership of request message is messy here; caller
-	//@does not know if put_message() succeeded or failed, so it doesn't know
-	//@whether to free request message
+
+	// Done with recipient thread
+	remove_reference(recipient);
+
 
 	return(status);
 	}
