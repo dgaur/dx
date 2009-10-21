@@ -26,15 +26,15 @@ typedef spinlock_c &    spinlock_cr;
 class   spinlock_c
 	{
 	private:
-		bool_t	acquired;
-		bool_t	interrupts_enabled;
+		bool_t		acquired;
+		uint32_t	interrupt_state;
 
 	protected:
 
 	public:
 		spinlock_c():
 			acquired(FALSE),
-			interrupts_enabled(TRUE)
+			interrupt_state(0)
 			{ return; }
 		~spinlock_c()
 			{ return; }

@@ -37,18 +37,6 @@ class   x86_hardware_abstraction_layer_c
 
 
 		static
-		inline
-		void_t
-			interrupts_disable()
-				{ __asm("cli" : : : "cc"); return; }
-
-		static
-		inline
-		void_t
-			interrupts_enable()
-				{ __asm("sti" : : : "cc"); return; }
-
-		static
 		void_t
 			run_thread() NEVER_RETURNS;
 
@@ -89,6 +77,47 @@ class   x86_hardware_abstraction_layer_c
 		static
 		void_t
 			soft_yield();
+
+		static
+		inline
+		uintptr_t
+			interrupts_disable()
+				{
+				uint32_t eflags;
+
+				// Save the current interrupt state; then disable interrupts
+				__asm(	"pushfl;"
+						"popl %0;"
+						"cli"
+						: "=r"(eflags)
+						:
+						: "cc"	);
+
+				return(eflags);
+				}
+
+		static
+		inline
+		void_t
+			interrupts_enable()
+				{ __asm("sti" : : : "cc"); return; }
+
+
+		static
+		inline
+		void_t
+			interrupts_enable(uintptr_t interrupt_state)
+				{
+				// Re-enable interrupts, or not, depending on the cached
+				// interrupt state
+				__asm(	"pushl %0;"
+						"popfl"
+						:
+						: "g"(interrupt_state)
+						: "cc"	);
+				return;
+				}
+
 
 
 		//

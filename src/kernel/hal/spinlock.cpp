@@ -6,8 +6,8 @@
 
 #include "debug.hpp"
 #include "hal/spinlock.hpp"
-#include "x86.h"
 #include "kernel_panic.hpp"
+#include "kernel_subsystems.hpp"
 
 
 
@@ -21,23 +21,12 @@
 void_t spinlock_c::
 acquire()
 	{
-	uint32_t	eflags;
+	//
+	// Disable interrupts; and cache the previous interrupt state so that
+	// the release logic can reenable interrupts if necessary
+	//
+	interrupt_state = __hal->interrupts_disable();
 
-	//
-	// Fetch the value of EFLAGS to determine whether interrupts
-	// were already disabled.  If not, then interrupts were enabled
-	// and must be re-enabled when releasing the lock.
-	//
-	__asm(	"pushfl;"
-			"popl %0;"
-			"cli"
-			: "=r"(eflags)
-			:
-			: "cc"	);
-	if (eflags & EFLAGS_IF)
-		interrupts_enabled = TRUE;
-	else
-		interrupts_enabled = FALSE;
 
 	//
 	// Spinlocks may not be acquired recursively; so prevent the current
@@ -66,10 +55,7 @@ release()
 
 	// If interrupts were initially enabled, then re-enable them now.
 	// This thread may now be preempted.
-	if (interrupts_enabled)
-		{
-		__asm("sti" : : : "cc" );
-		}
+	__hal->interrupts_enable(interrupt_state);
 
 	return;
 	}
