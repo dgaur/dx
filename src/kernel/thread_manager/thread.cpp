@@ -474,7 +474,7 @@ get_message(message_cpp message)
 		}
 	else
 		{
-		// mailbox.is empty;
+		// Mailbox is empty
 		*message = NULL;
 		status = STATUS_MAILBOX_EMPTY;
 		}
