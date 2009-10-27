@@ -158,8 +158,6 @@ class   thread_c:
 		//
 		// Mailbox management
 		//
-		bool_t
-			delete_wakeup_message();
 		inline
 		void_t
 			disable_mailbox()

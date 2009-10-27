@@ -98,6 +98,33 @@ class queue_m
 
 
 		//
+		// Add a new object to the head/front of the queue.  This is a simple
+		// pointer copy, for performance reasons.  Performance is O(1).
+		//
+		void_t
+			push_head(DATATYPE& object)
+				{
+				queue_node_sp	node = new queue_node_s;
+				if (node)
+					{
+					node->next		= head;
+					node->object	= &object;	// Pointer copy
+
+					// Insert the node at the front of the queue
+					head = node;
+
+					// First element?
+					if (!tail)
+						tail = node;
+
+					count++;
+					}
+
+				return;
+				}
+
+
+		//
 		// Remove the object at the head of the queue.  This simply removes
 		// the entry from the list; the caller still owns the underlying
 		// object.  Performance is O(1).

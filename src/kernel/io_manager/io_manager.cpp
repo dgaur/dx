@@ -57,9 +57,9 @@ io_manager_c():
 
 
 ///
-/// Handler for broken send_message() transaction.  Cleanup the sender's
-/// (current thread's) context + allocate a bogus reply, which may allow it to
-/// continue executing without violating normal message ownership rules
+/// Handler for broken send_message() transaction.  Allocate a bogus reply,
+/// which may allow the sender (current thread) to continue executing without
+/// violating normal message ownership rules
 ///
 /// In general, this should be extremely rare.
 ///
@@ -83,15 +83,10 @@ abort_send_message(	thread_cr		current_thread,
 	// Here, the current thread sent a synchronous message to the recipient;
 	// the recipient replied to the original request, waking the current
 	// thread; but the current thread was somehow unable to retrieve the
-	// response.
+	// response.  The mailbox state is unknown here -- the original wakeup
+	// message could still be pending in the mailbox, depending on the nature
+	// of the reception error.
 	//
-
-
-	//
-	// If it's still pending, discard the message that woke this thread, to
-	// avoid any additional complications on this mailbox
-	//
-	current_thread.delete_wakeup_message();
 	incomplete_count++;
 
 
@@ -706,6 +701,7 @@ send_message(	message_cr	request,
 				message_cpp	response)
 	{
 	thread_cr	current_thread = __hal->read_current_thread();
+	uintptr_t	interrupt_state;
 	status_t	status;
 
 
@@ -727,6 +723,16 @@ send_message(	message_cr	request,
 
 
 	//
+	// The interrupt-handling logic relies on this same blocking-message
+	// mechanism.  Briefly disable interrupts here to avoid blocking the
+	// current thread on multiple messages simultaneously.  Note that while
+	// interrupts are disabled locally, the I/O Manager subsystem itself is
+	// not locked here.
+	//
+	interrupt_state = __hal->interrupts_disable();
+
+
+	//
 	// Attempt to queue this message on the recipient's mailbox
 	//
 	status = put_message(request);
@@ -736,6 +742,14 @@ send_message(	message_cr	request,
 		// Wait for recipient to receive the message + reply
 		//
 		thread_yield();
+
+
+		//
+		// End of critical section.  This thread delivered its message; and
+		// then went to sleep.  Woken here by the recipient.  An interrupt
+		// taken here will not violate mailbox integrity/invariants
+		//
+		__hal->interrupts_enable(interrupt_state);
 
 
 		//
@@ -755,8 +769,12 @@ send_message(	message_cr	request,
 			status = STATUS_SUCCESS;
 			}
 		}
-	// else, encountered an error during message delivery; current thread
-	// still owns the original request message
+	else
+		{
+		// Encountered an error during message delivery; current thread
+		// still owns the original request message
+		__hal->interrupts_enable(interrupt_state);
+		}
 
 
 	// Done with recipient thread
@@ -929,7 +947,11 @@ syscall_send_and_receive_message(volatile syscall_data_s* syscall)
 		//
 		status = send_message(*request_message, &reply_message);
 		if (status != STATUS_SUCCESS)
-			{ break; }	//@see send_message(), ownership of request is unclear
+			{
+			// Current thread is responsible for cleanup on failed transmission
+			delete(request_message);
+			break;
+			}
 
 
 		//

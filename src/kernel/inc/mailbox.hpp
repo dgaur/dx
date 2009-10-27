@@ -33,12 +33,10 @@ struct  mailbox_s
 	public:
 		bool_t				enabled;
 		message_queue_c		message_queue;
-		message_cp			wakeup_message;
 
 
 		mailbox_s():
-			enabled(TRUE),
-			wakeup_message(NULL)
+			enabled(TRUE)
 			{ return; }
 
 

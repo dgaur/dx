@@ -140,7 +140,6 @@ thread_c::
 	TRACE(ALL, "Destroying thread %#x\n", id);
 	ASSERT(*this != __hal->read_current_thread());
 	ASSERT(mailbox.message_queue.is_empty());
-	ASSERT(mailbox.wakeup_message == NULL);
 
 
 	//
@@ -222,9 +221,6 @@ block_on(	thread_cr	recipient,
 	//
 	if (message.is_blocking())
 		{
-		// Invariant: Setting blocking_thread here, so wakeup_message is NULL
-		ASSERT(mailbox.wakeup_message == NULL);
-
 		ASSERT(!blocking_thread);
 
 		state				= THREAD_STATE_BLOCKED;
@@ -288,48 +284,6 @@ causes_scheduling_loop(	thread_cr	current_thread,
 		}
 
 	return(scheduling_loop);
-	}
-
-
-///
-/// Aborts the pending wakeup message, if any.  This is only necessary when
-/// a blocking/synchronous exchange of messages cannot complete cleanly.  In
-/// this case, it's necessary to destroy the pending wakeup message, if any,
-/// to avoid message/memory leaks + confusing message cleanup.
-///
-/// In general, this method should be invoked rarely at best.  See
-/// io_manager_c::send_message() for more details.
-///
-/// Returns TRUE if the wakeup message was deleted; or FALSE if no message
-/// was still pending (e.g., if it was already deleted via some other
-/// I/O Manager path)
-///
-bool_t thread_c::
-delete_wakeup_message()
-	{
-	bool_t deleted = FALSE;
-
-	lock.acquire();
-
-	if (mailbox.wakeup_message)
-		{
-		// The wakeup message is still pending, so destroy it here to prevent
-		// a message leak; the current thread tried (unsuccessfully) to
-		// retrieve this message earlier, so little point in trying to
-		// preserve it now
-		printf("Deleting wakeup message for thread %#x\n", id);
-		delete(mailbox.wakeup_message);
-		mailbox.wakeup_message = NULL;
-
-		// Invariant: wakeup_message was valid, so blocking_thread must be NULL
-		ASSERT(blocking_thread == NULL);
-
-		deleted = TRUE;
-		}
-
-	lock.release();
-
-	return(deleted);
 	}
 
 
@@ -448,27 +402,11 @@ get_message(message_cpp message)
 	lock.acquire();
 
 	//
-	// Retrieve the next message, if any, pending for this thread.  There
-	// are three possibilities here:
-	// (a) This thread has a "wakeup" message pending; this will be a response
-	//	   to a synchronous message sent previously by this thread.  In this
-	//	   case, return this message ahead of any others
-	// (b) No wakeup message pending, but the thread has some other message(s)
-	//	   in its queue.  Return the first/oldest message pending in the queue
-	// (c) The mailbox is empty.  No messages are pending
+	// Retrieve the next message, if any, pending for this thread
 	//
-	if (mailbox.wakeup_message != NULL)
+	if (!mailbox.message_queue.is_empty())
 		{
-		// A wakeup message is pending, so return it ahead of any other
-		// messages in the mailbox
-		*message = mailbox.wakeup_message;
-		mailbox.wakeup_message = NULL;
-		status = STATUS_SUCCESS;
-		}
-	else if (!mailbox.message_queue.is_empty())
-		{
-		// No wakeup message, but queue contains messages.  Return the next
-		// message queued on this mailbox
+		// Return the next message queued on this mailbox
 		*message = &mailbox.message_queue.pop();
 		status = STATUS_SUCCESS;
 		}
@@ -559,16 +497,6 @@ mark_for_deletion(	message_list_cr	leftover_messages,
 	// rare situations when a thread removes messages from a mailbox it does
 	// not own
 	//
-	if (mailbox.wakeup_message)
-		{
-		// This is unfortunate.  The victim thread has a wakeup message still
-		// pending, so it might misbehave if it resumes and this message is
-		// missing.  This should be rare.
-		printf("Stealing wakeup message from thread %#x\n", id);
-		leftover_messages += *mailbox.wakeup_message;
-		mailbox.wakeup_message = NULL;
-		}
-
 	while (!mailbox.message_queue.is_empty())
 		{
 		message_cr message = mailbox.message_queue.pop();
@@ -722,17 +650,18 @@ put_message(message_cr message)
 		//
 		// Queue the message for the recipient thread.  There are three
 		// possibilities here:
-		// (a) this message wakes the thread, bypasses the mbox queue;
+		// (a) this message wakes the thread, bypasses the mailbox queue;
 		// (b) this message does not wake the thread, queued normally;
 		// (c) this message does not wake the thread, queue overflow
 		//
 		if (unblock_on(message))
 			{
 			// This recipient thread is blocked, waiting for this message; now
-			// that this message has arrived, it may resume execution
+			// that this message has arrived, it may resume execution.  This
+			// incoming (wakeup) message automatically moves to the front of
+			// the message queue
 			ASSERT(state == THREAD_STATE_READY);
-			ASSERT(mailbox.wakeup_message == NULL);	// Invariant
-			mailbox.wakeup_message = &message;
+			mailbox.message_queue.push_head(message);
 			status = STATUS_SUCCESS;
 			}
 		else if (!mailbox.overflow())
