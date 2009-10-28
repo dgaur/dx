@@ -46,10 +46,8 @@ io_manager_c():
 
 
 	//
-	// The idle thread + null thread must be initialized before enabling any
-	// lotteries
+	// The null thread must be initialized before enabling any lotteries
 	//
-	ASSERT(__idle_thread);
 	ASSERT(__null_thread);
 
 	return;
@@ -574,7 +572,7 @@ receive_message(message_cpp	message,
 /// another thread, pass the CPU directly to this blocking thread.  Otherwise,
 /// hold a lottery to pseudo-randomly select the next thread, using pending
 /// messages as lottery tickets.  If no messages are pending; and the current
-/// thread is not blocked on I/O, then just dispatch the idle thread.
+/// thread is not blocked on I/O, then just dispatch the null thread.
 ///
 /// This logic may execute in interrupt context, depending on when/why it
 /// is invoked.
@@ -600,7 +598,8 @@ select_next_thread(thread_cr current_thread)
 	//	(b) One or more messages are pending.  Hold a lottery, using the
 	//		pending messages as tickets, to select the winning thread
 	//	(c) No messages are currently pending and therefore no thread can
-	//		execute.  Automatically dispatch the idle thread to fill the gap.
+	//		execute.  Automatically dispatch the null/idle thread to fill
+	//		the gap.
 	//
 	next_thread = current_thread.find_blocking_thread();
 	if (next_thread != NULL)
@@ -635,11 +634,12 @@ select_next_thread(thread_cr current_thread)
 			{
 			//
 			// The current thread cannot continue; and there are no pending
-			// messages.  Dispatch the idle thread.  This is option (c) above
+			// messages.  Dispatch the null/idle thread.  This is option (c)
+			// above
 			//
 			idle_count++;
-			ASSERT(__idle_thread);
-			next_thread = __idle_thread;
+			ASSERT(__null_thread);
+			next_thread = __null_thread;
 			}
 
 

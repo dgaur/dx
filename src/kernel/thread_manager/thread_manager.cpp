@@ -7,7 +7,6 @@
 #include "dx/capability.h"
 #include "dx/system_call.h"
 #include "dx/system_call_vectors.h"
-#include "idle_thread.hpp"
 #include "kernel_panic.hpp"
 #include "kernel_subsystems.hpp"
 #include "kernel_threads.hpp"
@@ -372,9 +371,8 @@ handle_interrupt(interrupt_cr interrupt)
 
 ///
 /// Initializes contexts for the various kernel threads: the current/boot
-/// thread; the cleanup thread; the idle thread + the null thread.  This should
-/// only be invoked once, during system-boot, before holding any scheduling
-/// lotteries.
+/// thread; the cleanup thread; the null thread.  This should only be invoked
+/// once, during system-boot, before holding any scheduling lotteries.
 ///
 /// By definition, this should execute only in the context of the boot thread;
 /// and no other threads exist yet.  No risk of preemption here.
@@ -438,18 +436,14 @@ initialize_system_threads()
 	__cleanup_thread =
 		create_thread(cleanup_thread_entry, NULL, THREAD_ID_CLEANUP);
 
-	//@on SMP host, must allocate one idle thread for each CPU
-	ASSERT(__idle_thread == NULL);
-	__idle_thread = create_thread(idle_thread_entry, NULL, THREAD_ID_IDLE);
-
+	//@on SMP host, must allocate one idle/null thread for each CPU
 	ASSERT(__null_thread == NULL);
 	__null_thread = create_thread(null_thread_entry, NULL, THREAD_ID_NULL);
 
-	if (!__cleanup_thread || !__idle_thread || !__null_thread)
+	if (!__cleanup_thread || !__null_thread)
 		{ kernel_panic(KERNEL_PANIC_REASON_UNABLE_TO_CREATE_SYSTEM_THREAD); }
 
 	TRACE(ALL, "Initialized cleanup thread (id %#x)\n", __cleanup_thread->id);
-	TRACE(ALL, "Initialized idle thread (id %#x)\n", __idle_thread->id);
 	TRACE(ALL, "Initialized null thread (id %#x)\n", __null_thread->id);
 
 	return;

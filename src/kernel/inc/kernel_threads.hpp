@@ -24,13 +24,9 @@ extern
 thread_cp		__cleanup_thread;
 
 
-/// The idle thread consumes CPU cycles when no other threads are ready to run
-extern
-thread_cp		__idle_thread;
-
-
-/// The null thread is a message-sink; and provides a convenient source for
-/// messages that originate in the kernel
+/// The null thread is multi-purpose: it consumes CPU cycles when no other
+/// threads are ready to run; it acts as a simple message-sink; and it
+/// provides a convenient source for messages that originate in the kernel
 extern
 thread_cp		__null_thread;
 

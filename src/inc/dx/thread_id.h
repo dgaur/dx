@@ -21,11 +21,10 @@ typedef thread_id_tp*		thread_id_tpp;
 //
 // Some well-known thread ids
 //
-#define THREAD_ID_IDLE		((thread_id_t)(-256))	//@SMP one per CPU
+#define THREAD_ID_NULL		((thread_id_t)(-256))	//@SMP one per CPU
 
 #define THREAD_ID_BOOT		((thread_id_t)(-16))	// 0xFFFFFFF0
-#define THREAD_ID_NULL		((thread_id_t)(-15))	// 0xFFFFFFF1
-#define THREAD_ID_CLEANUP	((thread_id_t)(-14))	// 0xFFFFFFF2, etc
+#define THREAD_ID_CLEANUP	((thread_id_t)(-15))	// 0xFFFFFFF1, etc
 
 #define THREAD_ID_LOOPBACK	((thread_id_t)(-2))		/// Loopback to self
 #define THREAD_ID_INVALID	((thread_id_t)(-1))
