@@ -406,7 +406,9 @@ get_message(message_cpp message)
 	//
 	if (!mailbox.message_queue.is_empty())
 		{
-		// Return the next message queued on this mailbox
+		// Return the next message queued on this mailbox.  This should either
+		// be the response to the most recent blocking message; or the oldest
+		// unsolicited input message
 		*message = &mailbox.message_queue.pop();
 		status = STATUS_SUCCESS;
 		}
@@ -659,7 +661,8 @@ put_message(message_cr message)
 			// This recipient thread is blocked, waiting for this message; now
 			// that this message has arrived, it may resume execution.  This
 			// incoming (wakeup) message automatically moves to the front of
-			// the message queue
+			// the message queue, so it becomes the first message that the
+			// recipient sees upon waking
 			ASSERT(state == THREAD_STATE_READY);
 			mailbox.message_queue.push_head(message);
 			status = STATUS_SUCCESS;
