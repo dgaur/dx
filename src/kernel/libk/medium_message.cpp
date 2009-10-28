@@ -21,6 +21,7 @@ medium_message_c(	thread_cr		message_source,
 	sender_payload(message_payload)
 	{
 	ASSERT(payload_size <= MEDIUM_MESSAGE_PAYLOAD_SIZE);
+	ASSERT(payload_size > 0);
 	return;
 	}
 

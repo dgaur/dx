@@ -107,6 +107,8 @@ collect_payload()
 			// Destination address must be in user-visible memory
 			if (!__memory_manager->is_user_address(receiver_payload))
 				{
+				TRACE(ALL, "Cannot place message payload at kernel %p\n",
+					receiver_payload);
 				status = STATUS_ACCESS_DENIED;
 				break;
 				}
