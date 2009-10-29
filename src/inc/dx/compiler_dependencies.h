@@ -51,6 +51,22 @@
 		__builtin_va_start(argument_list, last_fixed_argument)
 
 
+
+	//
+	// Branch prediction/hints
+	//
+	#define LIKELY(condition)		__builtin_expect(!!(condition), 1)
+	#define UNLIKELY(condition)		__builtin_expect(!!(condition), 0)
+
+
+	//
+	// Cache management
+	//
+	//@size? stride distance?
+	#define PREFETCH(address, write) __builtin_prefetch((address), !!(write))
+
+
+
 #else
 	//
 	// Unknown tool chain
