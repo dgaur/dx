@@ -9,9 +9,9 @@
 
 
 #include "address_space.hpp"
-#include "compiler_dependencies.hpp"
 #include "counted_object.hpp"
 #include "dx/capability.h"
+#include "dx/compiler_dependencies.h"
 #include "dx/status.h"
 #include "dx/thread_id.h"
 #include "dx/types.h"

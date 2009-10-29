@@ -7,11 +7,11 @@
 //
 
 
-#include "compiler_dependencies.hpp"
 #include "drivers/display.hpp"
 #include "drivers/kernel_test.hpp"
 #include "drivers/serial_console.hpp"
 #include "dx/capability.h"
+#include "dx/compiler_dependencies.h"
 #include "dx/version.h"
 #include "hal/processor_type.h"
 #include "kernel_heap.hpp"

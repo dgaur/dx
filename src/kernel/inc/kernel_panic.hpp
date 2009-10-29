@@ -10,7 +10,7 @@
 #ifndef _KERNEL_PANIC_HPP
 #define _KERNEL_PANIC_HPP
 
-#include "compiler_dependencies.hpp"
+#include "dx/compiler_dependencies.h"
 #include "dx/types.h"
 
 

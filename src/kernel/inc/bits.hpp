@@ -10,8 +10,8 @@
 #define _BITS_HPP
 
 
-#include "compiler_dependencies.hpp"
 #include "debug.hpp"
+#include "dx/compiler_dependencies.h"
 #include "dx/types.h"
 
 

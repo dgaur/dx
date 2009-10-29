@@ -1,12 +1,12 @@
 //
-// compiler_dependencies.hpp
+// compiler_dependencies.h
 //
 // Various compiler dependencies, syntax quirks + idiosyncrasies.  Currently,
 // only the GCC tool chain is supported.
 //
 
-#ifndef _COMPILER_DEPENDENCIES_HPP
-#define _COMPILER_DEPENDENCIES_HPP
+#ifndef _COMPILER_DEPENDENCIES_H
+#define _COMPILER_DEPENDENCIES_H
 
 
 #ifdef __GNUC__

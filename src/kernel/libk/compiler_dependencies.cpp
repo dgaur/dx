@@ -2,7 +2,7 @@
 // compiler_dependencies.cpp
 //
 
-#include "compiler_dependencies.hpp"
+#include "dx/compiler_dependencies.h"
 #include "dx/types.h"
 
 

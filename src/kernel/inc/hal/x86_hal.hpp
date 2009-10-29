@@ -15,7 +15,7 @@
 #define _X86_HAL_HPP
 
 #include "address_space.hpp"
-#include "compiler_dependencies.hpp"
+#include "dx/compiler_dependencies.h"
 #include "dx/types.h"
 #include "hal/interrupt_vectors.h"
 #include "interrupt.hpp"
