@@ -85,10 +85,14 @@ allocate_block()
 ///
 /// @param block -- the victim block
 ///
-void_t memory_pool_c::
+/// @return STATUS_SUCCESS if the block is successfully freed; non-zero
+/// otherwise
+///
+status_t memory_pool_c::
 free_block(void_tp block)
 	{
 	uint32_t index;
+	status_t status;
 
 	ASSERT(block);
 	ASSERT(block >= base);
@@ -101,6 +105,8 @@ free_block(void_tp block)
 		lock.acquire();
 		bitmap.free(index);
 		lock.release();
+
+		status = STATUS_SUCCESS;
 		}
 	else
 		{
@@ -108,8 +114,9 @@ free_block(void_tp block)
 		// here if the block is not returned to the correct pool
 		printf("Cannot return block at %p to pool at %p (base %p)\n",
 			block, this, base);
+		status = STATUS_INVALID_DATA;
 		}
 
-	return;
+	return(status);
 	}
 

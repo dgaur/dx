@@ -802,8 +802,9 @@ send_message(	message_cr	request,
 void_t io_manager_c::
 syscall_delete_message(volatile syscall_data_s* syscall)
 	{
-	void_tp	data		= void_tp(syscall->data0);
-	size_t	data_size	= size_t(syscall->data1);
+	void_tp		data		= void_tp(syscall->data0);
+	size_t		data_size	= size_t(syscall->data1);
+	status_t	status;
 
 	TRACE(SYSCALL, "System call: delete message, %p\n", syscall);
 
@@ -812,20 +813,27 @@ syscall_delete_message(volatile syscall_data_s* syscall)
 		thread_cr thread = __hal->read_current_thread();
 
 		ASSERT(data);
-		if (data > void_tp(LARGE_PAYLOAD_POOL_BASE))
+		if (data >= void_tp(LARGE_PAYLOAD_POOL_BASE))
 			{
 			// Assume this was a large_message_c
 			thread.address_space.unshare_frame(data, data_size);
-			thread.address_space.free_large_payload_block(data);
+			status = thread.address_space.free_large_payload_block(data);
 			}
 		else
 			{
 			// Assume this was a medium_message_c
+			ASSERT(data >= void_tp(MEDIUM_PAYLOAD_POOL_BASE));
 			ASSERT(data_size <= MEDIUM_MESSAGE_PAYLOAD_SIZE);
-			thread.address_space.free_medium_payload_block(data);
+			status = thread.address_space.free_medium_payload_block(data);
 			}
 		}
-	// else, this was a small_message_c and no cleanup is required
+	else
+		{
+		// This was a small_message_c and no cleanup is required
+		status = STATUS_SUCCESS;
+		}
+
+	syscall->status = status;
 
 	return;
 	}

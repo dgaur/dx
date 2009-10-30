@@ -6,6 +6,7 @@
 #define _MEMORY_POOL_HPP
 
 #include "bitmap.hpp"
+#include "dx/status.h"
 #include "dx/types.h"
 #include "hal/spinlock.hpp"
 
@@ -49,7 +50,7 @@ class   memory_pool_c
 		void_tp
 			allocate_block();
 
-		void_t
+		status_t
 			free_block(void_tp block);
 
 

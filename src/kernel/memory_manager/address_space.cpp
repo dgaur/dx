@@ -802,9 +802,14 @@ expand(	const void_tp		first_new_page,
 ///
 /// @param block -- the victim block to be released
 ///
-void_t address_space_c::
+/// @return STATUS_SUCCESS if the block is successfully freed; non-zero
+/// otherwise
+///
+status_t address_space_c::
 free_large_payload_block(const void_tp block)
 	{
+	status_t status;
+
 	ASSERT(block);
 	ASSERT(is_aligned(block, PAGE_SIZE));
 
@@ -815,11 +820,14 @@ free_large_payload_block(const void_tp block)
 	// Return this block back to the pool from which it was allocated
 	uint32_t index = (b - LARGE_PAYLOAD_POOL_BASE) / PAYLOAD_POOL_SIZE;
 	if (index < LARGE_PAYLOAD_POOL_COUNT)
-		{ large_payload_pool[index]->free_block(block); }
+		{ status = large_payload_pool[index]->free_block(block); }
 	else
-		{ TRACE(ALL, "Unable to free payload block at %p\n", block); }
+		{
+		TRACE(ALL, "Unable to free payload block at %p\n", block);
+		status = STATUS_INVALID_DATA;
+		}
 
-	return;
+	return(status);
 	}
 
 
@@ -830,16 +838,19 @@ free_large_payload_block(const void_tp block)
 ///
 /// @param block -- the victim block to be released
 ///
-void_t address_space_c::
+/// @return STATUS_SUCCESS if the block is successfully freed; non-zero
+/// otherwise
+///
+status_t address_space_c::
 free_medium_payload_block(const void_tp block)
 	{
 	// Release the payload block back to the pool
-	medium_payload_pool.free_block(block);
+	status_t status = medium_payload_pool.free_block(block);
 
 	// Leave the page directory/table unchanged, since there may be other
 	// blocks within this same page still in use
 
-	return;
+	return(status);
 	}
 
 

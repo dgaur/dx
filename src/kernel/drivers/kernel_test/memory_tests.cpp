@@ -25,6 +25,7 @@ void_t
 run_address_space_tests()
 	{
 	address_space_cp	address_space;
+	void_tp				block;
 	shared_frame_list_c	frame;
 	void_tp				self = void_tp(&run_address_space_tests);
 	size_t				size = 32;
@@ -36,10 +37,26 @@ run_address_space_tests()
 	address_space = __memory_manager->create_address_space(1234);
 	ASSERT(address_space);
 
+	// Allocate and free a large payload block from this address space
+	block = address_space->allocate_large_payload_block(4);
+	ASSERT(block);
+	address_space->free_large_payload_block(block);
+
+	// Allocate and free a medium payload block from this address space
+	block = address_space->allocate_medium_payload_block();
+	ASSERT(block);
+	address_space->free_medium_payload_block(block);
+
 	// Attempt to share a bogus memory address; expect this to fail
 	void_tp invalid = void_tp(0x1000);
 	status = address_space->share_frame(invalid, PAGE_SIZE, frame);
 	ASSERT(status != STATUS_SUCCESS);
+
+	// Attempt to unshare/free a bogus memory address; expect this to fail (but
+	// should not crash or panic)
+	invalid = void_tp(0xFFFF1234);
+	address_space->unshare_frame(invalid, 0);
+	address_space->unshare_frame(invalid, PAGE_SIZE);
 
 	// Enable the kernel page containing this method to be shared
 	status = address_space->share_kernel_frames(self, size);
@@ -157,6 +174,7 @@ run_pool_tests()
 	uint8_tp		base;
 	size_t			block_size	= 8;
 	uint32_t		pool_size	= 128;
+	status_t		status;
 
 	// Allocate the underlying memory block, then build a pool on top of it
 	base = new uint8_t[ pool_size ];
@@ -171,7 +189,12 @@ run_pool_tests()
 	ASSERT(is_aligned(block, block_size));
 
 	// Return the block to the pool
-	pool.free_block(block);
+	status = pool.free_block(block);
+	ASSERT(status == STATUS_SUCCESS);
+
+	// Attempt to return a bogus block; expect this to fail
+	status = pool.free_block(void_tp(0xFFFF0000));
+	ASSERT(status != STATUS_SUCCESS);
 
 	delete[](base);
 

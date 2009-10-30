@@ -141,12 +141,12 @@ class   address_space_c:
 		//
 		void_tp
 			allocate_large_payload_block(uint32_t page_count);
-		void_t
+		status_t
 			free_large_payload_block(const void_tp block);
 
 		void_tp
 			allocate_medium_payload_block();
-		void_t
+		status_t
 			free_medium_payload_block(const void_tp block);
 
 
