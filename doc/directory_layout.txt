@@ -5,6 +5,9 @@ This is a brief roadmap that describes the layout of the DX
 source tree.
 
 
+
+*** FULL SOURCE TREE:
+
 /dx
 
 	/doc		- Assorted dx documentation
@@ -32,7 +35,7 @@ source tree.
 			/hal			- Hardware Abstraction Layer (HAL)
 			/inc			- Kernel headers
 			/io_manager		- Messages-passing and scheduling
-			/klibk			- Misc kernel library: messages, bitmaps, etc
+			/libk			- Misc kernel library: messages, bitmaps, etc
 			/memory_manager	- Memory management subsystem
 			/thread_manager	- Thread creation + deletion
 
@@ -44,4 +47,19 @@ source tree.
 			/loader			- Loader for initializing user-space from ramdisk
 			/user_start		- Startup files for all user-mode applications
 			/vga			- VGA driver
+
+
+
+*** HEADER FILES:
+
+Private headers live in local source directories if possible.  For example,
+ramdisk.hpp lives in src/kernel/boot, because it's only used by the boot code.
+
+Common/shared headers live in one these places:
+	dx/src/inc				-- Standard C/POSIX headers
+	dx/src/inc/dx			-- DX-specific headers; hardware-independent
+	dx/src/inc/dx/hal		-- DX-specific headers;	hardware-dependent
+	dx/src/kernel/inc		-- DX kernel-specific headers; hardware-independent
+	dx/src/kernel/inc/hal	-- DX kernel-specific headers; hardware-dependent
+
 
