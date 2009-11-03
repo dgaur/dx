@@ -255,7 +255,7 @@ handle_interrupt(interrupt_cr interrupt)
 /// Handler for CREATE_ADDRESS_SPACE system call.
 ///
 /// System call output:
-///		syscall->status	= status of message delivery
+///		syscall->status	= final status of creation request
 ///		syscall->data0	= id of new address space
 ///
 /// @param syscall -- system call arguments
@@ -289,7 +289,7 @@ syscall_create_address_space(volatile syscall_data_s* syscall)
 ///		syscall->data2 = size of expansion, in bytes
 ///
 /// System call output:
-///		syscall->status	= status of message delivery
+///		syscall->status	= final status of expansion request
 ///
 /// @param syscall -- system call arguments
 ///
