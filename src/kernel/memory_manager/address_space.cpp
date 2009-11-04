@@ -664,24 +664,27 @@ enable_io_port(	uint16_t port,
 
 ///
 /// Grow/expand the current address space by adding new, uninitialized pages.
-/// This is typically used to add bss/heap/stack pages to an address space.
-/// This is the main logic underneath the EXPAND_ADDRESS_SPACE system call.
+/// This is typically used to add bss/heap/stack pages or DMA buffers to an
+/// address space.  This is the main logic underneath the EXPAND_ADDRESS_SPACE
+/// system call.
+///
 /// Allocate free (uninitialized) physical frames and map them into this
 /// address space at the specified address.  On return, threads in this address
 /// space can safely access these new pages.
 ///
 /// @param first_new_page	-- target address where pages should be added
 /// @param size				-- size, in bytes, of address space to add
+/// @param flags			-- allocation/expansion flags
 ///
 /// @return STATUS_SUCCESS if the requested space is added to the address
 /// space; non-zero otherwise
 ///
 status_t address_space_c::
 expand(	const void_tp		first_new_page,
-		size_t				size)
+		size_t				size,
+		uintptr_t			flags)	//@currently unused
 	{
 	thread_cr			current_thread = __hal->read_current_thread();
-	uint32_t			flags;
 	physical_address_t	frame[ EXPAND_ADDRESS_SPACE_PAGE_COUNT ];
 	uint32_t			frame_count;
 	void_tp				last_new_page;
@@ -753,6 +756,7 @@ expand(	const void_tp		first_new_page,
 		//
 		// Allocate enough frames to span the requested size
 		//
+		//@include flags here: DMA buffers must be contiguous
 		status = __page_frame_manager->allocate_frames(frame, frame_count, 0);
 		if (status != STATUS_SUCCESS)
 			{ break; }
@@ -763,7 +767,7 @@ expand(	const void_tp		first_new_page,
 		//
 		TRACE(ALL, "Expanding address space %#x: adding %d frames at %p\n",
 			this->id, frame_count, first_new_page);
-		flags	= MEMORY_PAGED | MEMORY_USER | MEMORY_WRITABLE;
+		flags	= MEMORY_PAGED | MEMORY_USER | MEMORY_WRITABLE; //@+input flags
 		status	= commit_frame(first_new_page, frame_count, frame, flags);
 		if (status != STATUS_SUCCESS)
 			{

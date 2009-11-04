@@ -16,6 +16,7 @@
 /// @param address_space	-- id of the target address space
 /// @param address			-- address where pages should be added
 /// @param size				-- size, in bytes, of the space to add
+/// @param flags			-- allocation/expansion flags
 ///
 /// @return a handle to the new address space; or ADDRESS_SPACE_ID_INVALID
 /// on error.
@@ -23,7 +24,8 @@
 status_t
 expand_address_space(	address_space_id_t	address_space,
 						const void_t*		address,
-						size_t				size)
+						size_t				size,
+						uintptr_t			flags)
 	{
 	syscall_data_s	syscall;
 
@@ -32,6 +34,7 @@ expand_address_space(	address_space_id_t	address_space,
 	syscall.data0	= (uintptr_t)(address_space);
 	syscall.data1	= (uintptr_t)(address);
 	syscall.data2	= (uintptr_t)(size);
+	syscall.data3	= (uintptr_t)(flags);
 
 	CALL_KERNEL(&syscall, SYSTEM_CALL_VECTOR_EXPAND_ADDRESS_SPACE);
 

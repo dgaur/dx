@@ -293,7 +293,8 @@ send_bss(	address_space_id_t			address_space,
 			{
 			status = expand_address_space(	address_space,
 											bss_first_page,
-											bss_size);
+											bss_size,
+											0);
 			}
 		else
 			{
@@ -404,7 +405,7 @@ send_heap(	address_space_id_t	address_space,
 		{
 		// Add uninitialized pages to the address space, for use as its initial
 		// runtime heap
-		status = expand_address_space(address_space, heap, heap_size);
+		status = expand_address_space(address_space, heap, heap_size, 0);
 		}
 	else
 		{
@@ -601,7 +602,7 @@ send_stack(	address_space_id_t	address_space,
 
 
 	// Add the stack pages at this address
-	status = expand_address_space(address_space, stack_top, stack_size);
+	status = expand_address_space(address_space, stack_top, stack_size, 0);
 
 
 	return(status);

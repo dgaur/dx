@@ -287,6 +287,7 @@ syscall_create_address_space(volatile syscall_data_s* syscall)
 ///		syscall->data0 = id of target address space
 ///		syscall->data1 = base address where pages should be added
 ///		syscall->data2 = size of expansion, in bytes
+///		syscall->data3 = allocation/expansion flags
 ///
 /// System call output:
 ///		syscall->status	= final status of expansion request
@@ -308,7 +309,8 @@ syscall_expand_address_space(volatile syscall_data_s* syscall)
 		{
 		// Expand the address space, if possible
 		syscall->status = address_space->expand(void_tp(syscall->data1), //addr
-												size_t(syscall->data2)); //size
+												size_t(syscall->data2),  //size
+												syscall->data3);		 //flag
 
 		// Done with the target address space
 		remove_reference(*address_space);

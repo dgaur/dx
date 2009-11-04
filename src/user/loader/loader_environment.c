@@ -36,7 +36,7 @@ initialize_environment()
 		// Allocate (map) enough pages to span the environment block
 		//
 		status = expand_address_space(ADDRESS_SPACE_ID_USER_LOADER,
-			(uint8_tp)(USER_ENVIRONMENT_BLOCK), sizeof(*environment));
+			(uint8_tp)(USER_ENVIRONMENT_BLOCK), sizeof(*environment), 0);
 		if (status != STATUS_SUCCESS)
 			{ break; }
 
@@ -68,7 +68,7 @@ initialize_environment()
 		//
 		heap_size = 32 * PAGE_SIZE;		//@is this enough?
 		status = expand_address_space(ADDRESS_SPACE_ID_USER_LOADER, heap,
-			heap_size);
+			heap_size, 0);
 		if (status != STATUS_SUCCESS)
 			{ break; }
 

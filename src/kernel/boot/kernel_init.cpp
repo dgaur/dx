@@ -339,7 +339,7 @@ initialize_user_mode()
 	// Give the thread a usermode stack.  Assume one page is enough for init
 	//
 	stack_size = 1 * PAGE_SIZE;
-	status = user_address_space->expand(stack - stack_size, stack_size);
+	status = user_address_space->expand(stack - stack_size, stack_size, 0);
 	if (status != STATUS_SUCCESS)
 		{
 		printf("Unable to install stack (%#x)\n", status);

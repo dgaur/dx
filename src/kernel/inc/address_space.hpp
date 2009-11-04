@@ -114,7 +114,8 @@ class   address_space_c:
 		//
 		status_t
 			expand(	const void_tp		address,
-					size_t				size);
+					size_t				size,
+					uintptr_t			flags);
 
 		//@contract/trim
 
