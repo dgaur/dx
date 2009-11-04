@@ -124,6 +124,7 @@ interrupt_handler_loop()
 					status = map_device(interrupt_vector,
 										DEVICE_TYPE_INTERRUPT,
 										0,
+										0,
 										NULL);
 					//@what to do on error here?  exit?
 					}

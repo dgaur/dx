@@ -318,7 +318,8 @@ initialize()
 		//
 		for (unsigned i = 0; i < KEYBOARD_PORT_COUNT; i++)
 			{
-			status = map_device(KEYBOARD_PORT[i], DEVICE_TYPE_IO_PORT, 1,NULL);
+			status = map_device(KEYBOARD_PORT[i], DEVICE_TYPE_IO_PORT, 1,
+				0, NULL);
 			if (status != STATUS_SUCCESS)
 				{ break; }
 			}

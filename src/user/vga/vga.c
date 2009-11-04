@@ -166,7 +166,7 @@ initialize()
 		//
 		for (i = 0; i < VGA_PORT_COUNT; i++)
 			{
-			status = map_device(VGA_PORT[i], DEVICE_TYPE_IO_PORT, 1, NULL);
+			status = map_device(VGA_PORT[i], DEVICE_TYPE_IO_PORT, 1, 0, NULL);
 			if (status != STATUS_SUCCESS)
 				{ break; }
 			}
@@ -178,6 +178,7 @@ initialize()
 		status = map_device((uintptr_t)VGA_TEXT_USER_PAGE,
 							DEVICE_TYPE_MEMORY,
 							VGA_TEXT_MEMORY_SIZE,
+							0,
 							(void_tpp)&vga->memory);
 		if (status != STATUS_SUCCESS)
 			{ break; }

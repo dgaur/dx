@@ -21,6 +21,7 @@ status_t
 map_device(	uintptr_t	address,
 			uintptr_t	device_type,
 			size_t		device_size,
+			uintptr_t	flags,
 			void_tpp	mapped_address	);
 
 

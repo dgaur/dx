@@ -144,6 +144,7 @@ handle_interrupt(interrupt_cr interrupt)
 ///		syscall->data0 = device address/resource
 ///		syscall->data1 = type (INTERRUPT, MEMORY or PORT)
 ///		syscall->data2 = size
+///		syscall->data3 = flags
 ///
 /// System call output:
 ///		syscall->status	= resulting status
@@ -304,6 +305,7 @@ map_memory(	thread_cr					current_thread,
 		// of device resource; the device is now visible at this location in
 		// the current address space
 		//
+		//@incorporate syscall->flags here
 		uint32_t flags = MEMORY_WRITABLE | MEMORY_USER;	//@cannot be paged
 		status = current_address_space.commit_frame(mapped_address,
 													page_count,
