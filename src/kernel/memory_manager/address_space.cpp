@@ -408,7 +408,9 @@ commit_frame(	void_tp					page,
 
 ///
 /// Copy-on-write handler.  Invoked from the page-fault path to handle a
-/// copy-on-write fault in the current thread + address space.
+/// copy-on-write fault in the current thread/address space.   Allocate a
+/// new physical page frame; and copy the contents of the faulting page to the
+/// new frame.
 ///
 /// @param address -- the faulting address referenced by the current thread
 ///
@@ -417,7 +419,8 @@ commit_frame(	void_tp					page,
 bool_t address_space_c::
 copy_on_write(const void_tp address)
 	{
-	bool_t success = FALSE;
+	status_t	status;
+	bool_t		success = FALSE;
 
 	lock.acquire();
 
@@ -445,23 +448,8 @@ copy_on_write(const void_tp address)
 
 
 		//
-		// Allocate a new physical frame.  The faulting page will be rebound
-		// to this new frame, so that the thread can modify the page at will
-		//
-		physical_address_t frame;
-		status_t status = __page_frame_manager->allocate_frames(&frame, 1, 0);
-		if (status != STATUS_SUCCESS)
-			{
-			// Physical memory is exhausted; unable to allocate any more frames
-			//@how to handle this?  user mem mgr cannot fix, so thread is stuck
-			printf("Unable to allocate frame for copy-on-write\n");
-			break;
-			}
-
-
-		//
-		// Use the thread's preallocated copy-on-write buffer to map the new
-		// frame temporarily
+		// Locate the thread's preallocated copy-on-write buffer.  Use this
+		// page to map the new frame temporarily
 		//
 		thread_cr	thread		= __hal->read_current_thread();
 		void_tp		copy_page	= thread.copy_page;
@@ -478,8 +466,23 @@ copy_on_write(const void_tp address)
 
 
 		//
-		// Bind the temporary page to this new frame, so that the data in the
-		// original page can be copied out
+		// Allocate a new physical frame.  The faulting page will be rebound
+		// to this new frame, so that the thread can modify the page at will
+		//
+		physical_address_t frame;
+		status = __page_frame_manager->allocate_frames(&frame, 1, 0);
+		if (status != STATUS_SUCCESS)
+			{
+			// Physical memory is exhausted; unable to allocate any more frames
+			//@how to handle this?  user mem mgr cannot fix, so thread is stuck
+			printf("Unable to allocate frame for copy-on-write\n");
+			break;
+			}
+
+
+		//
+		// Bind the temporary COW page to this new frame, so that the data in
+		// the original page can be copied out
 		//
 		status = copy_entry->commit_frame(frame, MEMORY_WRITABLE);
 		ASSERT(status == STATUS_SUCCESS);
