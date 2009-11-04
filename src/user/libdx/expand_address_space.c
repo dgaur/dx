@@ -18,9 +18,10 @@
 /// @param size				-- size, in bytes, of the space to add
 /// @param flags			-- allocation/expansion flags
 ///
-/// @return a handle to the new address space; or ADDRESS_SPACE_ID_INVALID
+/// @return STATUS_SUCCESS if the pages were successfully added; or non-zero
 /// on error.
 ///
+//@@@need to return the resulting physical address here for DMA buffers?
 status_t
 expand_address_space(	address_space_id_t	address_space,
 						const void_t*		address,
