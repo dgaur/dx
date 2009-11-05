@@ -4,6 +4,10 @@
 
 
 * PENDING-RELEASE:
+	Maintenance and bug-fix release.  Various bug fixes, code cleanup and
+	minor optimizations.  Documentation updates.  No major changes in
+	functionality.
+
 
 * Version 0.0.2, released 2009-10-14:
 	Maintenance release.  Various build improvements + fixes.  Added support
