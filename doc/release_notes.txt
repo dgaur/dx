@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.3, released 2009-11-04:
 	Maintenance and bug-fix release.  Various bug fixes, code cleanup and
 	minor optimizations.  Documentation updates.  No major changes in
 	functionality.
