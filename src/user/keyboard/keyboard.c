@@ -179,21 +179,28 @@ handle_interrupt(	thread_id_t	parent_thread,
 	uint8_t		keyboard_status;
 	uint8_t		scan_code;
 
-	//
-	// Determine the current keyboard state; typically, it will interrupt to
-	// signal a key up/down event
-	//
-	keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
-
-	if (keyboard_status & KEYBOARD_STATUS_OUTPUT_BUFFER_READY)
+	for(uintptr_t i = 0; i < 8; i++)
 		{
-		// Consume the next scan code from the keyboard.  Delegate all further
-		// processing + scan code translation to the main keyboard thread
-		scan_code = io_port_read8(KEYBOARD_OUTPUT_BUFFER);
-		defer_interrupt(parent_thread, scan_code);
-		}
+		// Determine the current keyboard state; typically, it will interrupt
+		// to signal a key up/down event
+		keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
 
-	//@if (timeout or parity error), send RESEND command?
+		if (keyboard_status & KEYBOARD_STATUS_OUTPUT_BUFFER_READY)
+			{
+			// Consume the next scan code from the keyboard.  Delegate all
+			// further processing + scan code translation to the main keyboard
+			// thread
+			scan_code = io_port_read8(KEYBOARD_OUTPUT_BUFFER);
+			defer_interrupt(parent_thread, scan_code);
+			}
+		else
+			{
+			// No more keyboard events are pending here, so bail out
+			break;
+			}
+
+		//@if (timeout or parity error), send RESEND command?
+		}
 
 	return;
 	}
