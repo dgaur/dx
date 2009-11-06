@@ -19,9 +19,12 @@
 /// Convenience routine for creating + registering a interrupt handler (thread)
 /// within a device driver.  Create a new thread for handling interrupts +
 /// launch it within the current address space.  On return, the driver must
-/// be prepared to start handling device interrupts immediately, even if its
-/// own device is not enabled.  The handler may later be removed via
-/// unregister_interrupt_handler().
+/// be prepared to start handling (deferred) device interrupts immediately,
+/// even if its own device is not enabled yet.  The handler may later be
+/// removed via unregister_interrupt_handler().
+///
+/// @see interrupt_handler_loop()
+/// @see defer_interrupt()
 ///
 /// @param interrupt_vector	-- the vector on which this driver is listening
 /// @param handler			-- the driver's interrupt handler (ISR, etc)

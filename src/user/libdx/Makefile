@@ -12,6 +12,7 @@ LIBDX_OBJECTS	:=	libdx.o \
 					create_address_space.o \
 					create_process.o \
 					create_thread.o \
+					defer_interrupt.o \
 					delete_message.o \
 					delete_thread.o \
 					expand_address_space.o \

@@ -3,6 +3,7 @@
 //
 
 #include "assert.h"
+#include "dx/defer_interrupt.h"
 #include "dx/delete_message.h"
 #include "dx/hal/io_port.h"
 #include "dx/map_device.h"
@@ -171,13 +172,12 @@ handle_deferred_interrupt(	keyboard_context_sp	keyboard,
 /// @see handle_deferred_interrupt()
 ///
 static
-bool_t
-handle_interrupt(	void_tp		context,
-					uintptr_tp	defer_message_data)
+void_t
+handle_interrupt(	thread_id_t	parent_thread,
+					void_tp		context)
 	{
 	uint8_t		keyboard_status;
-	bool_t		send_defer_message = FALSE;
-
+	uint8_t		scan_code;
 
 	//
 	// Determine the current keyboard state; typically, it will interrupt to
@@ -189,13 +189,13 @@ handle_interrupt(	void_tp		context,
 		{
 		// Consume the next scan code from the keyboard.  Delegate all further
 		// processing + scan code translation to the main keyboard thread
-		*defer_message_data	= io_port_read8(KEYBOARD_OUTPUT_BUFFER);
-		send_defer_message	= TRUE;
+		scan_code = io_port_read8(KEYBOARD_OUTPUT_BUFFER);
+		defer_interrupt(parent_thread, scan_code);
 		}
 
 	//@if (timeout or parity error), send RESEND command?
 
-	return(send_defer_message);
+	return;
 	}
 
 

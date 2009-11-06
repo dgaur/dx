@@ -9,9 +9,9 @@
 #include "dx/types.h"
 
 
-/// Signature for interrupt handlers
-typedef bool_t (*interrupt_handler_fp)(	void_tp		context,
-										uintptr_tp	defer_message_data);
+/// Signature for user-mode interrupt handlers
+typedef void_t (*interrupt_handler_fp)(	thread_id_t	parent_thread,
+										void_tp		context);
 
 
 thread_id_t
