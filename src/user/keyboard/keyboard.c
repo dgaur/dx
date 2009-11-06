@@ -22,6 +22,8 @@
 static void_t handle_make_code(	keyboard_context_sp	keyboard,
 								uint8_t				scan_code);
 
+static void_t select_scan_code_map(keyboard_context_s* keyboard);
+
 static char8_t translate_scan_code(	const keyboard_context_s*	keyboard,
 									uint8_t						scan_code);
 
@@ -128,8 +130,28 @@ handle_break_code(	keyboard_context_sp	keyboard,
 	// index into the scan-code table)
 	scan_code &= ~KEYBOARD_CODE_BREAK;
 
-	//@only need to deal with silent keys: shift, control, alt, etc; ignore
-	//@all others?
+	switch (scan_code)
+		{
+		case SCAN_CODE_LEFT_SHIFT:
+		case SCAN_CODE_RIGHT_SHIFT:
+			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_SHIFT;
+			select_scan_code_map(keyboard);
+			break;
+
+		case SCAN_CODE_CONTROL:
+			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_CONTROL;
+			select_scan_code_map(keyboard);
+			break;
+
+		case SCAN_CODE_ALT:
+			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_ALT;
+			select_scan_code_map(keyboard);
+			break;
+
+		default:
+			// Normal key.  No additional logic required
+			break;
+		}
 
 	return;
 	}
@@ -217,33 +239,56 @@ void_t
 handle_make_code(	keyboard_context_sp	keyboard,
 					uint8_t				scan_code)
 	{
-	char8_t character = translate_scan_code(keyboard, scan_code);
+	char8_t character;
 
-	if (character != 0)	//@nonprinting chars
+	switch (scan_code)
 		{
-		//
-		// If a thread is already waiting, then wake it here
-		//
-		if (keyboard->pending_request)
-			{
-			// If a thread is already waiting, then the keyboard buffer/queue
-			// should be empty by definition
-			assert(keyboard->queue_head == keyboard->queue_tail);
-			finish_read_request(keyboard->pending_request, character);
+		case SCAN_CODE_LEFT_SHIFT:
+		case SCAN_CODE_RIGHT_SHIFT:
+			keyboard->modifier_mask |= KEYBOARD_MODIFIER_SHIFT;
+			select_scan_code_map(keyboard);
+			break;
 
-			// This request is now satisfied, so discard it
-			free(keyboard->pending_request);
-			keyboard->pending_request = NULL;
-			}
+		case SCAN_CODE_CONTROL:
+			keyboard->modifier_mask |= KEYBOARD_MODIFIER_CONTROL;
+			select_scan_code_map(keyboard);
+			break;
 
-		else
-			{
-			// No threads are waiting for input, so just record this input key
-			// for later consumption
-			keyboard->queue[ keyboard->queue_tail ] = character;
-			keyboard->queue_tail =
-				(keyboard->queue_tail+1) % KEYBOARD_QUEUE_SIZE;
-			}
+		case SCAN_CODE_ALT:
+			keyboard->modifier_mask |= KEYBOARD_MODIFIER_ALT;
+			select_scan_code_map(keyboard);
+			break;
+
+		default:
+			// Normal key.  Convert the scan code into the equivalent printable
+			// character and dispatch it as appropriate
+			character = translate_scan_code(keyboard, scan_code);
+			if (!character)
+				break; //@nonprinting chars
+
+			// If a thread is already waiting for input, then wake it here
+			if (keyboard->pending_request)
+				{
+				// If a thread is already waiting, then the keyboard
+				// buffer/queue should be empty by definition
+				assert(keyboard->queue_head == keyboard->queue_tail);
+				finish_read_request(keyboard->pending_request, character);
+
+				// This request is now satisfied, so discard it
+				free(keyboard->pending_request);
+				keyboard->pending_request = NULL;
+				}
+
+			else
+				{
+				// No threads are waiting for input, so just record this input
+				// key for later consumption
+				keyboard->queue[ keyboard->queue_tail ] = character;
+				keyboard->queue_tail =
+					(keyboard->queue_tail+1) % KEYBOARD_QUEUE_SIZE;
+				}
+
+			break;
 		}
 
 	return;
@@ -279,6 +324,7 @@ handle_read_request(keyboard_context_sp	keyboard,
 		{
 		// No keyboard input is pending, so block the caller until the request
 		// can be satisfied
+		//@@this assumes at most one thread is reading from the keyboard
 		assert(keyboard->pending_request == NULL);
 		keyboard->pending_request = malloc(sizeof(*request));
 		if (keyboard->pending_request)
@@ -337,6 +383,13 @@ initialize()
 		//
 		keyboard->queue_head = 0;
 		keyboard->queue_tail = 0;
+
+
+		//
+		// Start with a default key map
+		// @numlock, etc, could already be enabled here, etc
+		//
+		select_scan_code_map(keyboard);
 
 
 		//
@@ -404,8 +457,32 @@ main()
 
 
 ///
+/// Given the current modifier state (shift, control, etc), select the
+/// appropriate scan-code-to-printable-character translation table.
+///
+/// @param keyboard  -- driver context
+///
+static
+void_t
+select_scan_code_map(keyboard_context_s* keyboard)
+	{
+	//@must also account for ctrl, alt, etc
+
+	if (keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT)
+		keyboard->scan_code_map = scan_code_map_with_shift;
+	else
+		keyboard->scan_code_map = scan_code_map_default;
+
+	assert(keyboard->scan_code_map);
+
+	return;
+	}
+
+
+///
 /// Translate a scan code (read from the keyboard) into a character (for
-/// display on the console)
+/// display on the console), accounting for shift, control, alt and other
+/// modifiers
 ///
 /// No side effects
 ///
@@ -421,8 +498,8 @@ translate_scan_code(const keyboard_context_s*	keyboard,
 	{
 	char8_t character;
 
-	//@should account for SHIFT, CTRL, different key maps, etc
-	character = scan_code_map_unshifted[scan_code];
+	assert(keyboard->scan_code_map);
+	character = keyboard->scan_code_map[scan_code];
 
 	return(character);
 	}

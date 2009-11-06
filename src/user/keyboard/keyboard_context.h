@@ -42,7 +42,8 @@ typedef struct keyboard_context
 	/// Pending, unsatisfied requests to read keyboard input
 	message_sp	pending_request;	//@should be a queue?
 
-	//@pointer to keymap
+	/// Current map for translating scan-codes to printable characters
+	char8_tp	scan_code_map;
 
 	/// Interrupt handler
 	thread_id_t	interrupt_handler_thread;
