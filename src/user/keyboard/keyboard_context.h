@@ -18,11 +18,15 @@
 
 
 //
-// Internal mask of "modifier" keys
+// Internal mask of "modifier" keys; these affect the selection of the
+// scan-code map, the keyboard LED's, etc
 //
-#define KEYBOARD_MODIFIER_ALT		0x1		// Alt is currently held/pressed
-#define KEYBOARD_MODIFIER_CONTROL	0x2		// Ctrl is currently held/pressed
-#define KEYBOARD_MODIFIER_SHIFT		0x4		// etc
+#define KEYBOARD_MODIFIER_ALT			0x01 // Alt is currently held/pressed
+#define KEYBOARD_MODIFIER_CONTROL		0x02 // Ctrl is currently held/pressed
+#define KEYBOARD_MODIFIER_SHIFT			0x04 // etc
+#define KEYBOARD_MODIFIER_CAPS_LOCK		0x08
+#define KEYBOARD_MODIFIER_NUM_LOCK		0x10
+#define KEYBOARD_MODIFIER_SCROLL_LOCK	0x20
 
 
 
@@ -82,7 +86,7 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_STATUS_INPUT_BUFFER_BUSY	0x02
 #define KEYBOARD_STATUS_OUTPUT_BUFFER_READY	0x01
 
-#define KEYBOARD_COMMAND_DISABLE_LED		0xed
+#define KEYBOARD_COMMAND_TOGGLE_LED			0xed
 #define KEYBOARD_COMMAND_ECHO				0xee
 #define KEYBOARD_COMMAND_SET_SCAN_CODE		0xf0
 #define KEYBOARD_COMMAND_IDENTIFY_KEYBOARD	0xf2
@@ -92,6 +96,11 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_COMMAND_STANDARD_ENABLE	0xf6
 #define KEYBOARD_COMMAND_RESEND				0xfe
 #define KEYBOARD_COMMAND_RESET				0xff
+
+#define KEYBOARD_COMMAND_LED_SCROLL_LOCK	0x01
+#define KEYBOARD_COMMAND_LED_NUM_LOCK		0x02
+#define KEYBOARD_COMMAND_LED_CAPS_LOCK		0x04
+
 
 
 //

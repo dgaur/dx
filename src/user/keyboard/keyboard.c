@@ -24,6 +24,8 @@ static void_t handle_make_code(	keyboard_context_sp	keyboard,
 
 static void_t select_scan_code_map(keyboard_context_s* keyboard);
 
+static void_t toggle_leds(const keyboard_context_s* keyboard);
+
 static char8_t translate_scan_code(	const keyboard_context_s*	keyboard,
 									uint8_t						scan_code);
 
@@ -134,7 +136,8 @@ handle_break_code(	keyboard_context_sp	keyboard,
 		{
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
-			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_SHIFT;
+			// Toggle SHIFT state to allow for CAPS LOCK
+			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SHIFT;
 			select_scan_code_map(keyboard);
 			break;
 
@@ -178,7 +181,7 @@ handle_deferred_interrupt(	keyboard_context_sp	keyboard,
 	else if (IS_SIMPLE_BREAK_CODE(scan_code))
 		{ handle_break_code(keyboard, scan_code); }
 
-	// Some kind of control byte/reply
+	// Some kind of control byte/reply @@ack from LED update, etc
 	//@else handle_control_code()
 
 	return;
@@ -243,9 +246,18 @@ handle_make_code(	keyboard_context_sp	keyboard,
 
 	switch (scan_code)
 		{
+		case SCAN_CODE_CAPS_LOCK:
+			// Toggle CAPS LOCK state; and update LED's accordingly
+			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_CAPS_LOCK;
+			toggle_leds(keyboard);
+			
+			// ... and fall through to normal SHIFT processing
+
+
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
-			keyboard->modifier_mask |= KEYBOARD_MODIFIER_SHIFT;
+			// Toggle SHIFT state to allow for CAPS LOCK
+			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SHIFT;
 			select_scan_code_map(keyboard);
 			break;
 
@@ -387,7 +399,6 @@ initialize()
 
 		//
 		// Start with a default key map
-		// @numlock, etc, could already be enabled here, etc
 		//
 		select_scan_code_map(keyboard);
 
@@ -440,6 +451,7 @@ main()
 		//@configure_hardware(keyboard);
 		//@identify keyboard type: AT/XT/MF2
 		//@maybe set repeat rate/delay?
+		//@toggle_leds() to setup initial state, but races with IRQ init?
 
 		wait_for_messages(keyboard);
 
@@ -474,6 +486,66 @@ select_scan_code_map(keyboard_context_s* keyboard)
 		keyboard->scan_code_map = scan_code_map_default;
 
 	assert(keyboard->scan_code_map);
+
+	return;
+	}
+
+
+///
+/// Toggle/update the state of the keyboard LED's, based on the current
+/// CAPS LOCK, NUM LOCK and SCROLL LOCK modifiers.  If CAPS LOCK is enabled,
+/// then enable the CAPS LOCK LED; etc.
+///
+static
+void_t
+toggle_leds(const keyboard_context_s* keyboard)
+	{
+	uint8_t led_mask;
+	uint8_t status;
+
+
+	//
+	// Build a bitmask describing which LED's should be enabled/lit
+	//
+	led_mask = 0;
+	if (keyboard->modifier_mask & KEYBOARD_MODIFIER_CAPS_LOCK)
+		led_mask |= KEYBOARD_COMMAND_LED_CAPS_LOCK;
+	if (keyboard->modifier_mask & KEYBOARD_MODIFIER_NUM_LOCK)
+		led_mask |= KEYBOARD_COMMAND_LED_NUM_LOCK;
+	if (keyboard->modifier_mask & KEYBOARD_MODIFIER_SCROLL_LOCK)
+		led_mask |= KEYBOARD_COMMAND_LED_SCROLL_LOCK;
+
+
+	//
+	// Wait for the input buffer to empty, if necessary
+	//
+	do
+		{
+		status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+		} while (status & KEYBOARD_STATUS_INPUT_BUFFER_BUSY);
+
+
+	//
+	// Start the LED update
+	//
+	io_port_write8(KEYBOARD_INPUT_BUFFER, KEYBOARD_COMMAND_TOGGLE_LED);
+
+
+	//
+	// Wait for the keyboard controller to consume the LED command
+	//
+	do
+		{
+		status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+		} while (status & KEYBOARD_STATUS_INPUT_BUFFER_BUSY);
+
+
+	//
+	// Send the new LED mask
+	//
+	io_port_write8(KEYBOARD_INPUT_BUFFER, led_mask);
+
+
 
 	return;
 	}

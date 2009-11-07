@@ -7,7 +7,9 @@
 
 #include "dx/types.h"
 
+
 #define SCAN_CODE_ALT				56
+#define SCAN_CODE_CAPS_LOCK			58
 #define SCAN_CODE_CONTROL			29
 #define SCAN_CODE_LEFT_SHIFT		42
 #define SCAN_CODE_RIGHT_SHIFT		54
@@ -80,5 +82,6 @@ char8_tp scan_code_map_with_shift =
 	"\0"					// Various, not standard
 	"\0"					// Unmarked key on non-US keyboards
 	"\0\0";					// F11 + F12
+
 
 #endif
