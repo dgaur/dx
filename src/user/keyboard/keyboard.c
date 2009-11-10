@@ -136,8 +136,7 @@ handle_break_code(	keyboard_context_sp	keyboard,
 		{
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
-			// Toggle SHIFT state to allow for CAPS LOCK
-			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SHIFT;
+			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_SHIFT;
 			select_scan_code_map(keyboard);
 			break;
 
@@ -250,14 +249,12 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			// Toggle CAPS LOCK state; and update LED's accordingly
 			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_CAPS_LOCK;
 			toggle_leds(keyboard);
-			
-			// ... and fall through to normal SHIFT processing
-
+			select_scan_code_map(keyboard);
+			break;			
 
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
-			// Toggle SHIFT state to allow for CAPS LOCK
-			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SHIFT;
+			keyboard->modifier_mask |= KEYBOARD_MODIFIER_SHIFT;
 			select_scan_code_map(keyboard);
 			break;
 
@@ -478,12 +475,20 @@ static
 void_t
 select_scan_code_map(keyboard_context_s* keyboard)
 	{
-	//@must also account for ctrl, alt, etc
+	// Automatically all back to the default map, then look for a specific
+	// override
+	keyboard->scan_code_map = scan_code_map_default;
 
-	if (keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT)
+	// Handle shift, caps lock, etc, as needed
+	if ((keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT_CAPS_LOCK) ==
+		KEYBOARD_MODIFIER_SHIFT_CAPS_LOCK)
+		keyboard->scan_code_map = scan_code_map_with_shift_caps_lock;
+
+	else if (keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT)
 		keyboard->scan_code_map = scan_code_map_with_shift;
-	else
-		keyboard->scan_code_map = scan_code_map_default;
+
+	else if (keyboard->modifier_mask & KEYBOARD_MODIFIER_CAPS_LOCK)
+		keyboard->scan_code_map = scan_code_map_with_caps_lock;
 
 	assert(keyboard->scan_code_map);
 
