@@ -71,6 +71,21 @@
 
 
 ///
+/// Standard scancode for a MF-II US keyboard, without SHIFT, CTRL or any
+/// other modifiers
+///
+static
+const
+char8_tp scan_code_map_default =
+	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
+						ROW1_LOWERCASE "[]",
+						ROW2_LOWERCASE ";'`",
+						"\\" ROW3_LOWERCASE ",./",
+						KEYPAD_NAVIGATION );
+
+
+
+///
 /// Standard scancode for a MF-II US keyboard, with CAPS LOCK enabled
 ///
 static
@@ -123,21 +138,6 @@ char8_tp scan_code_map_with_caps_lock_num_lock_shift =
 						ROW2_LOWERCASE ":\"~",
 						"|" ROW3_LOWERCASE "<>?",
 						KEYPAD_DIGITS );
-
-
-///
-/// Standard scancode for a MF-II US keyboard, without SHIFT, CTRL or any
-/// other modifiers
-///
-static
-const
-char8_tp scan_code_map_default =
-	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
-						ROW1_LOWERCASE "[]",
-						ROW2_LOWERCASE ";'`",
-						"\\" ROW3_LOWERCASE ",./",
-						KEYPAD_NAVIGATION );
-
 
 
 ///

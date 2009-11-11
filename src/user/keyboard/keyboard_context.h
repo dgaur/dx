@@ -110,9 +110,6 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_CODE_BREAK					0x80	// High bit of scancode
 #define KEYBOARD_CODE_MAKE_MAX				0x58	// Standard 101-key MF II
 
-#define KEYBOARD_CODE_MFII					0xe0	// New MF-II prefix
-#define KEYBOARD_CODE_MFII_PAUSE			0xe1	// New MF-II "pause" key
-
 #define KEYBOARD_CODE_OVERFLOW				0x00
 #define KEYBOARD_CODE_ECHO_REPLY			0xee
 #define KEYBOARD_CODE_ACK					0xfa
@@ -124,7 +121,8 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 	((scan_code < KEYBOARD_CODE_MAKE_MAX) &&	\
 	 (scan_code != KEYBOARD_CODE_OVERFLOW))
 
-/// Is this just a normal key-up code?
+/// Is this just a normal key-up code?  This assumes that the 8042 controller
+/// is translating the raw (set 2) scan-codes into set 1 scan-codes
 #define IS_SIMPLE_BREAK_CODE(scan_code)			\
 	(IS_SIMPLE_MAKE_CODE((scan_code & ~KEYBOARD_CODE_BREAK)))
 
