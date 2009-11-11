@@ -491,19 +491,37 @@ select_scan_code_map(keyboard_context_s* keyboard)
 
 
 	// Select the new scan-code translation table, based on these mask bits
-	//@@just use an array: pack mask bits, then map = array[ mask ]
+	//@@just use an array: pack the mask bits, then map = array[ mask ]
 	switch (mask)
 		{
 		case KEYBOARD_MODIFIER_SHIFT:
 			keyboard->scan_code_map = scan_code_map_with_shift;
 			break;
 
+		case KEYBOARD_MODIFIER_NUM_LOCK:
+			keyboard->scan_code_map = scan_code_map_with_num_lock;
+			break;
+
+		case KEYBOARD_MODIFIER_NUM_LOCK | KEYBOARD_MODIFIER_SHIFT:
+			keyboard->scan_code_map = scan_code_map_with_num_lock_shift;
+			break;
+
 		case KEYBOARD_MODIFIER_CAPS_LOCK:
 			keyboard->scan_code_map = scan_code_map_with_caps_lock;
 			break;
 
-		case (KEYBOARD_MODIFIER_SHIFT | KEYBOARD_MODIFIER_CAPS_LOCK):
-			keyboard->scan_code_map = scan_code_map_with_shift_caps_lock;
+		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_SHIFT):
+			keyboard->scan_code_map = scan_code_map_with_caps_lock_shift;
+			break;
+
+		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_NUM_LOCK):
+			keyboard->scan_code_map = scan_code_map_with_caps_lock_num_lock;
+			break;
+
+		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_NUM_LOCK |
+				KEYBOARD_MODIFIER_SHIFT):
+			keyboard->scan_code_map =
+				scan_code_map_with_caps_lock_num_lock_shift;
 			break;
 
 		case 0:

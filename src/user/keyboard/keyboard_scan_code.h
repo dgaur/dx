@@ -27,7 +27,7 @@
 /// Macro for defining a scan-code translation table, for converting a single
 /// make-code to its printable-character equivalent.
 ///
-#define MAKE_SCAN_CODE_MAP(row0, row1, row2, row3)						\
+#define MAKE_SCAN_CODE_MAP(row0, row1, row2, row3, numeric_keypad)		\
 	"\0"					/* Timeout error */							\
 	"\0"					/* ESC */									\
 	row0					/* Usually top/numeric row: 123 ... */		\
@@ -46,14 +46,83 @@
 	"\0"					/* Caps Lock */								\
 	"\0\0\0\0\0\0\0\0\0\0"	/* F1 - F10 */								\
 	"\0\0"					/* Num Lock + Scroll Lock */				\
-	"\0\0\0-"				/* Numeric keypad */						\
-	"\0\0\0+"				/* Numeric keypad */						\
-	"\0\0\0"				/* Numeric keypad */						\
-	"\0\0"					/* Numeric keypad */						\
+	numeric_keypad			/* Numeric keypad/navigation */				\
 	"\0"					/* SysReq */								\
 	"\0"					/* Various, not standard */					\
 	"\0"					/* Unmarked key on non-US keyboards */		\
 	"\0\0";					/* F11 + F12 */
+
+
+#define ROW0_DIGITS			"1234567890-="
+#define ROW0_SYMBOLS		"!@#$%^&*()_+"
+
+#define ROW1_LOWERCASE		"qwertyuiop"
+#define ROW1_UPPERCASE		"QWERTYUIOP"
+
+#define ROW2_LOWERCASE		"asdfghjkl"
+#define ROW2_UPPERCASE		"ASDFGHJKL"
+
+#define ROW3_LOWERCASE		"zxcvbnm"
+#define ROW3_UPPERCASE		"ZXCVBNM"
+
+#define KEYPAD_DIGITS		"789-456+1230."
+#define KEYPAD_NAVIGATION	"\0\0\0-\0\0\0+\0\0\0\0\0"
+
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with CAPS LOCK enabled
+///
+static
+const
+char8_tp scan_code_map_with_caps_lock =
+	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
+						ROW1_UPPERCASE "[]",
+						ROW2_UPPERCASE ";'`",
+						"\\" ROW3_UPPERCASE ",./",
+						KEYPAD_NAVIGATION );
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with both CAPS LOCK + NUM LOCK
+/// enabled
+///
+static
+const
+char8_tp scan_code_map_with_caps_lock_num_lock =
+	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
+						ROW1_UPPERCASE "[]",
+						ROW2_UPPERCASE ";'`",
+						"\\" ROW3_UPPERCASE ",./",
+						KEYPAD_DIGITS );
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with both CAPS LOCK and SHIFT
+/// enabled simultaneously
+///
+static
+const
+char8_tp scan_code_map_with_caps_lock_shift =
+	MAKE_SCAN_CODE_MAP(	ROW0_SYMBOLS,
+						ROW1_LOWERCASE "{}",
+						ROW2_LOWERCASE ":\"~",
+						"|" ROW3_LOWERCASE "<>?",
+						KEYPAD_NAVIGATION );
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with CAPS LOCK, NUM LOCK and
+/// SHIFT all enabled simultaneously
+///
+static
+const
+char8_tp scan_code_map_with_caps_lock_num_lock_shift =
+	MAKE_SCAN_CODE_MAP(	ROW0_SYMBOLS,
+						ROW1_LOWERCASE "{}",
+						ROW2_LOWERCASE ":\"~",
+						"|" ROW3_LOWERCASE "<>?",
+						KEYPAD_DIGITS );
 
 
 ///
@@ -63,11 +132,38 @@
 static
 const
 char8_tp scan_code_map_default =
-	MAKE_SCAN_CODE_MAP(	"1234567890-=",
-						"qwertyuiop[]",
-						"asdfghjkl;'`",
-						"\\zxcvbnm,./" );
+	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
+						ROW1_LOWERCASE "[]",
+						ROW2_LOWERCASE ";'`",
+						"\\" ROW3_LOWERCASE ",./",
+						KEYPAD_NAVIGATION );
 
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with NUM LOCK enabled
+///
+static
+const
+char8_tp scan_code_map_with_num_lock =
+	MAKE_SCAN_CODE_MAP(	ROW0_DIGITS,
+						ROW1_LOWERCASE "[]",
+						ROW2_LOWERCASE ";'`",
+						"\\" ROW3_LOWERCASE ",./",
+						KEYPAD_DIGITS );
+
+
+///
+/// Standard scancode for a MF-II US keyboard, with SHIFT + NUM LOCK enabled
+///
+static
+const
+char8_tp scan_code_map_with_num_lock_shift =
+	MAKE_SCAN_CODE_MAP(	ROW0_SYMBOLS,
+						ROW1_UPPERCASE "{}",
+						ROW2_UPPERCASE ":\"~",
+						"|" ROW3_UPPERCASE "<>?",
+						KEYPAD_DIGITS );
 
 
 ///
@@ -76,35 +172,11 @@ char8_tp scan_code_map_default =
 static
 const
 char8_tp scan_code_map_with_shift =
-	MAKE_SCAN_CODE_MAP(	"!@#$%^&*()_+",
-						"QWERTYUIOP{}",
-						"ASDFGHJKL:\"~",
-						"|ZXCVBNM<>?" );
-
-
-///
-/// Standard scancode for a MF-II US keyboard, with CAPS LOCK enabled
-///
-static
-const
-char8_tp scan_code_map_with_caps_lock =
-	MAKE_SCAN_CODE_MAP(	"1234567890-=",
-						"QWERTYUIOP[]",
-						"ASDFGHJKL;'`",
-						"\\ZXCVBNM,./" );
-
-
-///
-/// Standard scancode for a MF-II US keyboard, with both CAPS LOCK and SHIFT
-/// enabled simultaneously
-///
-static
-const
-char8_tp scan_code_map_with_shift_caps_lock =
-	MAKE_SCAN_CODE_MAP(	"!@#$%^&*()_+",
-						"qwertyuiop{}",
-						"asdfghjkl:\"~",
-						"|zxcvbnm<>?" );
+	MAKE_SCAN_CODE_MAP(	ROW0_SYMBOLS,
+						ROW1_UPPERCASE "{}",
+						ROW2_UPPERCASE ":\"~",
+						"|" ROW3_UPPERCASE "<>?",
+						KEYPAD_NAVIGATION );
 
 
 #endif
