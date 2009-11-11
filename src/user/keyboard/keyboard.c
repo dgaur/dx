@@ -142,12 +142,10 @@ handle_break_code(	keyboard_context_sp	keyboard,
 
 		case SCAN_CODE_CONTROL:
 			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_CONTROL;
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_ALT:
 			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_ALT;
-			select_scan_code_map(keyboard);
 			break;
 
 		default:
@@ -252,6 +250,13 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			select_scan_code_map(keyboard);
 			break;
 
+		case SCAN_CODE_NUM_LOCK:
+			// Toggle NUM LOCK state; and update LED's accordingly
+			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_NUM_LOCK;
+			toggle_leds(keyboard);
+			select_scan_code_map(keyboard);
+			break;
+
 		case SCAN_CODE_SCROLL_LOCK:
 			// Toggle SCROLL LOCK state; and update LED's accordingly
 			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SCROLL_LOCK;
@@ -266,12 +271,10 @@ handle_make_code(	keyboard_context_sp	keyboard,
 
 		case SCAN_CODE_CONTROL:
 			keyboard->modifier_mask |= KEYBOARD_MODIFIER_CONTROL;
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_ALT:
 			keyboard->modifier_mask |= KEYBOARD_MODIFIER_ALT;
-			select_scan_code_map(keyboard);
 			break;
 
 		default:
@@ -481,20 +484,33 @@ static
 void_t
 select_scan_code_map(keyboard_context_s* keyboard)
 	{
-	// Automatically all back to the default map, then look for a specific
-	// override
-	keyboard->scan_code_map = scan_code_map_default;
+	// Isolate the bits that select the scan-code map
+	uintptr_t mask = keyboard->modifier_mask &
+		(KEYBOARD_MODIFIER_SHIFT | KEYBOARD_MODIFIER_CAPS_LOCK|
+		KEYBOARD_MODIFIER_NUM_LOCK);
 
-	// Handle shift, caps lock, etc, as needed
-	if ((keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT_CAPS_LOCK) ==
-		KEYBOARD_MODIFIER_SHIFT_CAPS_LOCK)
-		keyboard->scan_code_map = scan_code_map_with_shift_caps_lock;
 
-	else if (keyboard->modifier_mask & KEYBOARD_MODIFIER_SHIFT)
-		keyboard->scan_code_map = scan_code_map_with_shift;
+	// Select the new scan-code translation table, based on these mask bits
+	//@@just use an array: pack mask bits, then map = array[ mask ]
+	switch (mask)
+		{
+		case KEYBOARD_MODIFIER_SHIFT:
+			keyboard->scan_code_map = scan_code_map_with_shift;
+			break;
 
-	else if (keyboard->modifier_mask & KEYBOARD_MODIFIER_CAPS_LOCK)
-		keyboard->scan_code_map = scan_code_map_with_caps_lock;
+		case KEYBOARD_MODIFIER_CAPS_LOCK:
+			keyboard->scan_code_map = scan_code_map_with_caps_lock;
+			break;
+
+		case (KEYBOARD_MODIFIER_SHIFT | KEYBOARD_MODIFIER_CAPS_LOCK):
+			keyboard->scan_code_map = scan_code_map_with_shift_caps_lock;
+			break;
+
+		case 0:
+		default:
+			keyboard->scan_code_map = scan_code_map_default;
+			break;
+		}
 
 	assert(keyboard->scan_code_map);
 
