@@ -250,7 +250,13 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_CAPS_LOCK;
 			toggle_leds(keyboard);
 			select_scan_code_map(keyboard);
-			break;			
+			break;
+
+		case SCAN_CODE_SCROLL_LOCK:
+			// Toggle SCROLL LOCK state; and update LED's accordingly
+			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_SCROLL_LOCK;
+			toggle_leds(keyboard);
+			break;
 
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:

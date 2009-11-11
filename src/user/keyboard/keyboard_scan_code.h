@@ -16,6 +16,10 @@
 #define SCAN_CODE_CONTROL			29
 #define SCAN_CODE_LEFT_SHIFT		42
 #define SCAN_CODE_RIGHT_SHIFT		54
+#define SCAN_CODE_NUM_LOCK			69
+#define SCAN_CODE_SCROLL_LOCK		70
+#define SCAN_CODE_E0_PREFIX			0xe0	// New MF-II prefix
+#define SCAN_CODE_E1_PREFIX			0xe1	// New MF-II "pause" prefix
 
 
 
