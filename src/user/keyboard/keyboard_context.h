@@ -19,14 +19,22 @@
 
 //
 // Internal mask of "modifier" keys; these affect the selection of the
-// scan-code map, the keyboard LED's, etc
+// scan-code translation string, the keyboard LED's, etc
 //
-#define KEYBOARD_MODIFIER_ALT			0x01 // Alt is currently held/pressed
-#define KEYBOARD_MODIFIER_CONTROL		0x02 // Ctrl is currently held/pressed
-#define KEYBOARD_MODIFIER_SHIFT			0x04 // etc
-#define KEYBOARD_MODIFIER_CAPS_LOCK		0x08
-#define KEYBOARD_MODIFIER_NUM_LOCK		0x10
-#define KEYBOARD_MODIFIER_SCROLL_LOCK	0x20
+#define KEYBOARD_MODIFIER_SHIFT			0x01 // Shift is currently help/pressed
+#define KEYBOARD_MODIFIER_NUM_LOCK		0x02 // Num Lock is currently active
+#define KEYBOARD_MODIFIER_CAPS_LOCK		0x04 // etc
+#define KEYBOARD_MODIFIER_EXTENSION		0x08 // 0xE0 prefix
+#define KEYBOARD_MODIFIER_ALT			0x10
+#define KEYBOARD_MODIFIER_CONTROL		0x20
+#define KEYBOARD_MODIFIER_SCROLL_LOCK	0x40
+
+
+/// Convert modifier mask into an index into scan_code_table[]
+#define MAKE_SCAN_CODE_INDEX(modifier)									\
+		((modifier) & (KEYBOARD_MODIFIER_CAPS_LOCK |					\
+			KEYBOARD_MODIFIER_NUM_LOCK | KEYBOARD_MODIFIER_SHIFT))
+
 
 
 
@@ -46,9 +54,6 @@ typedef struct keyboard_context
 	/// Pending, unsatisfied requests to read keyboard input
 	message_sp	pending_request;	//@should be a queue?
 
-	/// Current map for translating scan-codes to printable characters
-	char8_tp	scan_code_map;
-
 	/// Interrupt handler
 	thread_id_t	interrupt_handler_thread;
 
@@ -56,6 +61,7 @@ typedef struct keyboard_context
 
 typedef keyboard_context_s *    keyboard_context_sp;
 typedef keyboard_context_sp *   keyboard_context_spp;
+
 
 
 //
@@ -67,16 +73,17 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_CONTROL_REGISTER	0x64	// Write
 
 
+
 //
 // Standard PS/2 keyboard interrupt vector
 //
 #define KEYBOARD_INTERRUPT_VECTOR	1
 
 
+
 //
 // Bit definitions for the various registers
 //
-
 #define KEYBOARD_STATUS_PARITY_ERROR		0x80
 #define KEYBOARD_STATUS_TIMEOUT				0x40
 #define KEYBOARD_STATUS_AUX_DATA			0x20
@@ -106,7 +113,6 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 //
 // Various special + predefined make- and break-codes
 //
-
 #define KEYBOARD_CODE_BREAK					0x80	// High bit of scancode
 #define KEYBOARD_CODE_MAKE_MAX				0x58	// Standard 101-key MF II
 

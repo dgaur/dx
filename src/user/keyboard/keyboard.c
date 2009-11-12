@@ -22,8 +22,6 @@
 static void_t handle_make_code(	keyboard_context_sp	keyboard,
 								uint8_t				scan_code);
 
-static void_t select_scan_code_map(keyboard_context_s* keyboard);
-
 static void_t toggle_leds(const keyboard_context_s* keyboard);
 
 static char8_t translate_scan_code(	const keyboard_context_s*	keyboard,
@@ -137,7 +135,6 @@ handle_break_code(	keyboard_context_sp	keyboard,
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
 			keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_SHIFT;
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_CONTROL:
@@ -247,14 +244,12 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			// Toggle CAPS LOCK state; and update LED's accordingly
 			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_CAPS_LOCK;
 			toggle_leds(keyboard);
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_NUM_LOCK:
 			// Toggle NUM LOCK state; and update LED's accordingly
 			keyboard->modifier_mask ^= KEYBOARD_MODIFIER_NUM_LOCK;
 			toggle_leds(keyboard);
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_SCROLL_LOCK:
@@ -266,7 +261,6 @@ handle_make_code(	keyboard_context_sp	keyboard,
 		case SCAN_CODE_LEFT_SHIFT:
 		case SCAN_CODE_RIGHT_SHIFT:
 			keyboard->modifier_mask |= KEYBOARD_MODIFIER_SHIFT;
-			select_scan_code_map(keyboard);
 			break;
 
 		case SCAN_CODE_CONTROL:
@@ -404,12 +398,6 @@ initialize()
 
 
 		//
-		// Start with a default key map
-		//
-		select_scan_code_map(keyboard);
-
-
-		//
 		// Register the interrupt handler
 		//
 		keyboard->interrupt_handler_thread =
@@ -475,68 +463,6 @@ main()
 
 
 ///
-/// Given the current modifier state (shift, control, etc), select the
-/// appropriate scan-code-to-printable-character translation table.
-///
-/// @param keyboard  -- driver context
-///
-static
-void_t
-select_scan_code_map(keyboard_context_s* keyboard)
-	{
-	// Isolate the bits that select the scan-code map
-	uintptr_t mask = keyboard->modifier_mask &
-		(KEYBOARD_MODIFIER_SHIFT | KEYBOARD_MODIFIER_CAPS_LOCK|
-		KEYBOARD_MODIFIER_NUM_LOCK);
-
-
-	// Select the new scan-code translation table, based on these mask bits
-	//@@just use an array: pack the mask bits, then map = array[ mask ]
-	switch (mask)
-		{
-		case KEYBOARD_MODIFIER_SHIFT:
-			keyboard->scan_code_map = scan_code_map_with_shift;
-			break;
-
-		case KEYBOARD_MODIFIER_NUM_LOCK:
-			keyboard->scan_code_map = scan_code_map_with_num_lock;
-			break;
-
-		case KEYBOARD_MODIFIER_NUM_LOCK | KEYBOARD_MODIFIER_SHIFT:
-			keyboard->scan_code_map = scan_code_map_with_num_lock_shift;
-			break;
-
-		case KEYBOARD_MODIFIER_CAPS_LOCK:
-			keyboard->scan_code_map = scan_code_map_with_caps_lock;
-			break;
-
-		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_SHIFT):
-			keyboard->scan_code_map = scan_code_map_with_caps_lock_shift;
-			break;
-
-		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_NUM_LOCK):
-			keyboard->scan_code_map = scan_code_map_with_caps_lock_num_lock;
-			break;
-
-		case (KEYBOARD_MODIFIER_CAPS_LOCK | KEYBOARD_MODIFIER_NUM_LOCK |
-				KEYBOARD_MODIFIER_SHIFT):
-			keyboard->scan_code_map =
-				scan_code_map_with_caps_lock_num_lock_shift;
-			break;
-
-		case 0:
-		default:
-			keyboard->scan_code_map = scan_code_map_default;
-			break;
-		}
-
-	assert(keyboard->scan_code_map);
-
-	return;
-	}
-
-
-///
 /// Toggle/update the state of the keyboard LED's, based on the current
 /// CAPS LOCK, NUM LOCK and SCROLL LOCK modifiers.  If CAPS LOCK is enabled,
 /// then enable the CAPS LOCK LED; etc.
@@ -598,8 +524,8 @@ toggle_leds(const keyboard_context_s* keyboard)
 
 ///
 /// Translate a scan code (read from the keyboard) into a character (for
-/// display on the console), accounting for shift, control, alt and other
-/// modifiers
+/// display on the console), accounting for shift, caps lock, num lock and
+/// other modifiers
 ///
 /// No side effects
 ///
@@ -613,10 +539,16 @@ char8_t
 translate_scan_code(const keyboard_context_s*	keyboard,
 					uint8_t						scan_code)
 	{
-	char8_t character;
+	// Based on the current modifiers, select the appropriate scan-code
+	// translation string
+	uintptr_t index = MAKE_SCAN_CODE_INDEX(keyboard->modifier_mask);
 
-	assert(keyboard->scan_code_map);
-	character = keyboard->scan_code_map[scan_code];
+	// Extract the indexed translation string
+	const char8_t* scan_code_string = scan_code_table[index];
+	assert(scan_code_string);
+
+	// Convert this scan code into the equivalent printable-character, if any
+	char8_t character = scan_code_string[scan_code];
 
 	return(character);
 	}
