@@ -24,7 +24,7 @@
 #define KEYBOARD_MODIFIER_SHIFT			0x01 // Shift is currently help/pressed
 #define KEYBOARD_MODIFIER_NUM_LOCK		0x02 // Num Lock is currently active
 #define KEYBOARD_MODIFIER_CAPS_LOCK		0x04 // etc
-#define KEYBOARD_MODIFIER_EXTENSION		0x08 // 0xE0 prefix
+#define KEYBOARD_MODIFIER_EXTENSION		0x08 // 0xE0 prefix/extension
 #define KEYBOARD_MODIFIER_ALT			0x10
 #define KEYBOARD_MODIFIER_CONTROL		0x20
 #define KEYBOARD_MODIFIER_SCROLL_LOCK	0x40
@@ -122,15 +122,22 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_CODE_RESEND				0xfe
 #define KEYBOARD_CODE_KEY_ERROR				0xff
 
+
 /// Is this just a normal key-down code?
 #define IS_SIMPLE_MAKE_CODE(scan_code)			\
 	((scan_code < KEYBOARD_CODE_MAKE_MAX) &&	\
 	 (scan_code != KEYBOARD_CODE_OVERFLOW))
 
+
 /// Is this just a normal key-up code?  This assumes that the 8042 controller
 /// is translating the raw (set 2) scan-codes into set 1 scan-codes
 #define IS_SIMPLE_BREAK_CODE(scan_code)			\
 	(IS_SIMPLE_MAKE_CODE((scan_code & ~KEYBOARD_CODE_BREAK)))
+
+
+/// Is this a 0xE0 or 0xE1 prefix byte?
+#define IS_EXTENSION_PREFIX(scan_code) \
+	(scan_code == 0xE0 || scan_code == 0xE1)
 
 
 #endif

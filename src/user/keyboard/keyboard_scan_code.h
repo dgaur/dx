@@ -170,7 +170,9 @@
 
 ///
 /// All available scan-code translation strings.  Indexed by the bits in the
-/// current modifier_mask.
+/// current modifier_mask.  Given the current state of the modifier keys,
+/// select the corresponding translation string from this array and use it (the
+/// string) to translate incoming scan-codes.
 ///
 /// @see MAKE_SCAN_CODE_INDEX()
 /// @see translate_scan_code()

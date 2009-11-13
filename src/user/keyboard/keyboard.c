@@ -150,6 +150,10 @@ handle_break_code(	keyboard_context_sp	keyboard,
 			break;
 		}
 
+	// Automatically discard the extension modifier, if it was previously
+	// active, since it only applies to the next key event
+	keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_EXTENSION;
+
 	return;
 	}
 
@@ -174,6 +178,10 @@ handle_deferred_interrupt(	keyboard_context_sp	keyboard,
 	// Key up?
 	else if (IS_SIMPLE_BREAK_CODE(scan_code))
 		{ handle_break_code(keyboard, scan_code); }
+
+	// An MF-II extended sequence?
+	else if (IS_EXTENSION_PREFIX(scan_code))
+		{ keyboard->modifier_mask |= KEYBOARD_MODIFIER_EXTENSION; }
 
 	// Some kind of control byte/reply @@ack from LED update, etc
 	//@else handle_control_code()
@@ -302,6 +310,10 @@ handle_make_code(	keyboard_context_sp	keyboard,
 
 			break;
 		}
+
+	// Automatically discard the extension modifier, if it was previously
+	// active, since it only applies to the next key event
+	keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_EXTENSION;
 
 	return;
 	}
@@ -544,10 +556,11 @@ translate_scan_code(const keyboard_context_s*	keyboard,
 	uintptr_t index = MAKE_SCAN_CODE_INDEX(keyboard->modifier_mask);
 
 	// Extract the indexed translation string
+	assert(index < (sizeof(scan_code_table)/sizeof(scan_code_table[0])));
 	const char8_t* scan_code_string = scan_code_table[index];
-	assert(scan_code_string);
 
 	// Convert this scan code into the equivalent printable-character, if any
+	assert(scan_code_string);
 	char8_t character = scan_code_string[scan_code];
 
 	return(character);
