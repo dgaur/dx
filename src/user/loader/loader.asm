@@ -32,8 +32,6 @@ loader:
 	nop
 	nop
 
-	xchgw	%bx, %bx	//@bochs
-
 	// Initialize the user-space environment: the heap, the environment block,
 	// etc.  Normally, the parent thread provides this for its children; but
 	// since the loader is the initial user thread, it has no such parent
