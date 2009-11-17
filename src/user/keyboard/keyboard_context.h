@@ -5,15 +5,8 @@
 #ifndef _KEYBOARD_CONTEXT_H
 #define _KEYBOARD_CONTEXT_H
 
-#include "dx/message.h"
 #include "dx/thread_id.h"
 #include "dx/types.h"
-
-
-///
-/// Maximum backlog of unprocessed keystrokes
-///
-#define KEYBOARD_QUEUE_SIZE		128
 
 
 
@@ -99,37 +92,6 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_COMMAND_LED_SCROLL_LOCK	0x01
 #define KEYBOARD_COMMAND_LED_NUM_LOCK		0x02
 #define KEYBOARD_COMMAND_LED_CAPS_LOCK		0x04
-
-
-
-//
-// Various special + predefined make- and break-codes
-//
-#define KEYBOARD_CODE_BREAK					0x80	// High bit of scancode
-#define KEYBOARD_CODE_MAKE_MAX				0x58	// Standard 101-key MF II
-
-#define KEYBOARD_CODE_OVERFLOW				0x00
-#define KEYBOARD_CODE_ECHO_REPLY			0xee
-#define KEYBOARD_CODE_ACK					0xfa
-#define KEYBOARD_CODE_RESEND				0xfe
-#define KEYBOARD_CODE_KEY_ERROR				0xff
-
-
-/// Is this just a normal key-down code?
-#define IS_SIMPLE_MAKE_CODE(scan_code)			\
-	((scan_code < KEYBOARD_CODE_MAKE_MAX) &&	\
-	 (scan_code != KEYBOARD_CODE_OVERFLOW))
-
-
-/// Is this just a normal key-up code?  This assumes that the 8042 controller
-/// is translating the raw (set 2) scan-codes into set 1 scan-codes
-#define IS_SIMPLE_BREAK_CODE(scan_code)			\
-	(IS_SIMPLE_MAKE_CODE((scan_code & ~KEYBOARD_CODE_BREAK)))
-
-
-/// Is this a 0xE0 or 0xE1 prefix byte?
-#define IS_EXTENSION_PREFIX(scan_code) \
-	(scan_code == 0xE0 || scan_code == 0xE1)
 
 
 #endif

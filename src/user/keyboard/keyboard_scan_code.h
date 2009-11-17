@@ -9,6 +9,37 @@
 
 
 //
+// Various special + predefined make- and break-codes
+//
+#define KEYBOARD_CODE_BREAK					0x80	// High bit of scancode
+#define KEYBOARD_CODE_MAKE_MAX				0x58	// Standard 101-key MF II
+
+#define KEYBOARD_CODE_OVERFLOW				0x00
+#define KEYBOARD_CODE_ECHO_REPLY			0xee
+#define KEYBOARD_CODE_ACK					0xfa
+#define KEYBOARD_CODE_RESEND				0xfe
+#define KEYBOARD_CODE_KEY_ERROR				0xff
+
+
+/// Is this just a normal key-down code?
+#define IS_SIMPLE_MAKE_CODE(scan_code)			\
+	((scan_code < KEYBOARD_CODE_MAKE_MAX) &&	\
+	 (scan_code != KEYBOARD_CODE_OVERFLOW))
+
+
+/// Is this just a normal key-up code?  This assumes that the 8042 controller
+/// is translating the raw (set 2) scan-codes into set 1 scan-codes
+#define IS_SIMPLE_BREAK_CODE(scan_code)			\
+	(IS_SIMPLE_MAKE_CODE((scan_code & ~KEYBOARD_CODE_BREAK)))
+
+
+/// Is this a 0xE0 or 0xE1 prefix byte?
+#define IS_EXTENSION_PREFIX(scan_code) \
+	(scan_code == 0xE0 || scan_code == 0xE1)
+
+
+
+//
 // Scan codes for some of the modifier keys
 //
 #define SCAN_CODE_ALT				56
