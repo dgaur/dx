@@ -8,6 +8,7 @@
 #include "dx/defer_interrupt.h"
 #include "dx/delete_message.h"
 #include "dx/hal/io_port.h"
+#include "dx/hal/keyboard_input.h"
 #include "dx/map_device.h"
 #include "dx/receive_message.h"
 #include "dx/register_interrupt_handler.h"
@@ -267,7 +268,9 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			message.u.destination		= 2;//@assume console is thd 2
 			message.type				= MESSAGE_TYPE_KEYBOARD_INPUT;
 			message.id					= MESSAGE_ID_ATOMIC;
-			message.data				= (void_t*)((uintptr_t)character);
+			message.data				= (void_t*)(MAKE_KEYBOARD_DATA(
+											keyboard->modifier_mask,
+											character));
 			message.data_size			= 0;
 			message.destination_address	= NULL;
 

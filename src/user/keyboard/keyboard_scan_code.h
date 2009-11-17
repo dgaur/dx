@@ -1,11 +1,16 @@
 //
 // keyboard_scan_code.h
 //
+// Scan-code constants, definitions and translation strings.  Mostly specific
+// to 8042-based controllers and MF-II keyboards
+//
 
 #ifndef _KEYBOARD_SCAN_CODE_H
 #define _KEYBOARD_SCAN_CODE_H
 
+#include "dx/hal/keyboard_input.h"
 #include "dx/types.h"
+
 
 
 //
@@ -221,6 +226,14 @@ char8_t* const scan_code_table[] =
 	SCAN_CODE_STRING_WITH_CAPS_LOCK_NUM_LOCK,
 	SCAN_CODE_STRING_WITH_CAPS_LOCK_NUM_LOCK_SHIFT
 	};
+
+
+///
+/// Convert modifier mask into an index into scan_code_table[]
+///
+#define MAKE_SCAN_CODE_INDEX(modifier)									\
+		((modifier) & (KEYBOARD_MODIFIER_CAPS_LOCK |					\
+			KEYBOARD_MODIFIER_NUM_LOCK | KEYBOARD_MODIFIER_SHIFT))
 
 
 #endif

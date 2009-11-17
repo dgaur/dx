@@ -4,6 +4,7 @@
 
 
 #include "dx/delete_message.h"
+#include "dx/hal/keyboard_input.h"
 #include "dx/receive_message.h"
 #include "dx/status.h"
 #include "stdio.h"
@@ -47,7 +48,7 @@ getchar(void)
 	//
 	// Extract the character from the payload word
 	//
-	character = (char8_t)((uintptr_t)message.data);
+	character = READ_KEYBOARD_CHARACTER(message.data);
 	putchar(character);	//@where does this belong? not echo'd until read?!
 
 

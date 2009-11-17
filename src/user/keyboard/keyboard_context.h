@@ -10,27 +10,6 @@
 
 
 
-//
-// Internal mask of "modifier" keys; these affect the selection of the
-// scan-code translation string, the keyboard LED's, etc
-//
-#define KEYBOARD_MODIFIER_SHIFT			0x01 // Shift is currently help/pressed
-#define KEYBOARD_MODIFIER_NUM_LOCK		0x02 // Num Lock is currently active
-#define KEYBOARD_MODIFIER_CAPS_LOCK		0x04 // etc
-#define KEYBOARD_MODIFIER_EXTENSION		0x08 // 0xE0 prefix/extension
-#define KEYBOARD_MODIFIER_ALT			0x10
-#define KEYBOARD_MODIFIER_CONTROL		0x20
-#define KEYBOARD_MODIFIER_SCROLL_LOCK	0x40
-
-
-/// Convert modifier mask into an index into scan_code_table[]
-#define MAKE_SCAN_CODE_INDEX(modifier)									\
-		((modifier) & (KEYBOARD_MODIFIER_CAPS_LOCK |					\
-			KEYBOARD_MODIFIER_NUM_LOCK | KEYBOARD_MODIFIER_SHIFT))
-
-
-
-
 ///
 /// Driver context.  Contains the runtime context/data for the keyboard driver
 ///
