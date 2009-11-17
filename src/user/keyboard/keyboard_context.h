@@ -15,7 +15,9 @@
 ///
 typedef struct keyboard_context
 	{
-	/// Mask of currently-active "modifier" keys
+	/// Mask of currently-active "modifier" keys.  This affects the selection
+	/// of scan-code translation strings, the keyboard LED's, etc.  Also
+	/// reported with each key-event
 	uintptr_t	modifier_mask;
 
 	/// Interrupt handler
