@@ -1,6 +1,8 @@
 //
 // keyboard.c
 //
+// Simple keyboard driver for an 8042-based MF-II keyboard
+//
 
 #include "assert.h"
 #include "dx/defer_interrupt.h"
@@ -83,39 +85,6 @@ cleanup(keyboard_context_sp keyboard)
 
 
 ///
-/// Complete a previous request to read from the keyboard.  Send the next
-/// input character back to the requestor
-///
-/// @param request		-- the request to be answered
-/// @param character	-- the next pending character, to be sent to the
-///							original requestor
-///
-static
-void_t
-finish_read_request(const message_s*	request,
-					char8_t				character)
-	{
-	message_s reply;
-
-	assert(request);
-
-	// Send this character to the caller
-	reply.u.destination			= request->u.source;
-	reply.type					= MESSAGE_TYPE_READ_COMPLETE;
-	reply.id					= request->id;
-	reply.data					= (void_t*)((uintptr_t)character);
-	reply.data_size				= 0;
-	reply.destination_address	= NULL;
-
-	// Send the key/character back to the original requestor; this wakes
-	// (unblocks) the requesting thread
-	send_message(&reply);
-
-	return;
-	}
-
-
-///
 /// Handle a key-up (key release) event
 ///
 /// @param keyboard		-- driver context
@@ -163,6 +132,9 @@ handle_break_code(	keyboard_context_sp	keyboard,
 /// (deferred) portion of handle_interrupt.  Runs in the context of the main
 /// keyboard thread, outside interrupt context.
 ///
+/// @param keyboard		-- driver context
+/// @param message		-- deferred interrupt message from interrupt handler
+///
 static
 void_t
 handle_deferred_interrupt(	keyboard_context_sp	keyboard,
@@ -197,6 +169,9 @@ handle_deferred_interrupt(	keyboard_context_sp	keyboard,
 /// keyboard thread
 ///
 /// @see handle_deferred_interrupt()
+///
+/// @param parent_thread	-- id of parent/main keyboard thread
+/// @param context			-- driver context
 ///
 static
 void_t
@@ -244,7 +219,9 @@ void_t
 handle_make_code(	keyboard_context_sp	keyboard,
 					uint8_t				scan_code)
 	{
-	char8_t character;
+	char8_t		character;
+	message_s	message;
+
 
 	switch (scan_code)
 		{
@@ -286,27 +263,16 @@ handle_make_code(	keyboard_context_sp	keyboard,
 			if (!character)
 				break; //@nonprinting chars
 
-			// If a thread is already waiting for input, then wake it here
-			if (keyboard->pending_request)
-				{
-				// If a thread is already waiting, then the keyboard
-				// buffer/queue should be empty by definition
-				assert(keyboard->queue_head == keyboard->queue_tail);
-				finish_read_request(keyboard->pending_request, character);
+			// Build a message describing this key event
+			message.u.destination		= 2;//@assume console is thd 2
+			message.type				= MESSAGE_TYPE_KEYBOARD_INPUT;
+			message.id					= MESSAGE_ID_ATOMIC;
+			message.data				= (void_t*)((uintptr_t)character);
+			message.data_size			= 0;
+			message.destination_address	= NULL;
 
-				// This request is now satisfied, so discard it
-				free(keyboard->pending_request);
-				keyboard->pending_request = NULL;
-				}
-
-			else
-				{
-				// No threads are waiting for input, so just record this input
-				// key for later consumption
-				keyboard->queue[ keyboard->queue_tail ] = character;
-				keyboard->queue_tail =
-					(keyboard->queue_tail+1) % KEYBOARD_QUEUE_SIZE;
-				}
+			// Send the key event to the console or next-stage recipient
+			send_message(&message);
 
 			break;
 		}
@@ -314,48 +280,6 @@ handle_make_code(	keyboard_context_sp	keyboard,
 	// Automatically discard the extension modifier, if it was previously
 	// active, since it only applies to the next key event
 	keyboard->modifier_mask &= ~KEYBOARD_MODIFIER_EXTENSION;
-
-	return;
-	}
-
-
-///
-/// Handle a request to read from the keyboard.  Dequeue the next pending
-/// keystroke, if any, and send it back to the requestor; block the requestor
-/// if no keyboard data is currently available
-///
-/// @param keyboard	-- driver context
-/// @param request	-- the incoming request message
-///
-static
-void_t
-handle_read_request(keyboard_context_sp	keyboard,
-					const message_s*	request)
-	{
-	//
-	// If at least one keystroke is pending, then dequeue it here and
-	// immediately return it to the caller
-	//
-	if (keyboard->queue_tail != keyboard->queue_head)
-		{
-		char8_t character = keyboard->queue[keyboard->queue_head];
-		keyboard->queue_head =
-			(keyboard->queue_head+1) % KEYBOARD_QUEUE_SIZE;
-
-		finish_read_request(request, character);
-		}
-	else
-		{
-		// No keyboard input is pending, so block the caller until the request
-		// can be satisfied
-		//@@this assumes at most one thread is reading from the keyboard
-		assert(keyboard->pending_request == NULL);
-		keyboard->pending_request = malloc(sizeof(*request));
-		if (keyboard->pending_request)
-			{ memcpy(keyboard->pending_request, request, sizeof(*request)); }
-
-		//@else, caller is stuck
-		}
 
 	return;
 	}
@@ -400,13 +324,6 @@ initialize()
 			if (status != STATUS_SUCCESS)
 				{ break; }
 			}
-
-
-		//
-		// Initially, no input queue/backlog
-		//
-		keyboard->queue_head = 0;
-		keyboard->queue_tail = 0;
 
 
 		//
@@ -467,6 +384,7 @@ main()
 		}
 	else
 		{
+		printf("Unable to load keyboard driver\n");
 		status = STATUS_RESOURCE_CONFLICT;
 		}
 
@@ -478,6 +396,8 @@ main()
 /// Toggle/update the state of the keyboard LED's, based on the current
 /// CAPS LOCK, NUM LOCK and SCROLL LOCK modifiers.  If CAPS LOCK is enabled,
 /// then enable the CAPS LOCK LED; etc.
+///
+/// @param keyboard	-- driver context
 ///
 static
 void_t
@@ -599,10 +519,6 @@ wait_for_messages(keyboard_context_sp keyboard)
 			{
 			case MESSAGE_TYPE_DEFER_INTERRUPT:
 				handle_deferred_interrupt(keyboard, &message);
-				break;
-
-			case MESSAGE_TYPE_READ:
-				handle_read_request(keyboard, &message);
 				break;
 
 			case MESSAGE_TYPE_NULL:

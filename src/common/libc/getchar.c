@@ -4,7 +4,7 @@
 
 
 #include "dx/delete_message.h"
-#include "dx/send_and_receive_message.h"
+#include "dx/receive_message.h"
 #include "dx/status.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -20,41 +20,42 @@ int
 getchar(void)
 	{
 	char8_t		character;
-	message_s	request;
-	message_s	reply;
+	message_s	message;
 	status_t	status;
 
 
 	//
-	// Pull the next character from the keyboard driver.  Block here until a
-	// reponse (key) is retrieved
+	// Wait for data on stdin/console
 	//
-	request.u.destination		= 2;	//@@@assumes kbd driver is thread 2
-	request.type				= MESSAGE_TYPE_READ;
-	request.id					= rand();
-	request.data_size			= 0;
-	request.destination_address	= NULL;
-
-	status = send_and_receive_message(&request, &reply);
-
-	if (status == STATUS_SUCCESS)
+	for(;;)
 		{
-		// Extract the character from the payload word
-		character = (char8_t)((uintptr_t)reply.data);
-		putchar(character);	//@where does this belong? not echo'd until read?!
+		status = receive_message(&message, WAIT_FOR_MESSAGE);
+		if (status != STATUS_SUCCESS)
+			{ continue; }
+
+		if (message.type == MESSAGE_TYPE_KEYBOARD_INPUT) //@STREAM_INPUT?
+			{ break; }
+
+		//@incomplete: stream id/handle; END_OF_STREAM; steer unexpected input
+		//@(sockets, etc) to proper queue based on stream id
+
+		// Unexpected message; discard it here
+		delete_message(&message);
 		}
-	else
-		{
-		// Error reading from console
-		character = EOF;
-		}
+
+
+	//
+	// Extract the character from the payload word
+	//
+	character = (char8_t)((uintptr_t)message.data);
+	putchar(character);	//@where does this belong? not echo'd until read?!
 
 
 	//
 	// Clean up, although this should typically be unnecessary here -- no
 	// external payload
 	//
-	delete_message(&reply);
+	delete_message(&message);
 
 	return(character);
 	}

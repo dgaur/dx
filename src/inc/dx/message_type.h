@@ -51,5 +51,8 @@ typedef message_type_tp *			message_type_tpp;
 #define MESSAGE_TYPE_RESET					SYSTEM_MESSAGE(42)
 #define MESSAGE_TYPE_RESET_COMPLETE			SYSTEM_MESSAGE(43)
 
+#define MESSAGE_TYPE_KEYBOARD_INPUT			SYSTEM_MESSAGE(44)
+//@stream_input?
+//@end_of_stream?
 
 #endif

@@ -30,8 +30,8 @@ RAMDISK_LISTING	:= ramdisk.lst
 #@@the order also determines assignment of thread ids
 RAMDISK_CONTENTS :=	loader/loader.bin \
 					vga/vga.exe \
-					keyboard/keyboard.exe \
-					shell/shell.exe
+					shell/shell.exe \
+					keyboard/keyboard.exe
 
 
 

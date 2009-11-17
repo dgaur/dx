@@ -43,16 +43,8 @@
 ///
 typedef struct keyboard_context
 	{
-	/// The queue of pending keystrokes (translated scan codes)
-	char8_t		queue[ KEYBOARD_QUEUE_SIZE ];
-	uintptr_t	queue_head;
-	uintptr_t	queue_tail;
-
 	/// Mask of currently-active "modifier" keys
 	uintptr_t	modifier_mask;
-
-	/// Pending, unsatisfied requests to read keyboard input
-	message_sp	pending_request;	//@should be a queue?
 
 	/// Interrupt handler
 	thread_id_t	interrupt_handler_thread;
