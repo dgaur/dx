@@ -654,7 +654,7 @@ run_thread()
 	{
 	thread_cr	thread = read_current_thread();
 
-	TRACE(ALL, "run_thread(), starting thread %p, id %#x\n", &thread,
+	TRACE(ALL, "hal::run_thread(), starting thread %p, id %#x\n", &thread,
 		thread.id);
 
 

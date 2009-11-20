@@ -320,7 +320,7 @@ handle_interrupt(interrupt_cr interrupt)
 
 			//
 			// The current thread is unwillingly losing the CPU, so send it
-			// it an empty message to ensure it is still a lottery candidate
+			// an empty message to ensure it is still a lottery candidate
 			//
 			__io_manager->lock.acquire();
 			message = current_thread.maybe_put_null_message();
