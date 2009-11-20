@@ -26,7 +26,7 @@
 /// @see interrupt_handler_loop()
 /// @see defer_interrupt()
 ///
-/// @param interrupt_vector	-- the vector on which this driver is listening
+/// @param irq				-- the IRQ line on which this driver is listening
 /// @param handler			-- the driver's interrupt handler (ISR, etc)
 /// @param handler_context	-- opaque context/data passed to handler
 ///
@@ -34,7 +34,7 @@
 /// registration failed
 ///
 thread_id_t
-register_interrupt_handler(	uintptr_t				interrupt_vector,
+register_interrupt_handler(	uintptr_t				irq,
 							interrupt_handler_fp	handler,
 							void_tp					handler_context)
 	{
@@ -97,9 +97,9 @@ register_interrupt_handler(	uintptr_t				interrupt_vector,
 		//
 		// Configure the new thread with its vector, handler + runtime context
 		//
-		context.interrupt_vector	= interrupt_vector;
 		context.handler				= handler;
 		context.handler_context		= handler_context;
+		context.irq					= irq;
 
 		message.u.destination		= thread_id;
 		message.type				= MESSAGE_TYPE_ENABLE_INTERRUPT_HANDLER;

@@ -13,9 +13,9 @@
 /// Context for initializing the interrupt handler
 typedef struct interrupt_handler_context
 	{
-	uintptr_t				interrupt_vector;
 	interrupt_handler_fp	handler;
 	void_tp					handler_context;
+	uintptr_t				irq;
 	} interrupt_handler_context_s;
 
 typedef interrupt_handler_context_s *	interrupt_handler_context_sp;

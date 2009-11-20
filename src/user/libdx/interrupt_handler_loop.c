@@ -29,7 +29,7 @@ interrupt_handler_loop()
 	message_s				ack;
 	interrupt_handler_fp	handler				= NULL;
 	void_tp					handler_context		= NULL;
-	uintptr_t				interrupt_vector	= (uintptr_t)(-1);
+	uintptr_t				irq					= (uintptr_t)(-1);
 	thread_id_t				parent_thread		= THREAD_ID_INVALID;
 
 
@@ -98,14 +98,14 @@ interrupt_handler_loop()
 					parent_thread		= message.u.source;
 					handler				= context->handler;
 					handler_context		= context->handler_context;
-					interrupt_vector	= context->interrupt_vector;
+					irq					= context->irq;
 
 					assert(handler);
 					if (!handler)
 						{ break; }
 
 					// Listen on this interrupt line
-					status = map_device(interrupt_vector,
+					status = map_device(irq,
 										DEVICE_TYPE_INTERRUPT,
 										0,
 										0,
@@ -122,7 +122,7 @@ interrupt_handler_loop()
 				if (message.u.source == parent_thread)
 					{
 					// Release the interrupt line
-					unmap_device(	interrupt_vector,
+					unmap_device(	irq,
 									DEVICE_TYPE_INTERRUPT,
 									0);
 

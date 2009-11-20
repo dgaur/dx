@@ -350,9 +350,9 @@ map_memory(	thread_cr					current_thread,
 
 ///
 /// Adds the current thread to the list of handlers associated with the
-/// specified interrupt line.  The handler must be prepared to start handling
-/// interrupts immediately.  The current thread will receive interrupt messages
-/// until it finally invokes unregister_interrupt_handler().
+/// specified interrupt (IRQ) line.  The handler must be prepared to start
+/// handling interrupts immediately.  The current thread will receive interrupt
+/// messages until it finally invokes unregister_interrupt_handler().
 ///
 /// @param current_thread	-- the calling thread
 /// @param syscall			-- system call arguments
@@ -364,17 +364,17 @@ status_t device_proxy_c::
 register_interrupt_handler(	thread_cr					current_thread,
 							volatile syscall_data_s*	syscall)
 	{
+	uintptr_t	irq = syscall->data0;
 	status_t	status;
-	uintptr_t	vector = syscall->data0;
 
 	ASSERT(syscall->data1 == DEVICE_TYPE_INTERRUPT);
 
 	do
 		{
 		//
-		// Must be a valid vector
+		// Must be a valid IRQ line
 		//
-		if (vector > INTERRUPT_VECTOR_LAST)
+		if (irq >= INTERRUPT_VECTOR_PIC_COUNT)
 			{
 			status = STATUS_INVALID_DATA;
 			break;
@@ -382,23 +382,11 @@ register_interrupt_handler(	thread_cr					current_thread,
 
 
 		//
-		// Prevent user mode threads from hooking the timer interrupt.  The
-		// I/O Manager already handles these interrupts
+		// Add this thread to the list of handlers attached to this
+		// IRQ.  This thread will now start receiving interrupt messages
 		//
-		if (vector == INTERRUPT_VECTOR_PIC_IRQ0)
-			{
-			status = STATUS_ACCESS_DENIED;
-			break;
-			}
-
-
-		//
-		// OK, add this thread to the list of handlers attached to this
-		// interrupt vector.  This thread will now start receiving interrupt
-		// messages
-		//
-		TRACE(SYSCALL, "Registering thread %#x on interrupt vector %#x\n",
-			current_thread.id, vector);
+		TRACE(SYSCALL, "Registering thread %#x on IRQ %#x\n",
+			current_thread.id, irq);
 
 		add_reference(current_thread);
 
@@ -407,8 +395,8 @@ register_interrupt_handler(	thread_cr					current_thread,
 		//@@running; or use some kind of non-blocking mechanism (e.g., CAS
 		//@@lists).  Must also unmask on *all* CPU's, not just local CPU
 		lock.acquire();
-		interrupt_handler[vector] += current_thread;
-		__hal->unmask_interrupt(vector);
+		interrupt_handler[irq] += current_thread;
+		__hal->unmask_interrupt(irq);
 		lock.release();
 
 
@@ -547,8 +535,8 @@ unmap_memory(	thread_cr					current_thread,
 
 ///
 /// Removes the current thread from the list of handlers associated with the
-/// specified interrupt line.  The handler will no longer receive interrupt
-/// messages.
+/// specified interrupt (IRQ) line.  The handler will no longer receive
+/// interrupt messages.
 ///
 /// @param current_thread	-- the calling thread
 /// @param syscall			-- system call arguments
@@ -560,24 +548,24 @@ status_t device_proxy_c::
 unregister_interrupt_handler(	thread_cr					current_thread,
 								volatile syscall_data_s*	syscall)
 	{
+	uintptr_t	irq = syscall->data0;
 	status_t	status;
-	uintptr_t	vector = syscall->data0;
 
 	ASSERT(syscall->data1 == DEVICE_TYPE_INTERRUPT);
 
-	if (vector < INTERRUPT_VECTOR_LAST)
+	if (irq < INTERRUPT_VECTOR_PIC_COUNT)
 		{
-		TRACE(SYSCALL, "Deregistering thread %#x from interrupt vector %#x\n",
-			current_thread.id, vector);
+		TRACE(SYSCALL, "Deregistering thread %#x from IRQ %#x\n",
+			current_thread.id, irq);
 
 		// Remove this handler
 		//@@SMP: same locking problem as register().  Masking is more difficult
 		//@@than unmasking, because it must be conditional + still coordinated
 		//@@across CPU's
 		lock.acquire();
-		interrupt_handler[vector] -= current_thread;
-		if (interrupt_handler[vector].read_count() == 0)
-			{ __hal->mask_interrupt(vector); }
+		interrupt_handler[irq] -= current_thread;
+		if (interrupt_handler[irq].read_count() == 0)
+			{ __hal->mask_interrupt(irq); }
 		lock.release();
 
 		remove_reference(current_thread);
@@ -617,9 +605,9 @@ wake_interrupt_handlers(interrupt_cr interrupt)
 	// Locate the list of threads/handlers that have registered on this
 	// interrupt line
 	//
-	uintptr_t index = interrupt.vector - INTERRUPT_VECTOR_FIRST_PIC_IRQ;
-	ASSERT(index < INTERRUPT_VECTOR_PIC_COUNT);
-	interrupt_handler_list_cr thread = interrupt_handler[index];
+	uintptr_t irq = interrupt.vector - INTERRUPT_VECTOR_FIRST_PIC_IRQ;
+	ASSERT(irq < INTERRUPT_VECTOR_PIC_COUNT);
+	interrupt_handler_list_cr thread = interrupt_handler[irq];
 
 
 	//
@@ -641,7 +629,7 @@ wake_interrupt_handlers(interrupt_cr interrupt)
 										thread[i],
 										MESSAGE_TYPE_HANDLE_INTERRUPT,
 										rand(),		// Arbitrary message id
-										uintptr_t(interrupt.vector));
+										irq);
 
 		if (!message)
 			{
