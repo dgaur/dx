@@ -405,9 +405,10 @@ register_interrupt_handler(	thread_cr					current_thread,
 		//@@SMP: this is inadequate; only blocks IRQ's on local CPU.  Need to
 		//@@either disable IRQ's across all CPU's and ensure no handlers are
 		//@@running; or use some kind of non-blocking mechanism (e.g., CAS
-		//@@lists)
+		//@@lists).  Must also unmask on *all* CPU's, not just local CPU
 		lock.acquire();
 		interrupt_handler[vector] += current_thread;
+		__hal->unmask_interrupt(vector);
 		lock.release();
 
 
@@ -570,9 +571,13 @@ unregister_interrupt_handler(	thread_cr					current_thread,
 			current_thread.id, vector);
 
 		// Remove this handler
-		//@@SMP: same locking problem as register()
+		//@@SMP: same locking problem as register().  Masking is more difficult
+		//@@than unmasking, because it must be conditional + still coordinated
+		//@@across CPU's
 		lock.acquire();
 		interrupt_handler[vector] -= current_thread;
+		if (interrupt_handler[vector].read_count() == 0)
+			{ __hal->mask_interrupt(vector); }
 		lock.release();
 
 		remove_reference(current_thread);
@@ -624,7 +629,6 @@ wake_interrupt_handlers(interrupt_cr interrupt)
 	thread_cr	current_thread	= __hal->read_current_thread();
 	uintptr_t	thread_count	= thread.read_count();
 
-	TRACE(ALL, "DP: IRQ %#x (%#x)\n", interrupt.vector, index);//@@@
 	ASSERT(thread_count > 0);
 
 	for (uintptr_t i = 0; i < thread_count; i++)
@@ -659,11 +663,12 @@ wake_interrupt_handlers(interrupt_cr interrupt)
 		status = __io_manager->send_message(*message, &acknowledgement);
 		if (status != STATUS_SUCCESS)
 			{
-			// Message delivery error.  The device may continue to interrupt
-			// or the driver may have silenced it already, depending on where
-			// the error occurred.  This may or may not be recoverable
+			// Message delivery error.  If this thread/driver owned this
+			// device, then the device will likely continue to interrupt.  This
+			// may or may not be recoverable
 			printf("Unable to deliver interrupt message to thread %#x (%#x)\n",
 				thread[i].id, status);
+			delete(message); // Failed transmission, so still message owner
 			continue;
 			}
 

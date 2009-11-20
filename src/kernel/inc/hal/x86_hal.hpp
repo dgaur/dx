@@ -118,6 +118,12 @@ class   x86_hardware_abstraction_layer_c
 				return;
 				}
 
+		static
+		void_t
+			mask_interrupt(uintptr_t irq);
+		static
+		void_t
+			unmask_interrupt(uintptr_t irq);
 
 
 		//

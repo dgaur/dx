@@ -44,7 +44,10 @@ uint8_t		i8259_ICW1_ICW4_REQUIRED				= 0x1,
 			i8259_ICW4_NO_SPECIAL_FULLY_NESTED_MODE	= 0x0,
 			i8259_ICW4_SPECIAL_FULLY_NESTED_MODE	= 0x10,
 
-			i8259_OCW1_MASK_ALL_IRQS				= 0xFF,
+			// Always leave IRQ2 unmasked so that IRQ's from the slave PIC can
+			// be masked/unmasked without touching the master PIC
+			i8259_OCW1_MASK_ALL_MASTER_IRQS			= 0xFB,
+			i8259_OCW1_MASK_ALL_SLAVE_IRQS			= 0xFF,
 
 			i8259_OCW2_NONSPECIFIC_END_OF_INTERRUPT	= 0x20;
 
@@ -77,6 +80,9 @@ class   i8259_programmable_interrupt_controller_c
 		io_mapped_register_c	slave_port_a0;
 		io_mapped_register_c	slave_port_a1;
 
+		uint8_t					master_mask;
+		uint8_t					slave_mask;
+
 		spinlock_c				lock;
 
 	protected:
@@ -89,7 +95,9 @@ class   i8259_programmable_interrupt_controller_c
 			acknowledge_interrupt(interrupt_cr interrupt);
 
 		void_t
-			mask_all_interrupts();
+			mask_interrupt(uint8_t irq);
+		void_t
+			unmask_interrupt(uint8_t irq);
 	};
 
 

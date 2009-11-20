@@ -6,12 +6,18 @@
 #include "drivers/i8259pic.hpp"
 
 
+///
+/// Constructor.  Initialize both PIC's.  On return, both PIC's are configured
+/// and operating normally, but all interrupts are masked.
+///
 i8259_programmable_interrupt_controller_c::
 i8259_programmable_interrupt_controller_c():
 	master_port_20(i8259_MASTER_PORT_ADDRESS_20),
 	master_port_21(i8259_MASTER_PORT_ADDRESS_21),
 	slave_port_a0(i8259_SLAVE_PORT_ADDRESS_A0),
-	slave_port_a1(i8259_SLAVE_PORT_ADDRESS_A1)
+	slave_port_a1(i8259_SLAVE_PORT_ADDRESS_A1),
+	master_mask(i8259_OCW1_MASK_ALL_MASTER_IRQS),
+	slave_mask(i8259_OCW1_MASK_ALL_SLAVE_IRQS)
 	{
 	uint8_t		icw1;
 	uint8_t		icw2;
@@ -64,20 +70,23 @@ i8259_programmable_interrupt_controller_c():
 	// Slave ICW4: same as master ICW4
 	slave_port_a1.write8(icw4);
 
+
+	//
+	// Both PIC's are initialized now.  As a precaution, mask all devices until
+	// driver(s) have registered interest
+	//
+	master_port_21.write8(master_mask);
+	slave_port_a1.write8(slave_mask);
+
+
 	return;
 	}
 
 
-i8259_programmable_interrupt_controller_c::
-~i8259_programmable_interrupt_controller_c()
-	{
-	// Prevent the PIC from generating spurious interrupts after
-	// the driver has unloaded.
-	mask_all_interrupts();
-	return;
-	}
-
-
+///
+/// Acknowledge an interrupt.  Send the EOI to the master or slave PIC as
+/// appropriate
+///
 void_t i8259_programmable_interrupt_controller_c::
 acknowledge_interrupt(interrupt_cr interrupt)
 	{
@@ -108,16 +117,68 @@ acknowledge_interrupt(interrupt_cr interrupt)
 	}
 
 
+///
+/// Mask a specific IRQ on the current/local CPU.  Configure the IMR on the
+/// master or slave PIC as appropriate
+///
 void_t i8259_programmable_interrupt_controller_c::
-mask_all_interrupts()
+mask_interrupt(uint8_t irq)
 	{
-	uint8_t		ocw1 = i8259_OCW1_MASK_ALL_IRQS;
+	interrupt_c interrupt(irq + INTERRUPT_VECTOR_FIRST_PIC_IRQ);
+
+	ASSERT(interrupt.is_pic_interrupt());
+
 
 	lock.acquire();
 
-	// Mask all IRQs on both PICs
-	slave_port_a1.write8(ocw1);
-	master_port_21.write8(ocw1);
+	if (interrupt.is_master_pic_interrupt())
+		{
+		TRACE(ALL, "Masking IRQ%d on master PIC\n", irq);
+		master_mask |= (1 << irq);
+		master_port_21.write8(master_mask);
+		}
+	else if (interrupt.is_slave_pic_interrupt())
+		{
+		TRACE(ALL, "Masking IRQ%d on slave PIC\n", irq);
+		slave_mask |= (1 << (irq-8));
+		slave_port_a1.write8(slave_mask);
+		}
+
+	lock.release();
+
+	return;
+	}
+
+
+///
+/// Unmask a specific IRQ on the current/local CPU.  Configure the IMR on the
+/// master or slave PIC as appropriate.  The current thread must (already) be
+/// prepared to handle this IRQ, since this IRQ could already be pending in
+/// the PIC; in this case, the current CPU might take this interrupt before
+/// this method even returns.
+///
+void_t i8259_programmable_interrupt_controller_c::
+unmask_interrupt(uint8_t irq)
+	{
+	interrupt_c interrupt(irq + INTERRUPT_VECTOR_FIRST_PIC_IRQ);
+
+	ASSERT(interrupt.is_pic_interrupt());
+
+
+	lock.acquire();
+
+	if (interrupt.is_master_pic_interrupt())
+		{
+		TRACE(ALL, "Unmasking IRQ%d on master PIC\n", irq);
+		master_mask &= ~(1 << irq);
+		master_port_21.write8(master_mask);
+		}
+	else if (interrupt.is_slave_pic_interrupt())
+		{
+		TRACE(ALL, "Unmasking IRQ%d on slave PIC\n", irq);
+		slave_mask &= ~(1 << (irq-8));
+		slave_port_a1.write8(slave_mask);
+		}
 
 	lock.release();
 

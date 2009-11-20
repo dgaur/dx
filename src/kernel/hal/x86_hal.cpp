@@ -449,7 +449,8 @@ initialize_processor()
 	//@enable RDTSC from ring3 in CR4?
 
 	// Enable interrupts; this is necessary before making any timing
-	// calculations since the PIT provides the clock reference
+	// calculations since the PIT provides the clock reference.  All other
+	// kernel system must be ready to handle device interrupts here.
 	interrupts_enable();
 
 	return;
@@ -530,6 +531,18 @@ jump_to_user(	void_tp start_address,
 	ASSERT(0);
 	for(;;)
 		;
+	}
+
+
+///
+/// Mask the specified IRQ line
+///
+void_t x86_hardware_abstraction_layer_c::
+mask_interrupt(uintptr_t irq)
+	{
+	ASSERT(i8259PIC);
+	i8259PIC->mask_interrupt(irq);
+	return;
 	}
 
 
@@ -808,6 +821,21 @@ system_reboot()
 	// to prevent it from continuing unexpectedly.
 	system_halt();
 
+	return;
+	}
+
+
+///
+/// Unmask the specified IRQ line.  Current thread must (already) be prepared
+/// to handle this interrupt.
+///
+/// @param irq -- IRQ line to be unmasked
+///
+void_t x86_hardware_abstraction_layer_c::
+unmask_interrupt(uintptr_t irq)
+	{
+	ASSERT(i8259PIC);
+	i8259PIC->unmask_interrupt(irq);
 	return;
 	}
 

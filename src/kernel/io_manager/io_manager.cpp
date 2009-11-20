@@ -50,6 +50,16 @@ io_manager_c():
 	//
 	ASSERT(__null_thread);
 
+
+	//
+	// Enable interrupts from the system clock; these interrupts drive the
+	// scheduling logic.  The CPU may take a clock interrupt here before the
+	// __io_manager is fully constructed, so the interrupt handler must account
+	// for this race.
+	//
+	__hal->unmask_interrupt(0);
+
+
 	return;
 	}
 
