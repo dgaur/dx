@@ -451,7 +451,7 @@ initialize_processor()
 	// Enable interrupts; this is necessary before making any timing
 	// calculations since the PIT provides the clock reference.  All other
 	// kernel system must be ready to handle device interrupts here.
-	interrupts_enable();
+	enable_interrupts();
 
 	return;
 	}
@@ -663,7 +663,7 @@ run_thread()
 	// launched this thread; so re-enable them here before starting
 	// the thread.
 	//
-	interrupts_enable();
+	enable_interrupts();
 
 
 	//

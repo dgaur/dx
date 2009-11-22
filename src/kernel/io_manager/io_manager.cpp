@@ -739,7 +739,7 @@ send_message(	message_cr	request,
 	// interrupts are disabled locally, the I/O Manager subsystem itself is
 	// not locked here.
 	//
-	interrupt_state = __hal->interrupts_disable();
+	interrupt_state = __hal->disable_interrupts();
 
 
 	//
@@ -759,7 +759,7 @@ send_message(	message_cr	request,
 		// then went to sleep.  Woken here by the recipient.  An interrupt
 		// taken here will not violate mailbox integrity/invariants
 		//
-		__hal->interrupts_enable(interrupt_state);
+		__hal->enable_interrupts(interrupt_state);
 
 
 		//
@@ -783,7 +783,7 @@ send_message(	message_cr	request,
 		{
 		// Encountered an error during message delivery; current thread
 		// still owns the original request message
-		__hal->interrupts_enable(interrupt_state);
+		__hal->enable_interrupts(interrupt_state);
 		}
 
 

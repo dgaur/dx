@@ -25,7 +25,7 @@ acquire()
 	// Disable interrupts; and cache the previous interrupt state so that
 	// the release logic can reenable interrupts if necessary
 	//
-	interrupt_state = __hal->interrupts_disable();
+	interrupt_state = __hal->disable_interrupts();
 
 
 	//
@@ -55,7 +55,7 @@ release()
 
 	// If interrupts were initially enabled, then re-enable them now.
 	// This thread may now be preempted.
-	__hal->interrupts_enable(interrupt_state);
+	__hal->enable_interrupts(interrupt_state);
 
 	return;
 	}

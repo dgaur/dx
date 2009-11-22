@@ -76,12 +76,18 @@ class   x86_hardware_abstraction_layer_c
 			handle_interrupt(interrupt_cr interrupt);
 		static
 		void_t
+			mask_interrupt(uintptr_t irq);
+		static
+		void_t
+			unmask_interrupt(uintptr_t irq);
+		static
+		void_t
 			soft_yield();
 
 		static
 		inline
 		uintptr_t
-			interrupts_disable()
+			disable_interrupts()
 				{
 				uint32_t eflags;
 
@@ -99,14 +105,14 @@ class   x86_hardware_abstraction_layer_c
 		static
 		inline
 		void_t
-			interrupts_enable()
+			enable_interrupts()
 				{ __asm("sti" : : : "cc"); return; }
 
 
 		static
 		inline
 		void_t
-			interrupts_enable(uintptr_t interrupt_state)
+			enable_interrupts(uintptr_t interrupt_state)
 				{
 				// Re-enable interrupts, or not, depending on the cached
 				// interrupt state
@@ -117,13 +123,6 @@ class   x86_hardware_abstraction_layer_c
 						: "cc"	);
 				return;
 				}
-
-		static
-		void_t
-			mask_interrupt(uintptr_t irq);
-		static
-		void_t
-			unmask_interrupt(uintptr_t irq);
 
 
 		//
