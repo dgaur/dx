@@ -33,4 +33,13 @@ typedef struct message
 typedef message_s *		message_sp;
 typedef message_sp *	message_spp;
 
+
+void_t
+initialize_message(message_s* message);
+
+void_t
+initialize_reply(	const message_s*	message,
+					message_s*			reply);
+
+
 #endif

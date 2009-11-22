@@ -18,6 +18,7 @@ LIBDX_OBJECTS	:=	libdx.o \
 					expand_address_space.o \
 					interrupt_handler_loop.o \
 					map_device.o \
+					message.o \
 					receive_message.o \
 					register_interrupt_handler.o \
 					send_and_receive_message.o \
