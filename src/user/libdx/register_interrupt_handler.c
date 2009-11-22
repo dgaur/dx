@@ -7,8 +7,9 @@
 #include "dx/address_space_environment.h"
 #include "dx/capability.h"
 #include "dx/create_thread.h"
+#include "dx/delete_message.h"
 #include "dx/register_interrupt_handler.h"
-#include "dx/send_message.h"
+#include "dx/send_and_receive_message.h"
 #include "dx/start_thread.h"
 #include "dx/types.h"
 #include "interrupt_handler_loop.h"
@@ -18,7 +19,8 @@
 ///
 /// Convenience routine for creating + registering a interrupt handler (thread)
 /// within a device driver.  Create a new thread for handling interrupts +
-/// launch it within the current address space.  On return, the driver must
+/// launch it within the current address space.  On success, the new thread
+/// is guaranteed to be executing + listening on this IRQ line; driver must
 /// be prepared to start handling (deferred) device interrupts immediately,
 /// even if its own device is not enabled yet.  The handler may later be
 /// removed via unregister_interrupt_handler().
@@ -41,6 +43,7 @@ register_interrupt_handler(	uintptr_t				irq,
 	interrupt_handler_context_s		context;
 	address_space_environment_sp	environment;
 	message_s						message;
+	message_s						reply;
 	uint8_tp						stack		= NULL;
 	uint8_tp						stack_base;
 	size_t							stack_size;
@@ -55,6 +58,7 @@ register_interrupt_handler(	uintptr_t				irq,
 		//
 		//@would be better memory performance (and memory protection) if this
 		//@were a dedicated page @@this memory is not freed on thread exit
+		//@this stack memory must be nonpaged
 		stack_size = 4096;
 		stack = (uint8_tp)malloc(stack_size);
 		if (!stack)
@@ -108,8 +112,12 @@ register_interrupt_handler(	uintptr_t				irq,
 		message.data_size			= sizeof(context);
 		message.destination_address	= NULL;
 
-		status = send_message(&message);
-		if (status != STATUS_SUCCESS)
+		status = send_and_receive_message(&message, &reply);
+		if (status == STATUS_SUCCESS)
+			{
+			delete_message(&reply);
+			}
+		else
 			{
 			thread_id = THREAD_ID_INVALID;
 			//@kill thread?  still running here
@@ -118,7 +126,7 @@ register_interrupt_handler(	uintptr_t				irq,
 
 
 		//
-		// Done
+		// Done.  The handler thread is now active.
 		//
 
 		} while(0);

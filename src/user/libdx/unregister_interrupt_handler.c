@@ -40,9 +40,10 @@ unregister_interrupt_handler(	uintptr_t	interrupt_vector,
 
 
 	//
-	// Tell the handler thread to exit; wait for it to reply so that the
-	// caller can safely reclaim its resources, etc
+	// Tell the handler thread to exit
 	//
+	//@expect/want this to fail, because the handler exited; the handler
+	//@should *not* reply to avoid races on cleanup
 	status = send_and_receive_message(&request, &response);
 	if (status == STATUS_SUCCESS)
 		{ delete_message(&response); }

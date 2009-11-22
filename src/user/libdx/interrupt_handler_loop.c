@@ -23,6 +23,8 @@
 ///
 /// @see defer_interrupt()
 ///
+//@this routine and the hardware-specific handler must both be locked in
+//@memory, not page-able
 void_t
 interrupt_handler_loop()
 	{
@@ -31,6 +33,7 @@ interrupt_handler_loop()
 	void_tp					handler_context		= NULL;
 	uintptr_t				irq					= (uintptr_t)(-1);
 	thread_id_t				parent_thread		= THREAD_ID_INVALID;
+	message_s				reply;
 
 
 	//
@@ -85,7 +88,6 @@ interrupt_handler_loop()
 			case MESSAGE_TYPE_ENABLE_INTERRUPT_HANDLER:
 				// For security purposes, only accept one (the first)
 				// initialization context
-				//@pass context on initial stack and avoid this altogether?
 				if (parent_thread == THREAD_ID_INVALID)
 					{
 					interrupt_handler_context_sp	context;
@@ -104,6 +106,9 @@ interrupt_handler_loop()
 					if (!handler)
 						{ break; }
 
+					// Initialize the response
+					initialize_reply(&message, &reply);
+
 					// Listen on this interrupt line
 					status = map_device(irq,
 										DEVICE_TYPE_INTERRUPT,
@@ -111,6 +116,11 @@ interrupt_handler_loop()
 										0,
 										NULL);
 					//@what to do on error here?  exit?
+					//@this thread now races with its IRQ until receive()
+
+					// Acknowledge the initialization request, so that the
+					// parent thread knows that this thread is active
+					send_message(&reply);
 					}
 
 				break;
@@ -128,6 +138,9 @@ interrupt_handler_loop()
 
 					//@delete_message(&message);
 					//@how to free user stack?
+
+					//@do not reply here to parent; just exit and let the
+					//@resulting abort message wake the parent
 					//@exit() or thread_exit();
 					}
 
