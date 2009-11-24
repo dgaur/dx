@@ -74,5 +74,8 @@ typedef keyboard_context_sp *   keyboard_context_spp;
 #define KEYBOARD_COMMAND_LED_NUM_LOCK		0x02
 #define KEYBOARD_COMMAND_LED_CAPS_LOCK		0x04
 
+#define KEYBOARD_SCAN_CODE_SET_1			0x01	// Untranslated?
+#define KEYBOARD_SCAN_CODE_SET_2			0x02	// Default
+#define KEYBOARD_SCAN_CODE_SET_3			0x03	// PS/2, others
 
 #endif

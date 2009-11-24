@@ -30,6 +30,8 @@ static void_t toggle_leds(const keyboard_context_s* keyboard);
 static char8_t translate_scan_code(	const keyboard_context_s*	keyboard,
 									uint8_t						scan_code);
 
+static void_t wait_for_keyboard_idle();
+
 static void_t wait_for_messages(keyboard_context_sp keyboard);
 
 
@@ -290,8 +292,9 @@ handle_make_code(	keyboard_context_sp	keyboard,
 
 ///
 /// Driver initialization.  Runs once, at load time.  Allocates or initializes
-/// all runtime resources.  All resources allocated here must later be freed
-/// via cleanup().
+/// all runtime resources.  Configures the keyboard hardware for runtime
+/// operations.  All resources allocated here must later be freed via
+/// cleanup().
 ///
 /// @return a pointer to the driver context structure; or NULL on error
 ///
@@ -300,6 +303,8 @@ keyboard_context_sp
 initialize()
 	{
 	keyboard_context_sp		keyboard	= NULL;
+	uint8_t					keyboard_status;
+	uint8_t					scan_code;
 	status_t				status;
 
 
@@ -330,7 +335,24 @@ initialize()
 
 
 		//
-		// Register the interrupt handler
+		// Drain the keyboard buffer to avoid any stale key data on startup.
+		// Do this prior to registering the interrupt handler, to avoid
+		// fighting over the incoming data stream.
+		//
+		keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+		while(keyboard_status & KEYBOARD_STATUS_OUTPUT_BUFFER_READY)
+			{
+			// Consume the next scan code or ack
+			scan_code = io_port_read8(KEYBOARD_OUTPUT_BUFFER);
+
+			// More data in the keyboard buffer?
+			keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+			}
+
+
+		//
+		// Register the interrupt handler.  Do this before any direct hardware
+		// configuration that might trigger an interrupt.
 		//
 		keyboard->interrupt_handler_thread =
 			register_interrupt_handler(	KEYBOARD_INTERRUPT_VECTOR,
@@ -341,6 +363,31 @@ initialize()
 			status = STATUS_RESOURCE_CONFLICT;
 			break;
 			}
+
+
+		//
+		// As a precaution, force the keyboard controller to use scan-code
+		// set 2.  This is usually the default setting, so this is redundant on
+		// most (all?) keyboards.
+		//
+		wait_for_keyboard_idle();
+		io_port_write8(KEYBOARD_INPUT_BUFFER, KEYBOARD_COMMAND_SET_SCAN_CODE);
+
+		wait_for_keyboard_idle();
+		io_port_write8(KEYBOARD_INPUT_BUFFER, KEYBOARD_SCAN_CODE_SET_2);
+
+
+		//
+		// Disable all modifier keys at startup.  Some systems/BIOS'
+		// automatically enable Num Lock, but this can be counterproductive on
+		// keyboards where the numeric keypad is overlaid on top of other keys
+		// (e.g., some laptops, where keyboard space is physically limited).
+		//
+		keyboard->modifier_mask = 0;
+		toggle_leds(keyboard);
+
+
+		//@maybe set repeat rate/delay?
 
 
 		//
@@ -374,11 +421,6 @@ main()
 	keyboard = initialize();
 	if (keyboard)
 		{
-		//@configure_hardware(keyboard);
-		//@identify keyboard type: AT/XT/MF2
-		//@maybe set repeat rate/delay?
-		//@toggle_leds() to setup initial state, but races with IRQ init?
-
 		wait_for_messages(keyboard);
 
 		cleanup(keyboard);
@@ -398,7 +440,9 @@ main()
 ///
 /// Toggle/update the state of the keyboard LED's, based on the current
 /// CAPS LOCK, NUM LOCK and SCROLL LOCK modifiers.  If CAPS LOCK is enabled,
-/// then enable the CAPS LOCK LED; etc.
+/// then enable the CAPS LOCK LED; etc.  This triggers an interrupt (ack) from
+/// the keyboard controller, so the interrupt handler must already be running
+/// here.
 ///
 /// @param keyboard	-- driver context
 ///
@@ -407,7 +451,6 @@ void_t
 toggle_leds(const keyboard_context_s* keyboard)
 	{
 	uint8_t led_mask;
-	uint8_t status;
 
 
 	//
@@ -423,34 +466,23 @@ toggle_leds(const keyboard_context_s* keyboard)
 
 
 	//
-	// Wait for the input buffer to empty, if necessary
-	//
-	do
-		{
-		status = io_port_read8(KEYBOARD_STATUS_REGISTER);
-		} while (status & KEYBOARD_STATUS_INPUT_BUFFER_BUSY);
-
-
-	//
 	// Start the LED update
 	//
+	wait_for_keyboard_idle();
 	io_port_write8(KEYBOARD_INPUT_BUFFER, KEYBOARD_COMMAND_TOGGLE_LED);
-
-
-	//
-	// Wait for the keyboard controller to consume the LED command
-	//
-	do
-		{
-		status = io_port_read8(KEYBOARD_STATUS_REGISTER);
-		} while (status & KEYBOARD_STATUS_INPUT_BUFFER_BUSY);
 
 
 	//
 	// Send the new LED mask
 	//
+	wait_for_keyboard_idle();
 	io_port_write8(KEYBOARD_INPUT_BUFFER, led_mask);
 
+
+	//
+	// Done.  The keyboard controller will raise an interrupt
+	// (an acknowledgement) when it completes this command.
+	//
 
 
 	return;
@@ -487,6 +519,26 @@ translate_scan_code(const keyboard_context_s*	keyboard,
 	char8_t character = scan_code_string[scan_code];
 
 	return(character);
+	}
+
+
+///
+/// Wait for the keyboard controller to empty its input buffer.  This is
+/// required before sending any new commands to the controller.
+///
+static
+void_t
+wait_for_keyboard_idle()
+	{
+	uint8_t status;
+
+	// Spin here until the controller consumes the data in the input buffer
+	do
+		{
+		status = io_port_read8(KEYBOARD_STATUS_REGISTER);
+		} while (status & KEYBOARD_STATUS_INPUT_BUFFER_BUSY);
+
+	return;
 	}
 
 
