@@ -2,6 +2,7 @@
 // shell.c
 //
 
+#include "dx/read_kernel_stats.h"
 #include "dx/status.h"
 #include "dx/types.h"
 #include "dx/version.h"
@@ -14,6 +15,50 @@ static void_t prompt();
 
 
 ///
+/// Dump the kernel stats
+///
+//@this should eventually be a standalone executable, separate from the shell
+static
+void_t
+dump_stats()
+	{
+	kernel_stats_s	kernel_stats;
+	status_t		status;
+
+	status = read_kernel_stats(&kernel_stats);
+	if (status == STATUS_SUCCESS)
+		{
+		printf(	"Messaging:\n"
+				"    total      %u\n"
+				"    incomplete %u\n"
+				"    tx error   %u\n"
+				"    rx error   %u\n",
+				(unsigned)kernel_stats.message_count,	//@32b/64b printf()
+				(unsigned)kernel_stats.incomplete_count,
+				(unsigned)kernel_stats.send_error_count,
+				(unsigned)kernel_stats.receive_error_count);
+
+		printf(	"Lottery:\n"
+				"    total      %u\n"
+				"    idle       %u\n"
+				"    direct     %u\n",
+				(unsigned)kernel_stats.lottery_count,
+				(unsigned)kernel_stats.idle_count,
+				(unsigned)kernel_stats.direct_handoff_count);
+
+		printf("\n");
+		}
+	else
+		{
+		printf("Unable to read kernel stats\n");
+		}
+
+	return;
+	}
+
+
+
+///
 /// Execute a single command
 ///
 static
@@ -22,6 +67,9 @@ execute(const char8_t* command)
 	{
 	if (strcmp(command, "help") == 0)
 		{ printf("No help available\n"); }
+
+	else if (strcmp(command, "stats") == 0)
+		{ dump_stats(); }
 
 	else if (strcmp(command, "version") == 0)
 		{ printf("dx v%s (%s)\n", DX_VERSION, DX_BUILD_TYPE); }
