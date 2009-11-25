@@ -320,16 +320,22 @@ handle_interrupt(interrupt_cr interrupt)
 
 			//
 			// The current thread is unwillingly losing the CPU, so send it
-			// an empty message to ensure it is still a lottery candidate
+			// an empty message to ensure it is still a lottery candidate.
+			// The idle thread does not compete for wakeup, so it does not need
+			// these messages; this also avoids unnecessary lotteries when no
+			// threads are ready to execute
 			//
-			__io_manager->lock.acquire();
-			message = current_thread.maybe_put_null_message();
-			if (message)
+			if (current_thread != *__null_thread)
 				{
-				__io_manager->pending_messages += *message;
-				__io_manager->message_count++;
+				__io_manager->lock.acquire();
+				message = current_thread.maybe_put_null_message();
+				if (message)
+					{
+					__io_manager->pending_messages += *message;
+					__io_manager->message_count++;
+					}
+				__io_manager->lock.release();
 				}
-			__io_manager->lock.release();
 
 
 			//
