@@ -510,7 +510,7 @@ put_message(message_cr message)
 
 ///
 /// Read the messaging + scheduling statistics.  Usually only invoked in the
-/// context of a SYSTEM_CALL_VECTOR_MONITOR_KERNEL syscall.
+/// context of a SYSTEM_CALL_VECTOR_READ_KERNEL_STATS syscall.
 ///
 /// @param kernel_stats -- kernel statistics structure, provided by user thread
 ///

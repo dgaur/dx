@@ -19,6 +19,7 @@ LIBDX_OBJECTS	:=	libdx.o \
 					interrupt_handler_loop.o \
 					map_device.o \
 					message.o \
+					read_kernel_stats.o \
 					receive_message.o \
 					register_interrupt_handler.o \
 					send_and_receive_message.o \

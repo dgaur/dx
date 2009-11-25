@@ -218,7 +218,17 @@ interrupt_handler_fp interrupt_handler[] =
 	NULL,								// 108
 	NULL,								// 109
 	__device_proxy->handle_interrupt,	// MAP_DEVICE
-	__device_proxy->handle_interrupt	// UNMAP_DEVICE
+	__device_proxy->handle_interrupt,	// UNMAP_DEVICE
+	NULL,								// 112
+	NULL,								// 113
+	NULL,								// 114
+	NULL,								// 115
+	NULL,								// 116
+	NULL,								// 117
+	NULL,								// 118
+	NULL,								// 119
+	__monitor->handle_interrupt			// READ_KERNEL_STATS
+
 
 	//
 	// No valid/present IDT entries beyond here

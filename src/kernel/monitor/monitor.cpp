@@ -18,8 +18,15 @@ kernel_monitor_cp	__monitor = NULL;
 
 
 ///
-/// System-call handler.  Retrieve the various kernel stats + parameters,
-/// return them back to the user space caller.
+/// System-call handler for SYSTEM_CALL_VECTOR_READ_KERNEL_STATS.  Retrieve
+/// the various kernel stats + parameters, return them back to the user space
+/// caller.
+///
+/// System call input:
+///		syscall->data0 = pointer to kernel_stats structure
+///
+/// System call output:
+///		syscall->status	= status of stats request
 ///
 /// @param interrupt -- interrupt (system call) descriptor
 ///
@@ -30,7 +37,7 @@ handle_interrupt(interrupt_cr interrupt)
 	status_t					status;
 	volatile syscall_data_s*	syscall;
 
-	ASSERT(interrupt.vector == SYSTEM_CALL_VECTOR_MONITOR_KERNEL);
+	ASSERT(interrupt.vector == SYSTEM_CALL_VECTOR_READ_KERNEL_STATS);
 
 	do
 		{
@@ -38,7 +45,7 @@ handle_interrupt(interrupt_cr interrupt)
 		// Validate the system call invocation
 		//
 		syscall = interrupt.validate_syscall();
-		TRACE(SYSCALL, "System call: monitor kernel, %p\n", syscall);
+		TRACE(SYSCALL, "System call: read kernel stats, %p\n", syscall);
 		if (!syscall)
 			{
 			status = STATUS_INVALID_DATA;

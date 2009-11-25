@@ -22,7 +22,7 @@
 #define SYSTEM_CALL_VECTOR_MAP_DEVICE				110
 #define SYSTEM_CALL_VECTOR_UNMAP_DEVICE				111
 
-#define SYSTEM_CALL_VECTOR_MONITOR_KERNEL			120
+#define SYSTEM_CALL_VECTOR_READ_KERNEL_STATS		120
 
 //@shutdown/reboot?
 //@manipulate security token?

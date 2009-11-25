@@ -12,7 +12,7 @@
 
 
 ///
-/// Kernel statistics reported via SYSTEM_CALL_VECTOR_MONITOR_KERNEL
+/// Kernel statistics reported via SYSTEM_CALL_VECTOR_READ_KERNEL_STATS
 ///
 typedef struct kernel_stats
 	{
