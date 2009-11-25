@@ -13,6 +13,7 @@
 #include "hal/x86_hal.hpp"
 #include "io_manager.hpp"
 #include "memory_manager.hpp"
+#include "monitor.hpp"
 #include "thread_manager.hpp"
 
 
@@ -32,6 +33,9 @@ io_manager_cp							__io_manager;
 
 extern
 memory_manager_cp						__memory_manager;
+
+extern
+kernel_monitor_cp						__monitor;
 
 extern
 thread_manager_cp						__thread_manager;

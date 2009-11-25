@@ -508,6 +508,29 @@ put_message(message_cr message)
 	}
 
 
+///
+/// Read the messaging + scheduling statistics.  Usually only invoked in the
+/// context of a SYSTEM_CALL_VECTOR_MONITOR_KERNEL syscall.
+///
+/// @param kernel_stats -- kernel statistics structure, provided by user thread
+///
+void_t io_manager_c::
+read_stats(volatile kernel_stats_s& kernel_stats)
+	{
+	// Messaging stats
+	kernel_stats.message_count			= message_count;
+	kernel_stats.incomplete_count		= incomplete_count;
+	kernel_stats.receive_error_count	= receive_error_count;
+	kernel_stats.send_error_count		= send_error_count;
+
+	// Lottery/scheduling stats
+	kernel_stats.lottery_count			= lottery_count;
+	kernel_stats.idle_count				= idle_count;
+	kernel_stats.direct_handoff_count	= direct_handoff_count;
+
+	return;
+	}
+
 
 ///
 /// Retrieves the next message, if any, pending for the current thread.

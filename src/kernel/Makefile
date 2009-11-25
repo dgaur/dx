@@ -22,6 +22,7 @@ KERNEL_SUBDIRS	:= boot \
 				   io_manager \
 				   libk \
 				   memory_manager \
+				   monitor \
 				   thread_manager
 
 

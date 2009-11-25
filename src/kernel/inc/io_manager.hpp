@@ -9,6 +9,7 @@
 
 
 #include "debug.hpp"
+#include "dx/kernel_stats.h"
 #include "dx/status.h"
 #include "dx/system_call.h"
 #include "dx/types.h"
@@ -88,6 +89,9 @@ class   io_manager_c
 		static
 		void_t
 			handle_interrupt(interrupt_cr interrupt);
+
+		void_t
+			read_stats(volatile kernel_stats_s& kernel_stats);
 
 
 		//
