@@ -73,15 +73,16 @@ class hash_table_m
 
 
 	private:
+		uint32_t			element_count;
 		node_list_cp		slot;
 		const uint32_t		slot_count;
 		const uint32_t		slot_count_shift;
 
 
-		//
-		// Locate the node, if any, with the specified key.  This
-		// is the basic lookup method.
-		//
+		///
+		/// Locate the node, if any, with the specified key.  This
+		/// is the basic lookup method.
+		///
 		hash_node_sp
 		find_node(const KEYTYPE& key)
 			{
@@ -105,15 +106,15 @@ class hash_table_m
 			}
 
 
-		//
-		// Locate the appropriate hash slot/bucket for this key.
-		// This is the basic hashing function.
-		//
-		// The key-type must support a uint32_t() coercion operator to provide
-		// the basis for the hash (i.e., similar to the Java's hash_code and
-		// Python's __hash__ method).  If two keys are equal, the coercion
-		// operator must return the same hash code.
-		//
+		///
+		/// Locate the appropriate hash slot/bucket for this key.
+		/// This is the basic hashing function.
+		///
+		/// The key-type must support a uint32_t() coercion operator to provide
+		/// the basis for the hash (i.e., similar to the Java's hash_code and
+		/// Python's __hash__ method).  If two keys are equal, the coercion
+		/// operator must return the same hash code.
+		///
 		node_list_cr
 		find_slot(const KEYTYPE& key)
 			{
@@ -138,6 +139,7 @@ class hash_table_m
 			// Force the number of hash slots/buckets to be a power-of-two,
 			// to simplify the hash computation.  Then precompute the shift
 			// distance needed by the hash function
+			element_count(0),
 			slot_count( round_up_2n(initial_slot_count) ),
 			slot_count_shift( 32 - find_one_bit32(slot_count) )
 			{
@@ -157,9 +159,9 @@ class hash_table_m
 			}
 
 
-		//
-		// Add a key/data pair to the hash table.  Performance is O(1).
-		//
+		///
+		/// Add a key/data pair to the hash table.  Performance is O(1).
+		///
 		void_t	//@bool?
 		add(const KEYTYPE&	key,
 			DATATYPE&		data)
@@ -176,18 +178,20 @@ class hash_table_m
 				node->data	= &data;	// Pointer copy
 
 				hash_slot += *node;
+
+				element_count++;
 				}
 
 			return;
 			}
 
 
-		//
-		// Fetch an item in the table, based on its key.  Returns NULL if
-		// no item exists with this key.  Performance is typically O(1) when
-		// population is less than slot count; but degrades to O(N) for large
-		// populations
-		//
+		///
+		/// Fetch an item in the table, based on its key.  Returns NULL if
+		/// no item exists with this key.  Performance is typically O(1) when
+		/// population is less than slot count; but degrades to O(N) for large
+		/// populations
+		///
 		inline
 		DATATYPE*
 		find(const KEYTYPE& key)
@@ -198,11 +202,11 @@ class hash_table_m
 			}
 
 
-		//
-		// Determine if a key is valid/present.  Performance is typically O(1)
-		// when population is less than slot count; but degrades to O(N)
-		// for large populations
-		//
+		///
+		/// Determine if a key is valid/present.  Performance is typically O(1)
+		/// when population is less than slot count; but degrades to O(N)
+		/// for large populations
+		///
 		bool_t
 		is_valid(const KEYTYPE& key)
 			{
@@ -212,12 +216,12 @@ class hash_table_m
 			}
 
 
-		//
-		// Remove some random element from the hash table.  There is no implied
-		// or guaranteed order here among the keys.  This is basically
-		// meant as a weak, destructive iteration over the elements of the
-		// table.
-		//
+		///
+		/// Remove some random element from the hash table.  There is no
+		/// implied or guaranteed order here among the keys.  This is basically
+		/// meant as a weak, destructive iteration over the elements of the
+		/// table.
+		///
 		DATATYPE*
 		pop()
 			{
@@ -239,6 +243,8 @@ class hash_table_m
 					hash_slot -= node;
 					delete(&node);
 
+					element_count--;
+
 					break;
 					}
 				}
@@ -247,11 +253,21 @@ class hash_table_m
 			}
 
 
-		//
-		// Remove a key/data pair from the hash table.  Performance is
-		// typically O(1) when population is less than slot count; but
-		// degrades to O(N) for large populations
-		//
+		///
+		/// Retrieve the total number of elements in the hash table.  No side
+		/// effects
+		///
+		inline
+		uint32_t
+		read_count() const
+			{ return(element_count); }
+
+			
+		///
+		/// Remove a key/data pair from the hash table.  Performance is
+		/// typically O(1) when population is less than slot count; but
+		/// degrades to O(N) for large populations
+		///
 		DATATYPE&
 		remove(const KEYTYPE& key)
 			{
@@ -273,30 +289,34 @@ class hash_table_m
 			hash_slot -= *node;
 			delete(node);
 
+			element_count--;
+
 			return(data);
 			}
 
 
-		//
-		// Remove all of the items in the table.  On return, the table
-		// is empty.  Performance is O(N).
-		//
+		///
+		/// Remove all of the items in the table.  On return, the table
+		/// is empty.  Performance is O(N).
+		///
 		void_t
 		reset()
 			{
 			for (uint32_t i = 0; i < slot_count; i++)
 				{ slot[i].reset(); }
 
+			element_count = 0;
+
 			return;
 			}
 
 
-		//
-		// Fetch an item in the table, based on its key.  Panics if no item
-		// exists with this key.  Performance is typically O(1) when
-		// population is less than slot count; but degrades to O(N) for large
-		// populations
-		//
+		///
+		/// Fetch an item in the table, based on its key.  Panics if no item
+		/// exists with this key.  Performance is typically O(1) when
+		/// population is less than slot count; but degrades to O(N) for large
+		/// populations
+		///
 		DATATYPE&
 		operator[] (const KEYTYPE& key)
 			{

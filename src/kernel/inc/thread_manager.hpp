@@ -10,6 +10,7 @@
 
 #include "address_space.hpp"
 #include "dx/capability.h"
+#include "dx/kernel_stats.h"
 #include "dx/system_call.h"
 #include "dx/thread_id.h"
 #include "dx/types.h"
@@ -75,6 +76,11 @@ class   thread_manager_c
 		static
 		void_t
 			handle_interrupt(interrupt_cr interrupt);
+
+		void_t
+			read_stats(volatile kernel_stats_s& kernel_stats)
+				{ kernel_stats.thread_count = thread_table.read_count(); }
+
 
 
 		//

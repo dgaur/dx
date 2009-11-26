@@ -32,21 +32,25 @@ dump_stats()
 				"    total      %u\n"
 				"    incomplete %u\n"
 				"    tx error   %u\n"
-				"    rx error   %u\n",
+				"    rx error   %u\n\n",
 				(unsigned)kernel_stats.message_count,	//@32b/64b printf()
 				(unsigned)kernel_stats.incomplete_count,
 				(unsigned)kernel_stats.send_error_count,
 				(unsigned)kernel_stats.receive_error_count);
 
-		printf(	"Lottery:\n"
-				"    total      %u\n"
+		printf(	"Scheduling:\n"
+				"    lottery    %u\n"
 				"    idle       %u\n"
-				"    direct     %u\n",
+				"    direct     %u\n\n",
 				(unsigned)kernel_stats.lottery_count,
 				(unsigned)kernel_stats.idle_count,
 				(unsigned)kernel_stats.direct_handoff_count);
 
-		printf("\n");
+
+		printf(	"Threads:\n"
+				"    total      %u\n\n",
+				(unsigned)kernel_stats.thread_count);
+
 		}
 	else
 		{
