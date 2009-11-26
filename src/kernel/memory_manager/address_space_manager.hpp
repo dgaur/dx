@@ -8,6 +8,7 @@
 
 #include "address_space.hpp"
 #include "dx/address_space_id.h"
+#include "dx/kernel_stats.h"
 #include "dx/types.h"
 #include "hal/spinlock.hpp"
 #include "hash_table.hpp"
@@ -61,8 +62,19 @@ class   address_space_manager_c
 		~address_space_manager_c()
 			{ return; }
 
+		void_t
+			read_stats(volatile kernel_stats_s& kernel_stats)
+				{
+				kernel_stats.address_space_count =
+					address_space_table.read_count();
+				return;
+				}
 
 
+
+		//
+		// Basic address space management
+		//
 		address_space_cp
 			create_address_space(address_space_id_t id =
 				ADDRESS_SPACE_ID_AUTO_ALLOCATE);

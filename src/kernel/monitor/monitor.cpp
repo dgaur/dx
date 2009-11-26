@@ -71,8 +71,8 @@ handle_interrupt(interrupt_cr interrupt)
 		// Read any stats/data from the various subsystems
 		//
 		__io_manager->read_stats(*kernel_stats);
+		__memory_manager->read_stats(*kernel_stats);
 		__thread_manager->read_stats(*kernel_stats);
-		//@__memory_manager->read_stats(*kernel_stats);
 
 
 		//

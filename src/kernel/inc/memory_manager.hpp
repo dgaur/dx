@@ -9,9 +9,11 @@
 
 #include "address_space.hpp"
 #include "dx/hal/memory.h"
+#include "dx/kernel_stats.h"
 #include "dx/system_call.h"
 #include "dx/types.h"
 #include "hal/address_space_layout.h"
+#include "hal/atomic_int32.hpp"
 
 
 
@@ -22,6 +24,10 @@ typedef memory_manager_c &    memory_manager_cr;
 class   memory_manager_c
 	{
 	private:
+		atomic_int32_c		cow_fault_count;
+		atomic_int32_c		page_fault_count;
+
+
 		void_t
 			syscall_create_address_space(volatile syscall_data_s* syscall);
 		void_t
@@ -40,6 +46,9 @@ class   memory_manager_c
 		bool_t
 			is_user_address(const void_tp address)
 				{ return(address >= void_tp(PAYLOAD_AREA_BASE)); }
+
+		void_t
+			read_stats(volatile kernel_stats_s& kernel_stats);
 
 
 

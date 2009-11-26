@@ -26,8 +26,6 @@ memory_manager_cp	__memory_manager = NULL;
 // of the Memory Manager itself
 //
 static address_space_manager_cp		address_space_manager;
-//@device memory mgr -- PCI, VGA, etc?
-
 
 
 
@@ -36,7 +34,9 @@ static address_space_manager_cp		address_space_manager;
 /// Allocate an initial address space + use it to enable paging.
 ///
 memory_manager_c::
-memory_manager_c()
+memory_manager_c():
+	cow_fault_count(0),
+	page_fault_count(0)
 	{
 	TRACE(ALL, "Initializing Memory Manager ...\n");
 
@@ -44,7 +44,6 @@ memory_manager_c()
 	//
 	// Initialize the sub-allocators
 	//
-	//@device mem mgr?
 	address_space_manager	= new address_space_manager_c();
 	__page_frame_manager	= new page_frame_manager_c();
 	if (!address_space_manager || !__page_frame_manager)
@@ -171,6 +170,8 @@ handle_interrupt(interrupt_cr interrupt)
 				faulting_address, interrupt.data,
 				&thread, thread.id);
 
+			__memory_manager->page_fault_count++;
+
 			// The kernel handles copy-on-write faults directly
 			success = thread.address_space.copy_on_write(faulting_address);
 			if (success)
@@ -178,7 +179,7 @@ handle_interrupt(interrupt_cr interrupt)
 				// Fixed up the current address space after a copy-on-write
 				// fault, so let the thread continue normally (and retry
 				// the memory write that triggered this fault)
-				//@statistic here
+				__memory_manager->cow_fault_count++;
 				}
 			else
 				{
@@ -246,6 +247,25 @@ handle_interrupt(interrupt_cr interrupt)
 			break;
 		}
 
+
+	return;
+	}
+
+
+///
+/// Read the memory management statistics.  Usually only invoked in the
+/// context of a SYSTEM_CALL_VECTOR_READ_KERNEL_STATS syscall.
+///
+/// @param kernel_stats -- kernel statistics structure, provided by user thread
+///
+void_t memory_manager_c::
+read_stats(volatile kernel_stats_s& kernel_stats)
+	{
+	ASSERT(address_space_manager);
+	address_space_manager->read_stats(kernel_stats);
+
+	kernel_stats.cow_fault_count	= cow_fault_count;
+	kernel_stats.page_fault_count	= page_fault_count;
 
 	return;
 	}

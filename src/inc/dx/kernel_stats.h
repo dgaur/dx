@@ -18,10 +18,6 @@ typedef struct kernel_stats
 	{
 	//@size/version?
 
-	// Hardware profile/stats
-	uint64_t	memory_size;
-	uint32_t	cpu_count;
-
 	// Message stats
 	uint64_t	message_count;
 	uint32_t	incomplete_count;
@@ -38,6 +34,8 @@ typedef struct kernel_stats
 
 	// Memory stats
 	uint32_t	address_space_count;
+	uint32_t	cow_fault_count;
+	uint32_t	page_fault_count;
 
 	} kernel_stats_s;
 
