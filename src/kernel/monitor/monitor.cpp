@@ -64,6 +64,18 @@ handle_interrupt(interrupt_cr interrupt)
 			}
 
 
+
+		//
+		// Caller must provide a valid buffer; avoid corrupting kernel memory
+		// here
+		//
+		if (!__memory_manager->is_user_address(void_tp(kernel_stats)))
+			{
+			status = STATUS_ACCESS_DENIED;
+			break;
+			}
+
+
 		//@validate kernel_stats->size/version?
 
 
