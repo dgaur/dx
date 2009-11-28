@@ -55,10 +55,23 @@ class   message_pool_c
 		~message_pool_c()
 			{ return; }
 
+
+		///
+		/// Is the message pool currently empty?
+		///
 		inline
 		bool_t
 			is_empty() const
 				{ return(count == 0); }
+
+
+		///
+		/// Read the number of messages currently pending in the pool
+		///
+		inline
+		uint32_t
+			read_count() const
+				{ return(count); }
 
 
 		///

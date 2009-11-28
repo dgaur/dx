@@ -38,10 +38,12 @@ dump_stats()
 
 		printf(	"Messaging:\n"
 				"    total          %u\n"
+				"    pending        %u\n"
 				"    incomplete     %u\n"
 				"    tx error       %u\n"
 				"    rx error       %u\n\n",
 				(unsigned)kernel_stats.message_count,	//@32b/64b printf()
+				(unsigned)kernel_stats.pending_count,
 				(unsigned)kernel_stats.incomplete_count,
 				(unsigned)kernel_stats.send_error_count,
 				(unsigned)kernel_stats.receive_error_count);

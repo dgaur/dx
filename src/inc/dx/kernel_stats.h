@@ -20,6 +20,7 @@ typedef struct kernel_stats
 
 	// Message stats
 	uint64_t	message_count;
+	uint32_t	pending_count;
 	uint32_t	incomplete_count;
 	uint32_t	receive_error_count;
 	uint32_t	send_error_count;
