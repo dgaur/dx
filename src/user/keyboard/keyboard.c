@@ -18,6 +18,7 @@
 #include "dx/unregister_interrupt_handler.h"
 #include "keyboard_context.h"
 #include "keyboard_scan_code.h"
+#include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 
