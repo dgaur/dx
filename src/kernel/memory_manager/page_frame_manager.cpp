@@ -25,9 +25,6 @@ page_frame_manager_cp		__page_frame_manager = NULL;
 page_frame_manager_c::
 page_frame_manager_c()
 	{
-	uint32_t	paged_memory_size;
-	uint32_t	paged_region_count;
-
 	//
 	// Determine the amount of memory available for paging + the number of
 	// physical regions it can accommodate
@@ -339,6 +336,24 @@ free_frames(const physical_address_t*	frame,
 			lock.release();
 			}
 		}
+
+	return;
+	}
+
+
+
+///
+/// Read the memory management statistics.  Usually only invoked in the
+/// context of a SYSTEM_CALL_VECTOR_READ_KERNEL_STATS syscall.
+///
+/// @param kernel_stats -- kernel statistics structure, provided by user thread
+///
+void_t page_frame_manager_c::
+read_stats(volatile kernel_stats_s& kernel_stats)
+	{
+	kernel_stats.total_memory_size	= total_memory_size;
+	kernel_stats.paged_memory_size	= paged_memory_size;
+	kernel_stats.paged_region_count	= paged_region_count;
 
 	return;
 	}

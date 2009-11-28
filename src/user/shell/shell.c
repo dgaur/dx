@@ -29,9 +29,15 @@ dump_stats()
 	if (status == STATUS_SUCCESS)
 		{
 		printf(	"Memory:\n"
+				"    total physical %u (MB)\n"
+				"    paged physical %u (MB)\n"
+				"    paged regions  %u\n"
 				"    address spaces %u\n"
 				"    COW faults     %u\n"
 				"    page faults    %u\n\n",
+				(unsigned)kernel_stats.total_memory_size/(1024*1024),
+				(unsigned)kernel_stats.paged_memory_size/(1024*1024),
+				(unsigned)kernel_stats.paged_region_count,
 				(unsigned)kernel_stats.address_space_count,
 				(unsigned)kernel_stats.cow_fault_count,
 				(unsigned)kernel_stats.page_fault_count);

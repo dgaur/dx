@@ -261,9 +261,15 @@ handle_interrupt(interrupt_cr interrupt)
 void_t memory_manager_c::
 read_stats(volatile kernel_stats_s& kernel_stats)
 	{
+	// Address space stats
 	ASSERT(address_space_manager);
 	address_space_manager->read_stats(kernel_stats);
 
+	// Physical memory stats
+	ASSERT(__page_frame_manager);
+	__page_frame_manager->read_stats(kernel_stats);
+
+	// Misc memory stats
 	kernel_stats.cow_fault_count	= cow_fault_count;
 	kernel_stats.page_fault_count	= page_fault_count;
 

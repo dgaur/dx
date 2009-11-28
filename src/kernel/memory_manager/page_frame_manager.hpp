@@ -8,6 +8,7 @@
 #define _PAGE_FRAME_MANAGER_HPP
 
 #include "bitmap.hpp"
+#include "dx/kernel_stats.h"
 #include "dx/status.h"
 #include "dx/types.h"
 #include "dx/hal/physical_address.h"
@@ -37,6 +38,8 @@ class   page_frame_manager_c
 	{
 	private:
 		spinlock_c				lock;	//@access from IRQ path?
+		uint32_t				paged_memory_size;
+		uint32_t				paged_region_count;
 		page_frame_region_cp	region[ REGION_COUNT_MAX ];
 		bitmap1024_c			region_map;
 		uint32_t				total_memory_size;
@@ -73,6 +76,9 @@ class   page_frame_manager_c
 		void_t
 			free_frames(const physical_address_t*	frame,
 						uint32_t					frame_count);
+
+		void_t
+			read_stats(volatile kernel_stats_s& kernel_stats);
 	};
 
 

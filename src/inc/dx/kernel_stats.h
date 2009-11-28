@@ -18,6 +18,14 @@ typedef struct kernel_stats
 	{
 	//@size/version?
 
+	// Memory stats
+	uint32_t	address_space_count;
+	uint32_t	cow_fault_count;
+	uint32_t	page_fault_count;
+	uint32_t	total_memory_size;		// Physical memory, in bytes
+	uint32_t	paged_memory_size;		// Paged physical memory, in bytes
+	uint32_t	paged_region_count;
+
 	// Message stats
 	uint64_t	message_count;
 	uint32_t	pending_count;
@@ -32,11 +40,6 @@ typedef struct kernel_stats
 
 	// Thread stats
 	uint32_t	thread_count;
-
-	// Memory stats
-	uint32_t	address_space_count;
-	uint32_t	cow_fault_count;
-	uint32_t	page_fault_count;
 
 	} kernel_stats_s;
 
