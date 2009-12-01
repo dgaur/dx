@@ -10,6 +10,7 @@
 #include "string.h"
 
 
+static void_t help();
 static void_t prompt();
 
 
@@ -84,7 +85,7 @@ void_t
 execute(const char8_t* command)
 	{
 	if (strcmp(command, "help") == 0)
-		{ printf("No help available\n"); }
+		{ help(); }
 
 	else if (strcmp(command, "stats") == 0)
 		{ dump_stats(); }
@@ -95,6 +96,21 @@ execute(const char8_t* command)
 	else if (strlen(command))
 		{ printf("Unknown command: '%s'\n", command); }
 
+	return;
+	}
+
+
+///
+/// Display a brief help message
+///
+static
+void_t
+help()
+	{
+	printf(	"help    -- show this help message\n"
+			"stats   -- show kernel statistics\n"
+			"version -- show the current system version\n"
+			"\n");
 	return;
 	}
 
@@ -127,6 +143,9 @@ main()
 	}
 
 
+///
+/// Display the console prompt
+///
 static
 void_t
 prompt()
