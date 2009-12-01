@@ -1,6 +1,9 @@
 //
 // vga.c
 //
+// Simple VGA/display driver.  Text mode only.
+//
+
 
 #include "dx/delete_message.h"
 #include "dx/hal/io_port.h"
@@ -23,10 +26,16 @@ static void_t wait_for_messages(vga_context_sp vga);
 
 
 ///
+/// Amount of VGA memory owned by the kernel driver
+///
+#define VGA_TEXT_KERNEL_SIZE	PAGE_SIZE
+
+
+///
 /// The user driver controls the second (and all subsequent) VGA pages
 ///
-#define		VGA_TEXT_USER_PAGE	((uint8_tp)(VGA_TEXT_BASE_ADDRESS + PAGE_SIZE))
-
+#define VGA_TEXT_USER_PAGE \
+	((uint8_tp)(VGA_TEXT_BASE_ADDRESS + VGA_TEXT_KERNEL_SIZE))
 
 
 ///
@@ -321,7 +330,7 @@ vga_enable_cursor(vga_context_s* vga)
 		{
 		uint8_t bits;
 
-		// Reposition the cursor before enabling it, so that it immediately
+		// Reposition the cursor before displaying it, so that it immediately
 		// appears in the correct location
 		vga->cursor_enabled = TRUE;
 		vga_move_cursor(vga);
@@ -355,8 +364,8 @@ vga_move_cursor(const vga_context_s* vga)
 		// Offset from the base of the frame buffer to the location of the
 		// cursor, in words (two bit planes)
 		uintptr_t offset =
-			 (uintptr_t)((vga->current_offset) - VGA_TEXT_BASE_ADDRESS) /
-				VGA_TEXT_BYTES_PER_CHARACTER;
+			 (uintptr_t)(vga->current_offset - vga->memory) +
+				(VGA_TEXT_KERNEL_SIZE / VGA_TEXT_BYTES_PER_CHARACTER);
 
 		// The upper 8 bits ...
 		uint8_t high8 = (uint8_t)(offset >> 8);
@@ -370,7 +379,7 @@ vga_move_cursor(const vga_context_s* vga)
 			VGA_CRTC_CURSOR_LOCATION_LOW_REGISTER);
 		io_port_write8(VGA_CRTC_DATA_PORT_ADDRESS, low8);
 		}
-	
+
 	return;
 	}
 
