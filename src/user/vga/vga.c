@@ -202,6 +202,8 @@ initialize()
 								VGA_TEXT_SECOND_LINE_OFFSET);
 		vga->last_line		= ((uint8_tp)(vga->memory) +
 								VGA_TEXT_LAST_LINE_OFFSET);
+		vga->overflow_line	= ((uint8_tp)(vga->memory) +
+								VGA_TEXT_OVERFLOW_LINE_OFFSET);
 
 
 		//
@@ -432,6 +434,14 @@ vga_write(	vga_context_sp	vga,
 
 			// Advance to the next word in the console
 			vga->current_offset++;
+
+			// Automatically wrap the line, if it exceeds the width of the
+			// console
+			if (vga->current_offset >= (uint16_tp)vga->overflow_line)
+				{
+				vga_scroll_up(vga);
+				vga->current_offset = (uint16_tp)(vga->last_line);
+				}
 			}
 		else
 			{

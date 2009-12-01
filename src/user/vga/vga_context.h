@@ -1,6 +1,8 @@
 //
 // vga_context.h
 //
+// Run-time context for the VGA/display driver
+//
 
 #ifndef _VGA_CONTEXT_H
 #define _VGA_CONTEXT_H
@@ -31,6 +33,7 @@ typedef struct vga_context
 	uint8_tp	first_line;
 	uint8_tp	second_line;
 	uint8_tp	last_line;
+	uint8_tp	overflow_line;
 
 	} vga_context_s;
 
