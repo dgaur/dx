@@ -4,6 +4,12 @@
 
 
 * PENDING-RELEASE:
+	Feature/functionality release.  Improved infrastructure for drivers running
+	in user space.  Keyboard driver is much improved, now supports SHIFT, CAPS
+	LOCK, etc.  Added some basic kernel statistics for monitoring/debugging.
+	Minor fixes to the VGA driver.  Some small performance improvements.
+	Other small fixes.
+
 
 * Version 0.0.3, released 2009-11-04:
 	Maintenance and bug-fix release.  Various bug fixes, code cleanup and
