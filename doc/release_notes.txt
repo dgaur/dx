@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.4, released 2009-12-06:
 	Feature/functionality release.  Improved infrastructure for drivers running
 	in user space.  Keyboard driver is much improved, now supports SHIFT, CAPS
 	LOCK, etc.  Added some basic kernel statistics for monitoring/debugging.
