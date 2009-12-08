@@ -11,6 +11,10 @@
 #include "type_tests.hpp"
 
 
+
+///
+/// Entry point to all of the kernel unit-tests
+///
 uint32_t kernel_test_c::
 run_tests()
 	{

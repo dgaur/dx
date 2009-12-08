@@ -8,6 +8,10 @@
 #include "drivers/i8254pit.hpp"
 
 
+///
+/// Constructor.  Initialize the PIT.  On return, the PIT is active and
+/// counting.
+///
 i8254_programmable_interval_timer_c::
 i8254_programmable_interval_timer_c()
 	{

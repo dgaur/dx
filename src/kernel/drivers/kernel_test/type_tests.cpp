@@ -48,6 +48,8 @@ run_atomic_tests()
 ///
 /// Exercises the bitmap_c classes
 ///
+/// @param bitmap -- the bitmap being tested
+///
 static
 void_t
 run_bitmap_tests(bitmap_cr bitmap)

@@ -87,6 +87,8 @@ i8259_programmable_interrupt_controller_c():
 /// Acknowledge an interrupt.  Send the EOI to the master or slave PIC as
 /// appropriate
 ///
+/// @param interrupt -- the interrupt to be acknowledged
+///
 void_t i8259_programmable_interrupt_controller_c::
 acknowledge_interrupt(interrupt_cr interrupt)
 	{
@@ -120,6 +122,8 @@ acknowledge_interrupt(interrupt_cr interrupt)
 ///
 /// Mask a specific IRQ on the current/local CPU.  Configure the IMR on the
 /// master or slave PIC as appropriate
+///
+/// @param irq -- the IRQ line to be masked
 ///
 void_t i8259_programmable_interrupt_controller_c::
 mask_interrupt(uint8_t irq)
@@ -156,6 +160,8 @@ mask_interrupt(uint8_t irq)
 /// prepared to handle this IRQ, since this IRQ could already be pending in
 /// the PIC; in this case, the current CPU might take this interrupt before
 /// this method even returns.
+///
+/// @param irq -- the IRQ line to be unmasked
 ///
 void_t i8259_programmable_interrupt_controller_c::
 unmask_interrupt(uint8_t irq)

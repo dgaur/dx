@@ -17,10 +17,10 @@
 
 
 
-//
-// Create a message with a "large payload" and attempt to mirror it at a
-// second address
-//
+///
+/// Create a message with a "large payload" and attempt to mirror it at a
+/// second address
+///
 static
 void_t
 run_large_payload_tests()
@@ -75,9 +75,9 @@ run_large_payload_tests()
 	}
 
 
-//
-// Create a message with a "medium" payload and copy it to a second address
-//
+///
+/// Create a message with a "medium" payload and copy it to a second address
+///
 static
 void_t
 run_medium_payload_tests()
@@ -111,12 +111,10 @@ run_medium_payload_tests()
 	}
 
 
-//
-// run_message_deadlock_tests()
-//
-// Attempt to create a scheduling deadlock by sending a blocking message
-// to the current thread.
-//
+///
+/// Attempt to create a scheduling deadlock by sending a blocking message
+/// to the current thread.
+///
 static
 void_t
 run_message_deadlock_tests()
@@ -143,12 +141,10 @@ run_message_deadlock_tests()
 	}
 
 
-//
-// run_null_message_tests()
-//
-// Send a couple of null/empty messages.  Exercises basic mailbox management
-// and the I/O Manager (non-blocking) message-passing methods.
-//
+///
+/// Send a couple of null/empty messages.  Exercises basic mailbox management
+/// and the I/O Manager (non-blocking) message-passing methods.
+///
 static
 void_t
 run_null_message_tests()
@@ -182,11 +178,9 @@ run_null_message_tests()
 	}
 
 
-//
-// run_message_tests()
-//
-// Entry point into this file.  Runs the various message-passing tests
-//
+///
+/// Entry point into this file.  Runs the various message-passing tests
+///
 void_t
 run_message_tests()
 	{
