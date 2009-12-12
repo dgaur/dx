@@ -5,6 +5,7 @@
 #ifndef _TIME_H
 #define _TIME_H
 
+#include "restrict.h"
 #include "stddef.h"		// Pick up size_t, NULL
 
 
@@ -13,7 +14,11 @@ extern "C" {
 #endif
 
 
+#define cLOCKS_PER_SEC ((clock_t)@)
+
 typedef unsigned int clock_t;	//@
+
+typedef unsigned int time_t;	//@
 
 
 struct tm
@@ -57,10 +62,10 @@ struct tm *gmtime(const time_t *timer);
 
 struct tm *localtime(const time_t *timer);
 
-size_t strftime(char * restrict s,
+size_t strftime(char * RESTRICT s,
 	size_t maxsize,
-	const char * restrict format,
-	const struct tm * restrict timeptr);
+	const char * RESTRICT format,
+	const struct tm * RESTRICT timeptr);
 
 
 

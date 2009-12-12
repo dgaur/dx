@@ -62,7 +62,8 @@ string.h		-- All routines defined, but not all implemented.  Includes
 
 tgmath.h		-- Not provided.
 
-time.h			-- Not provided.
+time.h			-- Defines time_t, clock_t, struct tm.  All routines defined,
+					but none implemented.
 
 wchar.h			-- Not provided.
 
