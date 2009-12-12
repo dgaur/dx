@@ -18,7 +18,7 @@ assert.h		-- Provides partial/incomplete definition of assert().
 
 complex.h		-- Not provided.
 
-ctype.h			-- Not provided.
+ctype.h			-- All routines implemented.
 
 errno.h			-- Defines errno, EDOM, EILSEQ and ERANGE.  Also defines the
 					standard POSIX error codes as well.

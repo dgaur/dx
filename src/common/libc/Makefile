@@ -11,6 +11,7 @@ include ../Makefile.common
 LIBC_OBJECTS	:=	libc.o \
 					abort.o \
 					atoi.o \
+					ctype.o \
 					errno.o \
 					exit.o \
 					_Exit.o \
