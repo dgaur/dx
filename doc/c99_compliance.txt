@@ -46,7 +46,7 @@ stdarg.h		-- Defines all va_* macros, but relies on GCC implementation
 
 stdbool.h		-- Defines bool, _Bool, true and false.
 
-stddef.h		-- Defines only size_t and NULL.
+stddef.h		-- Defines only ptrdiff_t, size_t and NULL.
 
 stdint.h		-- intN_t, uintN_t, intptr_t and uintptr_t types defined.
 
