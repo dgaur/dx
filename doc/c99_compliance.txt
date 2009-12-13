@@ -37,7 +37,7 @@ locale.h		-- Not provided.
 
 math.h			-- Not provided.
 
-setjmp.h		-- Not provided.
+setjmp.h		-- All routines implemented.
 
 signal.h		-- Not provided.
 

@@ -18,6 +18,8 @@ LIBC_OBJECTS	:=	libc.o \
 					fprintf.o \
 					getchar.o \
 					gets.o \
+					hal/longjmp.o \
+					hal/setjmp.o \
 					itoa.o \
 					malloc.o \
 					memcmp.o \
