@@ -12,59 +12,67 @@ etc).
 The C99 NDEBUG macro is automatically defined in the retail build; not defined
 in the debug build.
 
+Decoder:
+	COMPLETE	-- All types + routines are implemented; should work normally
+	INCOMPLETE	-- The header and/or implemenation is incomplete.  Some types
+				   or routines may not be defined or implemented.
+	ABSENT		-- This header/implementation is provided at all.
 
 
-assert.h		-- Provides partial/incomplete definition of assert().
 
-complex.h		-- Not provided.
+assert.h		-- INCOMPLETE.  Provides partial/incomplete definition of
+				   assert().
 
-ctype.h			-- All routines implemented.
+complex.h		-- ABSENT.
 
-errno.h			-- Defines errno, EDOM, EILSEQ and ERANGE.  Also defines the
-					standard POSIX error codes as well.
+ctype.h			-- COMPLETE.
 
-fenv.h			-- Not provided.
+errno.h			-- COMPLETE.  Defines errno, EDOM, EILSEQ and ERANGE.  Also
+				   defines the standard POSIX error codes as well.
 
-float.h			-- Not provided.
+fenv.h			-- ABSENT.
 
-inttypes.h		-- Not provided.
+float.h			-- ABSENT.
 
-iso646.h		-- Not provided.
+inttypes.h		-- ABSENT.
 
-limits.h		-- All limits defined.
+iso646.h		-- ABSENT.
 
-locale.h		-- Not provided.
+limits.h		-- COMPLETE.  All limits defined.
 
-math.h			-- Not provided.
+locale.h		-- ABSENT.
 
-setjmp.h		-- All routines implemented.
+math.h			-- ABSENT.
 
-signal.h		-- Not provided.
+setjmp.h		-- COMPLETE.  All routines implemented.
 
-stdarg.h		-- Defines all va_* macros, but relies on GCC implementation
-					due to optimization errors.
+signal.h		-- ABSENT.
 
-stdbool.h		-- Defines bool, _Bool, true and false.
+stdarg.h		-- COMPLETE.  Defines all va_* macros, but relies on GCC
+				   implementation due to optimization errors.
 
-stddef.h		-- Defines only ptrdiff_t, size_t and NULL.
+stdbool.h		-- COMPLETE.  Defines bool, _Bool, true and false.
 
-stdint.h		-- intN_t, uintN_t, intptr_t and uintptr_t types defined.
+stddef.h		-- INCOMPLETE.  Defines only ptrdiff_t, size_t and NULL.
 
-stdio.h			-- All routines defined, but not all implemented.  I/O
-					structures are incomplete.
+stdint.h		-- COMPLETE.  intN_t, uintN_t, intptr_t and uintptr_t types
+				   defined.
 
-stdlib.h		-- All routines defined, but not all implemented.  Includes
-					itoa() and uitoa() as extensions.  abs(), min(), max() are
-					all defined as macros.
+stdio.h			-- INCOMPLETE.  All routines defined, but not all implemented.
+				   I/O structures are incomplete.
 
-string.h		-- All routines defined, but not all implemented.  Includes
-					strrev() as an extension.
+stdlib.h		-- INCOMPLETE.  All routines defined, but not all implemented.
+				   Includes itoa() and uitoa() as extensions.  abs(), min(),
+				   max() are all defined as macros.
 
-tgmath.h		-- Not provided.
+string.h		-- INCOMPLETE.  All routines defined, but not all implemented.
+				   Includes strrev() as an extension.
 
-time.h			-- Defines time_t, clock_t, struct tm.  All routines defined,
-					but none implemented.
+tgmath.h		-- ABSENT.
 
-wchar.h			-- Not provided.
+time.h			-- INCOMPLETE.  Defines time_t, clock_t, struct tm.  All
+				   routines defined, but none implemented.
 
-wctype.h		-- Not provided.
+wchar.h			-- ABSENT.
+
+wctype.h		-- ABSENT.

@@ -6,10 +6,19 @@ In general, POSIX support is minimal.  Only enough to support Doug Lea's
 malloc().
 
 
-errno.h			-- Defines C99 errno and all standard error values.
+Decoder:
+	COMPLETE	-- All types + routines are implemented; should work normally
+	INCOMPLETE	-- The header and/or implemenation is incomplete.  Some types
+				   or routines may not be defined or implemented.
+	ABSENT		-- This header/implementation is provided at all.
 
-sys/types.h		-- Provides size_t.  Nothing else.
 
-unistd.h		-- Provides sbrk(), which isn't part of the POSIX standard.
-					Nothing else.
+
+errno.h			-- COMPLETE.  Defines C99 errno and all standard error values.
+
+sys/types.h		-- INCOMPLETE.  Provides size_t.  Nothing else.
+
+unistd.h		-- INCOMPLETE.  Provides sbrk(), which isn't actually part of
+				   the POSIX standard.  Nothing else.
+
 
