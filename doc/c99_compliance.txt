@@ -43,7 +43,8 @@ limits.h		-- COMPLETE.  All limits defined.
 locale.h		-- INCOMPLETE.  All types and routines are defined, but none
 				   are implemented.
 
-math.h			-- ABSENT.
+math.h			-- INCOMPLETE.  All types and routines are defined, but none
+				   are implemented.
 
 setjmp.h		-- COMPLETE.  All routines implemented.
 

@@ -39,6 +39,18 @@ typedef	short				char16_t;
 typedef	char16_t *			char16_tp;
 typedef	char16_tp *			char16_tpp;
 
+typedef float				float32_t;
+typedef float32_t *			float32_tp;
+typedef float32_tp *		float32_tpp;
+
+typedef double				float64_t;
+typedef float64_t *			float64_tp;
+typedef float64_tp *		float64_tpp;
+
+typedef long double			float96_t;
+typedef float96_t *			float96_tp;
+typedef float96_tp *		float96_tpp;
+
 typedef int8_t *			int8_tp;
 typedef int8_tp *			int8_tpp;
 
