@@ -32,7 +32,7 @@
 /// bit for the character that selects that entry.
 ///
 /// The representation here assumes standard 7-bit US ASCII.  Does not account
-/// for current locale.
+/// for current locale (i.e., ignores setlocale() invocation).
 ///
 static
 const

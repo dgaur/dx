@@ -40,7 +40,8 @@ iso646.h		-- ABSENT.
 
 limits.h		-- COMPLETE.  All limits defined.
 
-locale.h		-- ABSENT.
+locale.h		-- INCOMPLETE.  All types and routines are defined, but none
+				   are implemented.
 
 math.h			-- ABSENT.
 
@@ -55,8 +56,8 @@ stdbool.h		-- COMPLETE.  Defines bool, _Bool, true and false.
 
 stddef.h		-- INCOMPLETE.  Defines only ptrdiff_t, size_t and NULL.
 
-stdint.h		-- COMPLETE.  intN_t, uintN_t, intptr_t and uintptr_t types
-				   defined.
+stdint.h		-- INCOMPLETE.  intN_t, uintN_t, intptr_t and uintptr_t types
+				   defined.  Other types not defined.
 
 stdio.h			-- INCOMPLETE.  All routines defined, but not all implemented.
 				   I/O structures are incomplete.
