@@ -36,7 +36,7 @@ float.h			-- ABSENT.
 
 inttypes.h		-- ABSENT.
 
-iso646.h		-- ABSENT.
+iso646.h		-- COMPLETE.
 
 limits.h		-- COMPLETE.  All limits defined.
 
