@@ -78,6 +78,13 @@ char * uitoa(unsigned value, char * string, unsigned radix);
 //
 // Pseudo-random number generator
 //
+// These constants are specific to the Park-Miller linear congruential PRNG.
+// See the actual rand() implementation
+//
+#define PRNG_G		(16807ULL)
+#define PRNG_M		(2147483647ULL)
+
+#define RAND_MAX	(PRNG_M - 1)
 
 int rand(void);
 

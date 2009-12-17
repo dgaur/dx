@@ -3,6 +3,8 @@
 //
 
 #include "stdint.h"
+#include "stdlib.h"		// PRNG_M, PRNG_G
+
 
 static
 uint32_t random_seed = 1;
@@ -21,9 +23,6 @@ uint32_t random_seed = 1;
 // If multiple threads invoke this routine simultaneously, the routine may
 // return the same "random result" to each thread.
 //
-#define PRNG_G	(16807ULL)
-#define PRNG_M	(2147483647ULL)
-
 int
 rand()
 	{
