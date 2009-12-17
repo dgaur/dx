@@ -32,7 +32,7 @@ errno.h			-- COMPLETE.  Defines errno, EDOM, EILSEQ and ERANGE.  Also
 
 fenv.h			-- ABSENT.
 
-float.h			-- ABSENT.
+float.h			-- INCOMPLETE.  Defines only the FLT/DBL/LDBL ranges.
 
 inttypes.h		-- ABSENT.
 

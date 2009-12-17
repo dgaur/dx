@@ -5,14 +5,16 @@
 #ifndef _MATH_H
 #define _MATH_H
 
+#include "float.h" // FLT_MAX, DBL_MAX, LDBL_MAX
+
 
 typedef float			float_t;
 typedef double			double_t;
 
 
-#define HUGE_VAL		((double)@)
-#define HUGE_VALF		((float)@)
-#define HUGE_VALL		((log double)@)
+#define HUGE_VAL		((double)DBL_MAX)
+#define HUGE_VALF		((float)FLT_MAX)
+#define HUGE_VALL		((long double)LDBL_MAX)
 
 #define INFINITY		((float)@)
 
