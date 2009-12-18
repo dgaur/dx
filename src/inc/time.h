@@ -14,7 +14,8 @@ extern "C" {
 #endif
 
 
-#define cLOCKS_PER_SEC ((clock_t)@)
+#define CLOCKS_PER_SEC ((clock_t)512)	//@
+
 
 typedef unsigned int clock_t;	//@
 
@@ -32,7 +33,7 @@ struct tm
 	int tm_wday;
 	int tm_yday;
 	int tm_isdst;
-};
+	};
 
 
 
