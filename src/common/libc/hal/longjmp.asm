@@ -21,8 +21,8 @@
 // never return.
 //
 .align 4
-.global _longjmp
-_longjmp:
+.global longjmp
+longjmp:
 	// Stack here is:
 	//	*(esp) = caller's context
 	//	8(esp) = return value for setjmp()

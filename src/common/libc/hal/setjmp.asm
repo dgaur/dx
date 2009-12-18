@@ -20,8 +20,8 @@
 // Returns zero on initial invocation; or nonzero if restarted via longjmp()
 //
 .align 4
-.global _setjmp
-_setjmp:
+.global setjmp
+setjmp:
 	// Locate the jmp_buf
 	pushl	%edi
 	movl	8(%esp), %edi
