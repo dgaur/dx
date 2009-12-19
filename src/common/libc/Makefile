@@ -32,6 +32,7 @@ LIBC_OBJECTS	:=	libc.o \
 					rand.o \
 					sbrk.o \
 					snprintf.o \
+					sprintf.o \
 					strcmp.o \
 					strlen.o \
 					strrev.o \
