@@ -33,8 +33,10 @@ LIBC_OBJECTS	:=	libc.o \
 					sbrk.o \
 					snprintf.o \
 					sprintf.o \
+					strcat.o \
 					strcmp.o \
 					strlen.o \
+					strncat.o \
 					strrev.o \
 					uitoa.o \
 					vsnprintf.o
