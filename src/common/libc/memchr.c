@@ -6,7 +6,10 @@
 
 
 ///
-/// Locate the first occurrence of a character within a region of memory.
+/// Locate the first occurrence of a character within a region of memory.  No
+/// side effects.
+///
+/// This is a potential candidate for optimization.
 ///
 /// @param s	-- memory block to search
 /// @param c	-- desired character

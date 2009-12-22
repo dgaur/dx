@@ -6,7 +6,8 @@
 
 
 ///
-/// Find the first occurence of a character within a string
+/// Find the first occurrence of a character within a string.  No
+/// side effects.
 ///
 /// @param s	-- the string to search
 /// @param c	-- desired character
