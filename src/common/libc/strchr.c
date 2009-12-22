@@ -20,7 +20,7 @@ char *strchr(	const char	*s,
 	char	*character;
 	size_t	length = strlen(s);
 
-	character = memchr(s, c, length);
+	character = (char*)memchr(s, c, length);
 
 	return(character);
 	}

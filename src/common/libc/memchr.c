@@ -21,12 +21,12 @@ void *memchr(	const void	*s,
 				int			c,
 				size_t		n)
 	{
-	char*	character = (char*)(s);
+	unsigned char*	character = (unsigned char*)(s);
 
 	while(n)
 		{
 		// Matching character?
-		if (*character == (char)(c))
+		if (*character == (unsigned char)(c))
 			{ break; }
 
 		// No match, so continue searching
