@@ -36,6 +36,7 @@ LIBC_OBJECTS	:=	libc.o \
 					sprintf.o \
 					strcat.o \
 					strchr.o \
+					strcoll.o \
 					strcmp.o \
 					strcpy.o \
 					strlen.o \

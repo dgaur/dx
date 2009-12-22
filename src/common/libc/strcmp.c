@@ -6,7 +6,7 @@
 
 
 ///
-/// String comparison
+/// String comparison.  Does not account for locale.
 ///
 /// This is an obvious candidate for optimization.
 ///
