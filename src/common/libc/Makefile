@@ -43,6 +43,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strncat.o \
 					strncpy.o \
 					strrev.o \
+					strspn.o \
 					uitoa.o \
 					vsnprintf.o
 
