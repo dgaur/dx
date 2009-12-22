@@ -22,6 +22,7 @@ LIBC_OBJECTS	:=	libc.o \
 					hal/setjmp.o \
 					itoa.o \
 					malloc.o \
+					memchr.o \
 					memcmp.o \
 					memcpy.o \
 					memmove.o \
@@ -34,6 +35,7 @@ LIBC_OBJECTS	:=	libc.o \
 					snprintf.o \
 					sprintf.o \
 					strcat.o \
+					strchr.o \
 					strcmp.o \
 					strcpy.o \
 					strlen.o \
