@@ -12,7 +12,7 @@
 /// Convert a string to its "unsigned long integer" representation
 ///
 /// @warning -- This implementation is incomplete: it does not handle overflow;
-/// and does not set errno.
+/// does not set errno; does not account for locale setting.
 ///
 /// @param nptr		-- input string, possibly with leading whitespace
 /// @param endptr	-- pointer to first character after the end of the number.
