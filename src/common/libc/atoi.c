@@ -9,6 +9,8 @@
 /// Converts a string of decimal digits into the corresponding
 /// integer value.
 ///
+/// No side effects.
+///
 /// @see strtol()
 ///
 int
