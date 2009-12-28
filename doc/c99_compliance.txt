@@ -65,7 +65,8 @@ stdio.h			-- INCOMPLETE.  All routines defined, but not all implemented.
 
 stdlib.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes itoa() and uitoa() as extensions.  abs(), min(),
-				   max() are all defined as macros.
+				   max() are all defined as macros.  strtol() and strtoul()
+				   are incomplete, do not handle error conditions correctly.
 
 string.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes strrev() as an extension.
