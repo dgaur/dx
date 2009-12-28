@@ -44,6 +44,8 @@ LIBC_OBJECTS	:=	libc.o \
 					strncpy.o \
 					strrev.o \
 					strspn.o \
+					strtol.o \
+					strtoul.o \
 					uitoa.o \
 					vsnprintf.o
 
