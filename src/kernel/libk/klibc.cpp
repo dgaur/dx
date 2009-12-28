@@ -22,6 +22,55 @@ uint32_t	PRINTF_BUFFER_LENGTH = 128;
 
 
 ///
+/// Kernel-specific implementation of atoi(), mainly to avoid linking all of
+/// the strtol() machinery.  This implementation is incomplete: assumes only
+/// decimal inputs, minimal error checking.
+///
+/// Converts a string of decimal digits into the corresponding
+/// integer value.  Assumes a standard ASCII character set, in
+/// order to scan and convert the actual digits of the string.
+///
+/// No side effects.
+///
+/// Returns the corresponding integer value or zero if the string
+/// does not contain a valid number.
+///
+int
+atoi(const char *c)
+	{
+	int value = 0;
+
+	if (c)
+		{
+		bool_t	negative	= false;
+
+		// Parse the sign, if any
+		if (*c == '+')
+			{ c++; }
+		else if (*c == '-')
+			{ negative = true; c++; }
+
+		// Parse the actual decimal digits
+		while(*c >= '0' && *c <= '9')
+			{
+			// Add the next digit to the intermediate value
+			value *= 10;
+			value += (*c - '0');
+
+			// Advance to the next digit, if any
+			c++;
+			}
+
+		// Fix the sign if necessary
+		if (negative)
+			{ value = -value; }
+		}
+
+	return(value);
+	}
+
+
+///
 /// Kernel-specific implementation of printf().  Builds a string of characters
 /// according to the given format string and arguments, and writes it out to
 /// the console.
