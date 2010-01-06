@@ -74,9 +74,22 @@ endif
 
 
 #
+# Simple unit-tests.  This is mildly tricky -- use the native toolchain to
+# compile a subset of the dx libc; can only link/test the standalone routines
+# that do not require OS or system interaction.
+#
+UNIT_TEST_FILES := unittest.c ctype.c errno.c \
+					strtod.c strtoul.c strspn.c
+unittest: $(UNIT_TEST_FILES)
+	@gcc -o $@ $(CC_INCLUDES) $^
+
+
+#
 # Clean the local directory
 #
 clean:
 	@rm -f $(LIBC_FILE)
 	@rm -f $(LIBC_OBJECTS)
 	@rm -f $(LOCAL_DEPENDENCIES)
+	@rm -f unittest unittest.exe
+
