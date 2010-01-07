@@ -40,8 +40,9 @@ iso646.h		-- COMPLETE.
 
 limits.h		-- COMPLETE.  All limits defined.
 
-locale.h		-- INCOMPLETE.  All types and routines are defined, but none
-				   are implemented.
+locale.h		-- INCOMPLETE.  All types and routines are defined.
+				   setlocale() is not implemented.  Related routines, e.g.,
+				   strcoll(), do not honor the locale settings.
 
 math.h			-- INCOMPLETE.  All types and routines are defined, but none
 				   are implemented.
@@ -67,6 +68,7 @@ stdlib.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes itoa() and uitoa() as extensions.  abs(), min(),
 				   max() are all defined as macros.  strtol() and strtoul()
 				   are incomplete, do not handle error conditions correctly.
+				   strtod() is incomplete.
 
 string.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes strrev() as an extension.
