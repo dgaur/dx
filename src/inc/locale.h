@@ -8,6 +8,7 @@
 #include "stddef.h"		// NULL
 
 
+// Locale descriptor
 struct lconv
 	{
 	char *decimal_point;
@@ -37,7 +38,7 @@ struct lconv
 	};
 
 
-// Constants for setlocal()
+// Constants for setlocale()
 #define LC_ALL		0
 #define LC_COLLATE	1
 #define LC_CTYPE	2

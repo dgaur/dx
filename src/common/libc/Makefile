@@ -21,6 +21,7 @@ LIBC_OBJECTS	:=	libc.o \
 					hal/longjmp.o \
 					hal/setjmp.o \
 					itoa.o \
+					locale.o \
 					malloc.o \
 					memchr.o \
 					memcmp.o \

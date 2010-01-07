@@ -18,10 +18,10 @@
 #define UCHAR_MAX 255 // 2^8 - 1
 
 // minimum value for an object of type char
-#define CHAR_MIN see below
+#define CHAR_MIN 0		// Assume unsigned characters
 
 // maximum value for an object of type char
-#define CHAR_MAX see below
+#define CHAR_MAX UCHAR_MAX	// Assume unsigned characters
 
 // maximum number of bytes in a multibyte character, for any supported locale
 #define MB_LEN_MAX 1
