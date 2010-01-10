@@ -68,6 +68,22 @@ test_ctype()
 	}
 
 
+static
+void
+test_memset()
+	{
+	int i;
+	char buffer[ 100 ];
+
+	memset(buffer, 0, sizeof(buffer));
+
+	for (i = 0; i < sizeof(buffer); i++)
+		{ TEST(buffer[i] == 0); }
+
+	return;
+	}
+
+
 //@unused -- compiler/assembler confusion
 static
 void
@@ -141,6 +157,7 @@ main()
 	printf("Running unit tests ...\n");
 
 	test_ctype();
+	test_memset();
 	test_strspn();
 	test_strtod();
 	test_strtoul();

@@ -79,7 +79,7 @@ endif
 # compile a subset of the dx libc; can only link/test the standalone routines
 # that do not require OS or system interaction.
 #
-UNIT_TEST_FILES := unittest.c ctype.c errno.c \
+UNIT_TEST_FILES := unittest.c ctype.c errno.c memset.c \
 					strtod.c strtoul.c strspn.c
 unittest: $(UNIT_TEST_FILES)
 	@gcc -o $@ $(CC_INCLUDES) $^
