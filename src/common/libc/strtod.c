@@ -104,7 +104,7 @@ read_mantissa(	const char * RESTRICT	nptr,
 		// Add the next digit to the intermediate value
 		c -= '0';
 		mantissa *= 10.0;
-		mantissa += (double)(c);
+		mantissa += (double)(c);	//@expensive int-to-double conversion
 		//@possible overflow here
 
 		// Advance to the next digit, if any
