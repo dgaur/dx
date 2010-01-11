@@ -84,7 +84,6 @@ test_memset()
 	}
 
 
-//@unused -- compiler/assembler confusion
 static
 void
 test_setjmp()
@@ -158,6 +157,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_setjmp();
 	test_strspn();
 	test_strtod();
 	test_strtoul();
