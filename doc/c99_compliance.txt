@@ -3,7 +3,8 @@
 
 
 In general, the libc implementation here is minimal and only provides partial
-support for C99; it is not a full implementation at all.
+support for C99; it is not a full implementation at all.  All libc and POSIX
+code lives in src/common/libc.
 
 Note that the libc is *SHARED* between the kernel and user applications.  The
 kernel uses some of the standalone library routines (e.g., memcpy, memset,
@@ -11,6 +12,7 @@ etc).
 
 The C99 NDEBUG macro is automatically defined in the retail build; not defined
 in the debug build.
+
 
 Decoder:
 	COMPLETE	-- All types + routines are implemented; should work normally

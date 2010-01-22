@@ -3,7 +3,7 @@
 
 
 In general, POSIX support is minimal.  Only enough to support Doug Lea's
-malloc().
+malloc().  All libc and POSIX code lives in src/common/libc.
 
 
 Decoder:
