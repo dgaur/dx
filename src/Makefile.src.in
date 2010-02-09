@@ -85,10 +85,13 @@ LINK_COMMON_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
 
 
 #
-# The dx runtime library must be linked with all user-mode executables
+# User libraries, not linked or shared with the kernel.  The math library is
+# mostly optional, but the dx run-time library must be linked with all
+# user-mode executables
 #
 LINK_LIBDX			:= $(DX_SRC_DIR)/user/libdx/libdx.a
-LINK_USER_LIBS		:= $(LINK_LIBDX)
+LINK_LIBM			:= $(DX_SRC_DIR)/common/libm/libm.a
+LINK_USER_LIBS		:= $(LINK_LIBDX) $(LINK_LIBM)
 
 
 
