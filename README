@@ -38,7 +38,7 @@ This is the dx operating system, version 0.0.4, released 2009-12-06
 	This code is distributed under the standard two-clause BSD license.  See
 	dx/doc/license.txt
 
-	All code is copyright (c) 2005 - 2009, Dan Gaur, except where noted.
+	All code is copyright (c) 2005 - 2010, Dan Gaur, except where noted.
 
 	Includes Doug Lea's (public domain) malloc.c implementation.
 	See dx/src/common/libc/malloc.c
