@@ -8,7 +8,7 @@ directory_layout.txt for a brief description of the source tree layout.
 
 In general, DX requires a Unix-ish build environment: bash, gcc, binutils, etc.
 Building in cygwin is supported, but requires an ELF cross-compiler.  Building
-in Linux/BSD is supported, with native tools @@@but not tested recently.
+in Linux/BSD is supported, with native tools.
 
 
 

@@ -6,7 +6,7 @@ This document describes how to configure + build the GNU toolchain under
 cygwin.  Typically this is necessary because the default tools are
 configured to produce PE object files (the Windows native format), whereas
 DX requires ELF object files.  If you are building natively under Linux
-or *BSD, this probably is not necessary.
+or *BSD, this should not be necessary.
 
 
 

@@ -1,20 +1,22 @@
 
 * DX Tools *
 
-The following tools were used in the development of DX.  Other
-tools or tool versions may also work, but are probably untested.
+DX should build cleanly with the following tools (most of these are
+included in the default FC14 build).  Other tools or tool versions may
+also work, but are probably untested.
 
 
-* GNU bash, version 3.2.49(22)-release-(i686-pc-cygwin)
+* GNU bash, version 4.1.7(1)-release (i386-redhat-linux-gnu)
 
-* gcc version 4.4.1 (with gmp 4.3.1 and mpfr 2.4.1)
+* gcc version 4.5.1 20100924 (Red Hat 4.5.1-4) (GCC)
 
-* GNU ld (GNU Binutils) 2.19.1
+* GNU ld (GNU Binutils) 2.20.51.0.7-6.fc14 20100318
 
-* GNU Make version 3.81
+* GNU Make version 3.82
 
-* debugfs 1.35 (28-Feb-2004)
+* debugfs 1.41.12 (17-May-2010)
 
-* genisoimage 1.1.7.1 (CYGWIN)
+* genisoimage 1.1.10 (Linux)
 
-* Doxygen version 1.5.5
+* Doxygen version 1.7.1
+

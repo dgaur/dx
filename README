@@ -7,38 +7,32 @@ This is the dx operating system, version 0.0.4, released 2009-12-06
 	A small OS for the x86.  See dx/doc/vision.txt.
 
 
-
 * CURRENT STATUS
 	Still under active development.  Not useful yet.  Basic micro kernel,
 	some user mode libraries, couple of user executables.  Nothing else.
-
 
 
 * BUILD INSTRUCTIONS
 	See the documentation under dx/doc/build_process.
 
 
-
 * RELEASE NOTES and CHANGES FROM PREVIOUS VERSIONS
 	See dx/doc/release_notes.txt
-
 
 
 * HARDWARE REQUIREMENTS
 	See dx/doc/hardware_support.txt
 
 
-
 * ONLINE
-	This project is officially hosted at http://dx.kenai.com
-
+	This project is officially hosted at https://bitbucket.org/dgaur/dx.
 
 
 * COPYRIGHT + LICENSE
 	This code is distributed under the standard two-clause BSD license.  See
 	dx/doc/license.txt
 
-	All code is copyright (c) 2005 - 2010, Dan Gaur, except where noted.
+	All code is copyright (c) 2005 - 2011, Dan Gaur, except where noted.
 
 	Includes Doug Lea's (public domain) malloc.c implementation.
 	See dx/src/common/libc/malloc.c

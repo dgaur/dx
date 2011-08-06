@@ -2,7 +2,8 @@
 * DX Hardware Support *
 
 This document describes the current list of required + supported hardware.
-
+The target platform is fairly dated at this point, mostly because I've never
+updated or migrated to a new test system.
 
 
 Required:
@@ -17,13 +18,16 @@ Required:
 	- A VGA-compatible video controller
 
 
-
 Optional:
 	- A 16550-compatible UART on COM1.  This is only necessary in the kernel
 	  debug build (when the kernel serial console is enabled).
 
 
-
 Other:
 	- Uni-processor only.  Should run normally on an SMP machine, but will
 	  only take advantage of one processor.  @@this is untested
+
+
+Virtualization:
+	- The .iso and .vfd images should both work under VMware Player, VirtualBox,
+	  Microsoft Virtual PC and Bochs.
