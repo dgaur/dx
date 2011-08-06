@@ -12,7 +12,7 @@
 // Use a single definition here that can be #include'd from these (or other
 // headers) as necessary
 //
-typedef unsigned long size_t;
+typedef unsigned int size_t;
 
 
 #endif
