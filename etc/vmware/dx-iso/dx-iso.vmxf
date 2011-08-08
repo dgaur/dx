@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Foundry>
+<VM>
+<VMId type="string">52 23 6d 17 3a ce 18 ab-ce d0 96 48 ee 34 b8 a4</VMId>
+<ClientMetaData>
+<clientMetaDataAttributes/>
+<HistoryEventList/></ClientMetaData>
+<vmxPathName type="string">dx-iso.vmx</vmxPathName></VM></Foundry>

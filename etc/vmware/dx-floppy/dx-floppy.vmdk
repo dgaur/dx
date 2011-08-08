@@ -1,0 +1,21 @@
+# Disk DescriptorFile
+version=1
+encoding="UTF-8"
+CID=fffffffe
+parentCID=ffffffff
+isNativeSnapshot="no"
+createType="twoGbMaxExtentSparse"
+
+# Extent description
+RW 2097152 SPARSE "dx-floppy-s001.vmdk"
+
+# The Disk Data Base 
+#DDB
+
+ddb.virtualHWVersion = "7"
+ddb.longContentID = "3f13845486f9c0405f47253cfffffffe"
+ddb.uuid = "60 00 C2 90 b0 02 78 42-0c f1 3c bb 2b b9 57 ed"
+ddb.geometry.cylinders = "2080"
+ddb.geometry.heads = "16"
+ddb.geometry.sectors = "63"
+ddb.adapterType = "ide"
