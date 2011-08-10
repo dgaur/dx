@@ -4,7 +4,8 @@
 
 
 This document provides a brief overview of the DX build environment.  See also
-directory_layout.txt for a brief description of the source tree layout.
+directory_layout.txt for a brief description of the source tree layout.  See
+tools.txt for tool requirements.
 
 In general, DX requires a Unix-ish build environment: bash, gcc, binutils, etc.
 Building in cygwin is supported, but requires an ELF cross-compiler.  Building
