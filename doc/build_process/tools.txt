@@ -7,6 +7,7 @@ tools or tool versions may also work, but are probably untested.
 Note that the toolchain must be capable of generating 32b, ELF binaries.
 Cross-versions of these tools will be necessary if the native tools cannot
 produce this file format (e.g., building under cygwin, or on a 64b host).
+See cross_compiling.txt, if necessary.
 
 
 * GNU bash, version 4.2.10(1)-release (x86_64-redhat-linux-gnu)

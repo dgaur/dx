@@ -1,12 +1,13 @@
 
-* Cross-compiling DX under Cygwin *
+* Cross-compiling DX *
 
 
-This document describes how to configure + build the GNU toolchain under
-cygwin.  Typically this is necessary because the default tools are
-configured to produce PE object files (the Windows native format), whereas
-DX requires ELF object files.  If you are building natively under Linux
-or *BSD, this should not be necessary.
+This document describes how to configure + build a GNU toolchain for producing
+32-bit, ELF binaries (the expected dx file format).
+
+This is typically when the native tools produce the wrong file format.  For
+instance, the default cygwin tools will emit PE object files, since this is the
+Windows native format; and 64-bit Linux tools will emit 64-bit ELF objects.
 
 See also the instructions here: http://wiki.osdev.org/GCC_Cross-Compiler.
 
