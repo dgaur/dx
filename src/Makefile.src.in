@@ -46,7 +46,7 @@ STRIP		:= @STRIP@
 # Default tool settings
 #
 AR_FLAGS		= -rcs
-ASM_DEFINES		=
+ASM_DEFINES		= -DSIZET_IS_ULONG
 ASM_FLAGS		= -c -o $@ -xassembler-with-cpp
 ASM_INCLUDES	= -I. -I$(DX_SRC_DIR)/inc
 CC_DEFINES		= $(ASM_DEFINES)
