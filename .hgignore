@@ -28,3 +28,11 @@ doc/html/Makefile
 media/floppy/load-image.sh
 media/iso/Makefile
 src/Makefile.src
+
+# VM files
+etc/vmware/*/*.log
+etc/vmware/*/*.orig
+etc/virtualbox/*/Logs/*
+etc/virtualbox/*/*.vbox-prev
+
+
