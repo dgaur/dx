@@ -9,7 +9,7 @@ tools.txt for tool requirements.
 
 In general, DX requires a Unix-ish build environment: bash, gcc, binutils, etc.
 Building in cygwin is supported, but requires an ELF cross-compiler.  Building
-in Linux/BSD is supported, with native tools.
+in Linux/BSD is supported, with 32b tools.
 
 
 
@@ -29,9 +29,9 @@ in Linux/BSD is supported, with native tools.
 		% export DX_ROOT_DIR=~/src/dx
 		% cd ${DX_ROOT_DIR}
 
-	Configure your build tree to use the appropriate build tools.  For Linux,
-	BSD and Unix-ish systems, the default "configure" options are probably
-	sufficient.
+	Configure your build tree to use the appropriate build tools.  For 32b
+	Linux, BSD and Unix-ish systems, the default "configure" options are
+	probably sufficient.
 	Example:
 		% ./configure
 
@@ -51,13 +51,12 @@ in Linux/BSD is supported, with native tools.
 	In addition, "make help" will provide a brief list of all other build
 	targets and options.
 	Example:
-		% cd ${DX_ROOT_DIR}
 		% make help
 
 
 
 * Makefile.dx:
-	${DX_ROOT_DIR}/Makefile.dx contains common defintions used throughout
+	${DX_ROOT_DIR}/Makefile.dx contains common definitions used throughout
 	the entire DX source tree.  All other makefiles should include this one.
 
 	DX_ROOT_DIR should be set in the local environment; it should

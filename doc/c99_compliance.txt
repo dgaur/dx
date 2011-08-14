@@ -18,7 +18,7 @@ Decoder:
 	COMPLETE	-- All types + routines are implemented; should work normally
 	INCOMPLETE	-- The header and/or implemenation is incomplete.  Some types
 				   or routines may not be defined or implemented.
-	ABSENT		-- This header/implementation is provided at all.
+	ABSENT		-- This header/implementation is not provided at all.
 
 
 

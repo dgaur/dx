@@ -11,7 +11,7 @@ source tree.
 /dx
 
 	/doc		- Assorted dx documentation
-		/html	- Doxygen output from kernel + user code
+		/html	- Doxygen output from kernel + user code (e.g., via "make doc")
 
 
 	/media		- Files and tools for generating dx images
@@ -55,7 +55,7 @@ source tree.
 Private headers live in local source directories if possible.  For example,
 ramdisk.hpp lives in src/kernel/boot, because it's only used by the boot code.
 
-Common/shared headers live in one these places:
+Common/shared headers live in one of these places:
 	dx/src/inc				-- Standard C/POSIX headers
 	dx/src/inc/dx			-- DX-specific headers; hardware-independent
 	dx/src/inc/dx/hal		-- DX-specific headers;	hardware-dependent
