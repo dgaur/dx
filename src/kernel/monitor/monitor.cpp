@@ -34,7 +34,6 @@ void_t kernel_monitor_c::
 handle_interrupt(interrupt_cr interrupt)
 	{
 	volatile kernel_stats_s*	kernel_stats;
-	status_t					status;
 	volatile syscall_data_s*	syscall;
 
 	ASSERT(interrupt.vector == SYSTEM_CALL_VECTOR_READ_KERNEL_STATS);
@@ -47,10 +46,7 @@ handle_interrupt(interrupt_cr interrupt)
 		syscall = interrupt.validate_syscall();
 		TRACE(SYSCALL, "System call: read kernel stats, %p\n", syscall);
 		if (!syscall)
-			{
-			status = STATUS_INVALID_DATA;
-			break;
-			}
+			{ break; }
 
 
 		//
@@ -59,10 +55,9 @@ handle_interrupt(interrupt_cr interrupt)
 		kernel_stats = kernel_stats_sp(syscall->data0);
 		if (!kernel_stats)
 			{
-			status = STATUS_INVALID_DATA;
+			syscall->status = STATUS_INVALID_DATA;
 			break;
 			}
-
 
 
 		//
@@ -71,7 +66,7 @@ handle_interrupt(interrupt_cr interrupt)
 		//
 		if (!__memory_manager->is_user_address(void_tp(kernel_stats)))
 			{
-			status = STATUS_ACCESS_DENIED;
+			syscall->status = STATUS_ACCESS_DENIED;
 			break;
 			}
 
