@@ -1,9 +1,8 @@
 
 * DX Hardware Support *
 
-This document describes the current list of required + supported hardware.
-The target platform is fairly dated at this point, mostly because I've never
-updated or migrated to a new test system.
+This document describes the current list of required + supported hardware
+(which is fairly dated at this point).
 
 
 Required:
@@ -30,4 +29,6 @@ Other:
 
 Virtualization:
 	- The .iso and .vfd images should both work under VMware Player, VirtualBox,
-	  Microsoft Virtual PC and Bochs.
+	  Microsoft Virtual PC, Bochs, etc.  See the sample files under
+	  $(DX_ROOT_DIR)/etc.
+
