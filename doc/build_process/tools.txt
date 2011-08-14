@@ -1,22 +1,27 @@
 
 * DX Tools *
 
-DX should build cleanly with the following tools (most of these are
-included in the default FC14 build).  Other tools or tool versions may
-also work, but are probably untested.
+DX should build cleanly with the following tools (this is mostly FC15).  Other
+tools or tool versions may also work, but are probably untested.
+
+Note that the toolchain must be capable of generating 32b, ELF binaries.
+Cross-versions of these tools will be necessary if the native tools cannot
+produce this file format (e.g., building under cygwin, or on a 64b host).
 
 
-* GNU bash, version 4.1.7(1)-release (i386-redhat-linux-gnu)
+* GNU bash, version 4.2.10(1)-release (x86_64-redhat-linux-gnu)
 
-* gcc version 4.5.1 20100924 (Red Hat 4.5.1-4) (GCC)
+* gcc version 4.6.1
 
-* GNU ld (GNU Binutils) 2.20.51.0.7-6.fc14 20100318
+* GNU assembler (GNU Binutils) 2.21.1
+
+* GNU ld (GNU Binutils) 2.21.1
 
 * GNU Make version 3.82
 
-* debugfs 1.41.12 (17-May-2010)
+* debugfs 1.41.14 (22-Dec-2010)
 
-* genisoimage 1.1.10 (Linux)
+* genisoimage 1.1.11 (Linux)
 
-* Doxygen version 1.7.1
+* Doxygen version 1.7.4
 

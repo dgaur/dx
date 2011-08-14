@@ -8,6 +8,7 @@ configured to produce PE object files (the Windows native format), whereas
 DX requires ELF object files.  If you are building natively under Linux
 or *BSD, this should not be necessary.
 
+See also the instructions here: http://wiki.osdev.org/GCC_Cross-Compiler.
 
 
 * Building binutils:
