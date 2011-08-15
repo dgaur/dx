@@ -1,15 +1,15 @@
 //
-// tar.h
+// libtar.h
 //
 
-#ifndef _TAR_H
-#define _TAR_H
+#ifndef _LIBTAR_H
+#define _LIBTAR_H
 
+#include "dx/status.h"
 #include "dx/types.h"
 
 
 #define TAR_BLOCK_SIZE	512
-
 
 
 #pragma pack(1)
@@ -41,8 +41,27 @@ typedef struct tar_header
 typedef tar_header_s *  tar_header_sp;
 typedef tar_header_sp * tar_header_spp;
 
-
 #pragma pack()
 
 
+///
+/// A composite entry in the archive
+///
+typedef struct tar_entry
+	{
+	tar_header_sp	header;
+	uint8_tp		file;
+	size_t			file_size;
+	const uint8_t*	next;
+	} tar_entry_s;
+
+typedef tar_entry_s *    tar_entry_sp;
+typedef tar_entry_sp *   tar_entry_spp;
+
+
+status_t
+tar_read(const uint8_t* image, tar_entry_sp entry);
+
+
 #endif
+

@@ -13,7 +13,7 @@ include $(DX_ROOT_DIR)/Makefile.dx
 #
 # Subtrees that may be built
 #
-USER_LIBS		:= libdx user_start
+USER_LIBS		:= libdx libtar user_start
 USER_DAEMONS	:= keyboard loader shell vga
 USER_SUBDIRS	:= $(USER_LIBS) $(USER_DAEMONS)
 

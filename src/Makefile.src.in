@@ -85,28 +85,38 @@ LINK_COMMON_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
 
 
 #
-# User libraries, not linked or shared with the kernel.  The math library is
-# mostly optional, but the dx run-time library must be linked with all
-# user-mode executables
+# The default entry point for all user-mode executables.  Must be linked into
+# all executables
 #
-LINK_LIBDX			:= $(DX_SRC_DIR)/user/libdx/libdx.a
-LINK_LIBM			:= $(DX_SRC_DIR)/common/libm/libm.a
-LINK_USER_LIBS		:= $(LINK_LIBDX) $(LINK_LIBM)
-
+LINK_START_FILE	:= $(DX_SRC_DIR)/user/user_start/user_start.o
 
 
 #
-# The default entry point for all user-mode executables
+# The dx run-time library.  Must be linked with all user-mode executables
 #
-LINK_START_FILE		:= $(DX_SRC_DIR)/user/user_start/user_start.o
+LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
 
+
+#
+# Additional user libraries, not linked or shared with the kernel.  May be
+# linked with user executables as needed.
+#
+LINK_LIBM		:= $(DX_SRC_DIR)/common/libm/libm.a
+LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
+
+
+#
+# The aggregate collection of required user-mode libraries.  May be extended
+# via child Makefiles as needed
+#
+LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_COMMON_LIBS)
 
 
 #
 # As a nicety, rebuild any of the well-known libraries from anywhere in the
 # tree; this is mainly useful when building individual subdirectories
 #
-$(LINK_COMMON_LIBS) $(LINK_USER_LIBS) $(LINK_START_FILE):
+$(LINK_USER_LIBS):
 	@echo "Automatically rebuilding: $@"
 	@$(MAKE) -C $(dir $@)
 
@@ -131,11 +141,11 @@ $(LINK_COMMON_LIBS) $(LINK_USER_LIBS) $(LINK_START_FILE):
 	@echo Archiving $@ ...
 	@$(AR) $(AR_FLAGS) $@ $(filter-out $(MAKEFILE_LIST), $^)
 
-%.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(LINK_COMMON_LIBS) $(MAKEFILE_LIST)
+%.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(MAKEFILE_LIST)
 	@echo Linking $@ ...
 	@$(LINK) $(LINK_FLAGS) $(LINK_TEXT_SECTION) \
 		$(filter-out $(MAKEFILE_LIST), $^) \
-		$(LINK_USER_LIBS) $(LINK_COMMON_LIBS)
+		$(LINK_USER_LIBS)
 
 %.dep: %.asm $(MAKEFILE_LIST)
 	@echo Generating dependencies for $< ...
