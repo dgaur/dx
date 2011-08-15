@@ -305,7 +305,6 @@ initialize()
 	{
 	keyboard_context_sp		keyboard	= NULL;
 	uint8_t					keyboard_status;
-	uint8_t					scan_code;
 	status_t				status;
 
 
@@ -344,7 +343,7 @@ initialize()
 		while(keyboard_status & KEYBOARD_STATUS_OUTPUT_BUFFER_READY)
 			{
 			// Consume the next scan code or ack
-			scan_code = io_port_read8(KEYBOARD_OUTPUT_BUFFER);
+			io_port_read8(KEYBOARD_OUTPUT_BUFFER);
 
 			// More data in the keyboard buffer?
 			keyboard_status = io_port_read8(KEYBOARD_STATUS_REGISTER);
