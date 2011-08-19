@@ -44,6 +44,20 @@ typedef tar_header_sp * tar_header_spp;
 #pragma pack()
 
 
+//
+// Different types of entries in a .tar file
+//
+#define TAR_TYPE_REGULAR_FILE0	0
+#define TAR_TYPE_REGULAR_FILE1	'0'
+#define TAR_TYPE_HARD_LINK		1
+#define TAR_TYPE_SYMBOLIC_LINK	2
+#define TAR_TYPE_CHAR_DEVICE	3
+#define TAR_TYPE_BLOCK_DEVICE	4
+#define TAR_TYPE_DIRECTORY		5
+#define TAR_TYPE_FIFO			6
+
+
+
 ///
 /// A composite entry in the archive
 ///

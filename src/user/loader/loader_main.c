@@ -58,6 +58,13 @@ unpack_ramdisk(const uint8_t* ramdisk)
 	//
 	while(tar_read(entry.next, &entry) == STATUS_SUCCESS)
 		{
+		// Skip over directories, special files, empty files, etc
+		if (entry.file_size == 0)
+			continue;
+		if (entry.header->type != TAR_TYPE_REGULAR_FILE0 &&
+			entry.header->type != TAR_TYPE_REGULAR_FILE1)
+			continue;
+
 		create_process_from_image(entry.file, entry.file_size, CAPABILITY_ALL);
 		}
 
