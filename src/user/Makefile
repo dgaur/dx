@@ -22,17 +22,20 @@ USER_SUBDIRS	:= $(USER_LIBS) $(USER_DAEMONS)
 #
 # The user-mode ramdisk
 #
-RAMDISK_FILE	:= ramdisk.tgz
-RAMDISK_LISTING	:= ramdisk.lst
+RAMDISK_BOOT_TREE	:= boot
+RAMDISK_FILE		:= ramdisk.tgz
+RAMDISK_LISTING		:= ramdisk.lst
 
+
+#
 # The contents of the ramdisk.  The order is important here: the kernel expects
 # find the user loader in the first entry
 #@@the order also determines assignment of thread ids
-RAMDISK_CONTENTS :=	loader/loader.bin \
-					vga/vga.exe \
-					shell/shell.exe \
-					keyboard/keyboard.exe
-
+#
+RAMDISK_CONTENTS :=	loader.bin \
+					vga.exe \
+					shell.exe \
+					keyboard.exe
 
 
 #
@@ -61,11 +64,20 @@ $(USER_SUBDIRS):
 
 
 #
-# The ramdisk is just a simple tarball
+# Pack the various boot-time daemons into a tarball; this becomes the
+# boot-time ramdisk.
+#	- locate the various daemons in their respective subdirectories
+#	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
+#	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
 #
+vpath %.exe $(USER_DAEMONS)
+vpath %.bin $(USER_DAEMONS)
 $(RAMDISK_FILE): $(RAMDISK_CONTENTS)
 	@echo Building $@ ...
-	@tar czf $@ $(RAMDISK_CONTENTS)
+	@mkdir -p $(RAMDISK_BOOT_TREE)
+	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(abspath $^)
+	@tar chzf $@ \
+		$(foreach file, $(RAMDISK_CONTENTS), $(RAMDISK_BOOT_TREE)/$(file))
 	@tar tvzf $@ > $(RAMDISK_LISTING)
 
 
@@ -76,6 +88,7 @@ $(RAMDISK_FILE): $(RAMDISK_CONTENTS)
 .PHONY: clean
 clean:
 	@echo Cleaning user tree ...
+	@rm -rf $(RAMDISK_BOOT_TREE)
 	@rm -f $(RAMDISK_FILE)
 	@rm -f $(RAMDISK_LISTING)
 	@for dir in $(USER_SUBDIRS); do \
