@@ -77,7 +77,8 @@ $(RAMDISK_FILE): $(RAMDISK_CONTENTS)
 	@mkdir -p $(RAMDISK_BOOT_TREE)
 	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(abspath $^)
 	@tar chzf $@ \
-		$(foreach file, $(RAMDISK_CONTENTS), $(RAMDISK_BOOT_TREE)/$(file))
+		$(foreach file, $(RAMDISK_CONTENTS), $(RAMDISK_BOOT_TREE)/$(file)) \
+		--transform="s,^,/,"
 	@tar tvzf $@ > $(RAMDISK_LISTING)
 
 
