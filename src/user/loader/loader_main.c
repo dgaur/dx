@@ -8,6 +8,7 @@
 #include "dx/user_space_layout.h"
 #include "stdint.h"
 #include "stdlib.h"
+#include "string.h"
 
 
 static void_t	unpack_ramdisk(const uint8_t* ramdisk);
@@ -53,18 +54,23 @@ unpack_ramdisk(const uint8_t* ramdisk)
 
 
 	//
-	// The remaining entries will all be drivers, boot-time daemons, etc.
-	// Walk through the rest of the ramdisk and launch each entry in turn.
+	// Walk through the rest of the ramdisk and launch the various drivers
+	// and boot-time daemons
 	//
 	while(tar_read(entry.next, &entry) == STATUS_SUCCESS)
 		{
 		// Skip over directories, special files, empty files, etc
 		if (entry.file_size == 0)
-			continue;
+			{ continue; }
 		if (entry.header->type != TAR_TYPE_REGULAR_FILE0 &&
 			entry.header->type != TAR_TYPE_REGULAR_FILE1)
-			continue;
+			{ continue; }
 
+		// Only launch the boot-time daemons; ignore other executables for now
+		if (memcmp(entry.header->name, "/boot", 5) != 0)
+			{ continue; }
+
+		// This is one of the boot-time daemons, so start it now
 		create_process_from_image(entry.file, entry.file_size, CAPABILITY_ALL);
 		}
 
