@@ -4,8 +4,9 @@
 
 
 * PENDING-RELEASE:
-	Expanded and improved the libc implementation, mostly aimed at porting Lua
-	or other VM.
+	Expanded and improved the libc implementation, mostly aimed at porting the
+    Lua VM.  Some minor cleanup to the ramdisk.  No major changes or additions
+	in (external) functionality.
 
 
 * Version 0.0.4, released 2009-12-06:
