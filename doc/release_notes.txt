@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.5, released 2011-08-20:
 	Expanded and improved the libc implementation, mostly aimed at porting the
     Lua VM.  Some minor cleanup to the ramdisk.  No major changes or additions
 	in (external) functionality.

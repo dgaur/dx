@@ -6,7 +6,7 @@
 ** Use VBoxManage or the VirtualBox Manager GUI to make changes.
 -->
 <VirtualBox xmlns="http://www.innotek.de/VirtualBox-settings" version="1.11-linux">
-  <Machine uuid="{ee35b119-68f8-4039-863e-e419fa737f35}" name="dx-iso" OSType="Other" snapshotFolder="Snapshots" lastStateChange="2011-08-08T04:51:43Z">
+  <Machine uuid="{ee35b119-68f8-4039-863e-e419fa737f35}" name="dx-iso" OSType="Other" snapshotFolder="Snapshots" lastStateChange="2011-08-20T04:48:16Z">
     <MediaRegistry>
       <HardDisks/>
       <DVDImages>
@@ -17,13 +17,13 @@
     <ExtraData>
       <ExtraDataItem name="GUI/LastCloseAction" value="powerOff"/>
       <ExtraDataItem name="GUI/LastGuestSizeHint" value="720,400"/>
-      <ExtraDataItem name="GUI/LastNormalWindowPosition" value="320,239,720,444"/>
+      <ExtraDataItem name="GUI/LastNormalWindowPosition" value="320,239,720,447"/>
       <ExtraDataItem name="GUI/MiniToolBarAlignment" value="bottom"/>
       <ExtraDataItem name="GUI/SaveMountedAtRuntime" value="yes"/>
       <ExtraDataItem name="GUI/ShowMiniToolBar" value="yes"/>
     </ExtraData>
     <Hardware version="2">
-      <CPU count="1" hotplug="false">
+      <CPU count="1" executionCap="50" hotplug="false">
         <HardwareVirtEx enabled="true" exclusive="true"/>
         <HardwareVirtExNestedPaging enabled="true"/>
         <HardwareVirtExVPID enabled="true"/>
@@ -54,6 +54,7 @@
       <USBController enabled="false" enabledEhci="false"/>
       <Network>
         <Adapter slot="0" enabled="false" MACAddress="080027997A97" cable="true" speed="0" type="Am79C973">
+          <DisabledModes/>
           <NAT>
             <DNS pass-domain="true" use-proxy="false" use-host-resolver="false"/>
             <Alias logging="false" proxy-only="false" use-same-ports="false"/>
