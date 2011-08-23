@@ -40,6 +40,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strcoll.o \
 					strcmp.o \
 					strcpy.o \
+					strerror.o \
 					strlen.o \
 					strncat.o \
 					strncpy.o \
