@@ -8,7 +8,6 @@
 //
 #include "ctype.h"
 #include "errno.h"
-#include "setjmp.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -86,26 +85,6 @@ test_memset()
 
 static
 void
-test_setjmp()
-	{
-	jmp_buf env;
-	int value = 0;
-
-	value = setjmp(env);
-	TEST(value == 0 || value == 1);
-
-	if (value < 1)
-		{
-		value++;
-		longjmp(env, value);
-		}
-
-	return;
-	}
-
-
-static
-void
 test_strspn()
 	{
 	TEST( strspn("hello", "h")   == 1 );
@@ -153,11 +132,10 @@ test_strtoul()
 int
 main()
 	{
-	printf("Running unit tests ...\n");
+	printf("Running libc unit tests ...\n");
 
 	test_ctype();
 	test_memset();
-	test_setjmp();
 	test_strspn();
 	test_strtod();
 	test_strtoul();
