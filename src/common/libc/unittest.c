@@ -99,6 +99,21 @@ test_strspn()
 
 static
 void
+test_strstr()
+	{
+	const char* text = "text";
+
+	TEST(strstr("", "pattern")  == NULL);
+	TEST(strstr(text, "")		== text);
+	TEST(strstr(text, text)		== text);
+	TEST(strstr("text", "pat")	== NULL);
+
+	return;
+	}
+
+
+static
+void
 test_strtod()
 	{
 	TEST( APPROX_EQUAL(strtod("1.0", NULL),     1.0) );
@@ -137,6 +152,7 @@ main()
 	test_ctype();
 	test_memset();
 	test_strspn();
+	test_strstr();
 	test_strtod();
 	test_strtoul();
 
