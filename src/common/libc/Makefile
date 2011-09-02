@@ -15,7 +15,13 @@ LIBC_OBJECTS	:=	libc.o \
 					errno.o \
 					exit.o \
 					_Exit.o \
+					fclose.o \
+					feof.o \
+					ferror.o \
+					fopen.o \
 					fprintf.o \
+					fread.o \
+					freopen.o \
 					getchar.o \
 					gets.o \
 					hal/longjmp.o \
