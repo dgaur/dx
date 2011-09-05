@@ -18,6 +18,7 @@ LIBC_OBJECTS	:=	libc.o \
 					fclose.o \
 					feof.o \
 					ferror.o \
+					fgetc.o \
 					fopen.o \
 					fprintf.o \
 					fread.o \
@@ -57,6 +58,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strtol.o \
 					strtoul.o \
 					uitoa.o \
+					ungetc.o \
 					vsnprintf.o
 
 LIBC_FILE := $(notdir $(LINK_LIBC))

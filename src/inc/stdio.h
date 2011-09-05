@@ -167,9 +167,9 @@ int fputc(int c, FILE *stream);
 
 int fputs(const char * RESTRICT s, FILE * RESTRICT stream);
 
-int getc(FILE *stream);
+#define getc(stream)  fgetc(stream)   /* This can be a macro, per C99 */
 
-int getchar(void);	//@getc() macro with stdin?
+int getchar(void);
 
 char *gets(char *s);
 
