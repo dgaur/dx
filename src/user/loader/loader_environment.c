@@ -66,7 +66,9 @@ initialize_environment()
 		//
 		// Allocate enough pages to span the initial heap
 		//
-		heap_size = 32 * PAGE_SIZE;		//@is this enough?
+		//@is this enough?, must be larger than any misaligned ELF section
+		//@in ramdisk executables
+		heap_size = 64 * PAGE_SIZE;
 		status = expand_address_space(ADDRESS_SPACE_ID_USER_LOADER, heap,
 			heap_size, 0);
 		if (status != STATUS_SUCCESS)

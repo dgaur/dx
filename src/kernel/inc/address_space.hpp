@@ -25,7 +25,7 @@
 /// system call
 ///
 const
-uintptr_t	EXPAND_ADDRESS_SPACE_PAGE_COUNT		= 32;
+uintptr_t	EXPAND_ADDRESS_SPACE_PAGE_COUNT		= 64;
 
 
 
