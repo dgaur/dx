@@ -1,21 +1,122 @@
 #
-# Makefile
+# Custom dx Makefile for the fdlibm library.
+#
+# See http://www.netlib.org/fdlibm/ orhttp://www.validlab.com/software/
 #
 
 include ../Makefile.common
 
 
 #
-# The individual object files that comprise the math library
+# Enable standard/default IEEE libm behavior
 #
-LIBM_OBJECTS	:=	libm.o
+CC_DEFINES += -D_IEEE_LIBM
+
+
+#
+# Additional flags specifically for this library, mostly to cut down the
+# list of innocuous warnings; other (potentially more serious) warnings are
+# intentionally left enabled
+#
+CC_FLAGS += -fno-strict-aliasing \
+			-Wno-parentheses \
+			-Wno-shadow \
+			-Wno-unused-but-set-variable \
+			-Wno-unused-variable \
+			-Wno-unknown-pragmas
+
+
+#
+# The individual object files that comprise the C library
+#
+LIBM_OBJECTS	:=	libm.o \
+					k_standard.o \
+					k_rem_pio2.o \
+					k_cos.o \
+					k_sin.o \
+					k_tan.o \
+					e_acos.o \
+					e_acosh.o \
+					e_asin.o \
+					e_atan2.o \
+					e_atanh.o \
+					e_cosh.o \
+					e_exp.o \
+					e_fmod.o \
+					e_gamma.o \
+					e_gamma_r.o \
+					e_hypot.o \
+					e_j0.o \
+					e_j1.o \
+					e_jn.o \
+					e_lgamma.o \
+					e_lgamma_r.o \
+					e_log.o \
+					e_log10.o \
+					e_pow.o \
+					e_rem_pio2.o \
+					e_remainder.o  \
+					e_scalb.o \
+					e_sinh.o \
+					e_sqrt.o \
+					w_acos.o \
+					w_acosh.o \
+					w_asin.o \
+					w_atan2.o \
+					w_atanh.o \
+					w_cosh.o \
+					w_exp.o \
+					w_fmod.o \
+					w_gamma.o \
+					w_gamma_r.o \
+					w_hypot.o \
+					w_j0.o \
+					w_j1.o \
+					w_jn.o \
+					w_lgamma.o \
+					w_lgamma_r.o \
+					w_log.o \
+					w_log10.o \
+					w_pow.o \
+					w_remainder.o \
+					w_scalb.o \
+					w_sinh.o \
+					w_sqrt.o \
+					s_asinh.o \
+					s_atan.o \
+					s_cbrt.o \
+					s_ceil.o \
+					s_copysign.o \
+					s_cos.o \
+					s_erf.o \
+					s_expm1.o \
+					s_fabs.o \
+					s_finite.o \
+					s_floor.o \
+					s_frexp.o \
+					s_ilogb.o \
+					s_isnan.o \
+					s_ldexp.o \
+					s_lib_version.o \
+					s_log1p.o \
+					s_logb.o \
+					s_matherr.o \
+					s_modf.o \
+					s_nextafter.o \
+					s_rint.o \
+					s_scalbn.o \
+					s_signgam.o \
+					s_significand.o \
+					s_sin.o \
+					s_tan.o \
+					s_tanh.o
 
 LIBM_FILE := $(notdir $(LINK_LIBM))
 
 
 
 #
-# Build the actual math library
+# Build the actual libm library
 #
 all: $(LIBM_FILE)
 
@@ -34,23 +135,11 @@ endif
 
 
 #
-# Simple unit-tests.  This is mildly tricky -- use the native toolchain to
-# compile a subset of the dx libm; can only link/test the standalone routines
-# that do not require OS or system interaction.
-#
-UNIT_TEST_C_FILES := unittest.c
-UNIT_TEST_ASM_FILES	:=
-unittest: $(UNIT_TEST_C_FILES) $(UNIT_TEST_ASM_FILES)
-	@gcc -o $@ $(CC_INCLUDES) $(UNIT_TEST_C_FILES) \
-		-x assembler-with-cpp $(UNIT_TEST_ASM_FILES)
-
-
-#
 # Clean the local directory
 #
 clean:
 	@rm -f $(LIBM_FILE)
 	@rm -f $(LIBM_OBJECTS)
 	@rm -f $(LOCAL_DEPENDENCIES)
-	@rm -f unittest unittest.exe
+
 
