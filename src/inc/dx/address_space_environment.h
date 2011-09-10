@@ -22,7 +22,7 @@ typedef struct address_space_environment
 	//@not thread safe, needs lock
 	uint8_tp			heap_base;
 	uint8_tp			heap_current;	/// Pointer to current end-of-heap
-	uint8_tp			heap_limit;		/// Hard limit
+	uint8_tp			heap_limit;		/// Hard limit, last valid byte
 
 	//@signal handlers?  handle to signal handler thread?
 

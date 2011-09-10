@@ -79,7 +79,7 @@ sbrk(intptr_t delta)
 		// a request for more space on the heap, then return a pointer to the
 		// new block of memory
 		//
-		assert(new_heap <  environment->heap_limit);
+		assert(new_heap <= environment->heap_limit);
 		assert(new_heap >= environment->heap_base);
 		new_block = environment->heap_current;
 		environment->heap_current = new_heap;
