@@ -18,11 +18,15 @@ LIBC_OBJECTS	:=	libc.o \
 					fclose.o \
 					feof.o \
 					ferror.o \
+					fflush.o \
 					fgetc.o \
 					fopen.o \
 					fprintf.o \
+					fputs.o \
+					fputc.o \
 					fread.o \
 					freopen.o \
+					fwrite.o \
 					getchar.o \
 					gets.o \
 					hal/longjmp.o \
@@ -47,6 +51,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strcoll.o \
 					strcmp.o \
 					strcpy.o \
+					stream.o \
 					strerror.o \
 					strlen.o \
 					strncat.o \

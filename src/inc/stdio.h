@@ -18,14 +18,9 @@ extern "C" {
 
 
 //
-// Stream descriptor
+// Stream descriptor, opaque to the caller
 //
-typedef struct
-	{
-	//@target thread id: stream, kbd, console, filesystem, etc
-	//@boolean: open/closed/EOF
-	//@internal input queue, either read from device or replaced via ungetc()
-	} FILE;
+typedef struct file FILE;
 
 
 //
@@ -89,9 +84,9 @@ typedef int fpos_t;
 //
 // Predefined, well-known file streams
 //
-#define stdin  ((FILE*)0) //@thread id of kbd driver
-#define stdout ((FILE*)1) //@thread id of console driver
-#define stderr ((FILE*)2) //@thread id of console driver
+extern FILE* stdin; //@thread id of kbd driver
+extern FILE* stdout;//@thread id of console driver
+extern FILE* stderr; //@thread id of console driver
 
 
 
@@ -173,9 +168,9 @@ int getchar(void);
 
 char *gets(char *s);
 
-int putc(int c, FILE *stream);
+#define putc(c, stream)	fputc(c, stream)	/* This can be a macro, per C99 */
 
-int putchar(int c);	//@putc() macro with stdout?
+int putchar(int c);
 
 int puts(const char *s);
 

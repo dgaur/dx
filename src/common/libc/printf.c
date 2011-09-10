@@ -2,9 +2,6 @@
 // printf.c
 //
 
-
-#include "dx/send_message.h"
-#include "dx/status.h"
 #include "stdarg.h"
 #include "stdio.h"
 
@@ -20,11 +17,9 @@ int
 printf(const char * RESTRICT format, ...)
 	{
 	va_list		argument_list;
-	char8_t		buffer[ 256 ]; //@how to determine max size?
+	char		buffer[ 256 ]; //@how to determine max size?
 	int			length;
-	message_s	message;
-	int			result;
-	status_t	status;
+	int			written;
 
 
 	//
@@ -36,23 +31,11 @@ printf(const char * RESTRICT format, ...)
 
 
 	//
-	// Send the resulting string to the console driver.  This is non-blocking;
-	// caller must explicitly flush the stream if necessary
+	// Write the string out on stdout
 	//
-	message.u.destination		= 1;	//@@@assumes console driver is thread 1
-	message.type				= MESSAGE_TYPE_WRITE;
-	message.id					= MESSAGE_ID_ATOMIC;
-	message.data				= buffer;
-	message.data_size			= length;
-	message.destination_address	= NULL;
-
-	status = send_message(&message);
-	if (status == STATUS_SUCCESS)
-		{ result = length; }
-	else
-		{ result = EOF; }
+	written = fwrite(buffer, length, sizeof(char), stdout);
 
 
-	return(result);
+	return(written == length ? written : EOF);
 	}
 

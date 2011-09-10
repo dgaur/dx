@@ -3,11 +3,11 @@
 //
 
 #include <stdio.h>
-
+#include <stream.h>
 
 int
 feof(FILE* stream)
 	{
-	return(1);
+	return(stream->flags & STREAM_EOF);
 	}
 

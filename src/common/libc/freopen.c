@@ -4,14 +4,16 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stream.h>
 
 
 FILE*
 freopen(const char* path, const char* mode, FILE* stream)
 	{
-	if (stream)
-		{ fclose(stream); }
+	printf("Trying to reopen: %s\n", path);
 
-	return(fopen(path, mode));
+	fclose(stream);
+
+	return(NULL);
 	}
 

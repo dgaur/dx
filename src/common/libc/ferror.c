@@ -3,11 +3,12 @@
 //
 
 #include <stdio.h>
+#include <stream.h>
 
 
 int
 ferror(FILE* stream)
 	{
-	return(0);
+	return(stream->flags & STREAM_EOF);
 	}
 
