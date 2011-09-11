@@ -18,7 +18,7 @@ typedef struct file
 	//@file descriptor?
 
 	char*			buffer;
-	uintptr_t		flags;
+	unsigned		flags;
 	thread_id_t		thread_id;
 	char			pushback;	// last character pushed back via ungetc()
 	} FILE;
