@@ -45,6 +45,7 @@ LIBC_OBJECTS	:=	libc.o \
 					printf.o \
 					rand.o \
 					sbrk.o \
+					setvbuf.o \
 					snprintf.o \
 					sprintf.o \
 					strcat.o \

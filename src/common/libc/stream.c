@@ -12,10 +12,11 @@
 
 FILE stdin_file =
 	{
-	.buffer		= NULL,			// unbuffered by default
-	.flags		= STREAM_OPEN,	// automatically ready for I/O
-	.thread_id	= 3,			//@@@assumes keyboard driver is thread 3
-	.pushback	= EOF
+	.buffer			= NULL,			// unbuffered by default
+	.buffer_size	= 0,
+	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.thread_id		= 3,			//@@@assumes keyboard driver is thread 3
+	.pushback		= EOF
 	};
 
 FILE* stdin = &stdin_file;
@@ -28,10 +29,11 @@ FILE* stdin = &stdin_file;
 
 FILE stdout_file =
 	{
-	.buffer		= NULL,			// unbuffered by default
-	.flags		= STREAM_OPEN,	// automatically ready for I/O
-	.thread_id	= 1,			//@@@assumes console driver is thread 1
-	.pushback	= EOF
+	.buffer			= NULL,			// unbuffered by default
+	.buffer_size	= 0,
+	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.thread_id		= 1,			//@@@assumes console driver is thread 1
+	.pushback		= EOF
 	};
 
 FILE* stdout = &stdout_file;
@@ -44,10 +46,11 @@ FILE* stdout = &stdout_file;
 
 FILE stderr_file =
 	{
-	.buffer		= NULL,			// unbuffered by default
-	.flags		= STREAM_OPEN,	// automatically ready for I/O
-	.thread_id	= 1,			//@@@assumes console driver is thread 1
-	.pushback	= EOF
+	.buffer			= NULL,			// unbuffered by default
+	.buffer_size	= 0,
+	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.thread_id		= 1,			//@@@assumes console driver is thread 1
+	.pushback		= EOF
 	};
 
 FILE* stderr = &stderr_file;
