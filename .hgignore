@@ -35,4 +35,7 @@ etc/vmware/*/*.orig
 etc/virtualbox/*/Logs/*
 etc/virtualbox/*/*.vbox-prev
 
+# External/third-party libraries
+external/libm
+
 

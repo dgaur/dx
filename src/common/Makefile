@@ -9,7 +9,7 @@ include Makefile.common
 #
 # Subtrees that may be built
 #
-COMMON_SUBDIRS	:= libc libm
+COMMON_SUBDIRS	:= libc
 
 
 #

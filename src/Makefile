@@ -12,7 +12,7 @@ include $(DX_ROOT_DIR)/Makefile.dx
 #
 # Subtrees that may be built
 #
-SRC_SUBDIRS	:= common kernel user
+SRC_SUBDIRS	:= common external kernel user
 
 
 #
@@ -24,10 +24,12 @@ all: $(SRC_SUBDIRS)
 
 
 #
-# The order is important here.  Must be the common library code before either
-# the kernel or the user code
+# The order is important here.  Must build the common library code before either
+# the kernel or the user code; likewise, must build the external libraries
+# before any user executables
 #
-kernel user: common
+kernel: common
+user:   common external
 
 
 
@@ -62,6 +64,7 @@ help:
 	@echo "* \"make all\" builds the entire tree"
 	@echo "* \"make clean\" cleans the entire tree"
 	@echo "* \"make common\" builds the common kernel/user libraries"
+	@echo "* \"make external\" builds the external (3rd party) libraries"
 	@echo "* \"make kernel\" builds the kernel tree"
 	@echo "* \"make help\" displays this message"
 	@echo "* \"make user\" builds the user tree"
