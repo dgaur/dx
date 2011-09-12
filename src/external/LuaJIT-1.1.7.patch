@@ -1,0 +1,35 @@
+diff -Naur LuaJIT-1.1.7.orig/Makefile LuaJIT-1.1.7.modified/Makefile
+--- LuaJIT-1.1.7.orig/Makefile	2011-05-05 02:00:00.000000000 -0700
++++ LuaJIT-1.1.7.modified/Makefile	2011-09-11 21:50:45.988199805 -0700
+@@ -55,7 +55,7 @@
+ all:	$(PLAT)
+ 
+ $(PLATS) clean:
+-	cd src && $(MAKE) $@
++	@cd src && $(MAKE) $@
+ 
+ test:	dummy
+ 	src/luajit -O -e 'io.write("Hello world, from ", jit.version, "!\n")'
+diff -Naur LuaJIT-1.1.7.orig/src/Makefile LuaJIT-1.1.7.modified/src/Makefile
+--- LuaJIT-1.1.7.orig/src/Makefile	2011-05-05 02:00:00.000000000 -0700
++++ LuaJIT-1.1.7.modified/src/Makefile	2011-09-11 22:02:05.557199907 -0700
+@@ -104,7 +104,7 @@
+ # -- LuaJIT =========
+ 
+ clean:
+-	$(RM) $(ALL_T) $(ALL_O)
++	@$(RM) $(ALL_T) $(ALL_O)
+ 
+ depend:
+ 	@$(CC) $(CFLAGS) -MM l*.c print.c
+@@ -166,6 +166,10 @@
+ solaris:
+ 	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
+ 
++dx:
++	@$(MAKE) $(LUA_A) CC="$(CC)" MYCFLAGS="$(MYCFLAGS)" MYLDFLAGS="$(MYLDFLAGS)"
++
++
+ # list targets that do not create files (but not all makes understand .PHONY)
+ .PHONY: all $(PLATS) default o a clean depend echo none cleaner distclean
+ 
