@@ -7,7 +7,7 @@ include ../Makefile.user
 
 LIBTAR_OBJECTS	:=	libtar.o
 
-LIBDX_FILE = $(notdir $(LINK_LIBTAR))
+LIBTAR_FILE = $(notdir $(LINK_LIBTAR))
 
 
 
