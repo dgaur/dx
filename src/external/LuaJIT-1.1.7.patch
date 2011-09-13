@@ -12,8 +12,33 @@ diff -Naur LuaJIT-1.1.7.orig/Makefile LuaJIT-1.1.7.modified/Makefile
  	src/luajit -O -e 'io.write("Hello world, from ", jit.version, "!\n")'
 diff -Naur LuaJIT-1.1.7.orig/src/Makefile LuaJIT-1.1.7.modified/src/Makefile
 --- LuaJIT-1.1.7.orig/src/Makefile	2011-05-05 02:00:00.000000000 -0700
-+++ LuaJIT-1.1.7.modified/src/Makefile	2011-09-11 22:02:05.557199907 -0700
-@@ -104,7 +104,7 @@
++++ LuaJIT-1.1.7.modified/src/Makefile	2011-09-12 21:56:37.919198393 -0700
+@@ -18,6 +18,12 @@
+ MYLDFLAGS=
+ MYLIBS=
+ 
++# Local inference rule
++%.o: %.c
++	@echo Compiling $< ...
++	@$(CC) $(CFLAGS) -c -o $@ $<
++
++
+ # ++ Coco =========
+ # Default: autodetect gccasm/setjmp/ucontext/fibers context switch method.
+ COCOCFLAGS=
+@@ -83,8 +89,9 @@
+ a:	$(ALL_A)
+ 
+ $(LUA_A): $(CORE_O) $(LIB_O)
+-	$(AR) $@ $?
+-	$(RANLIB) $@
++	@echo Archiving $@ ...
++	@$(AR) $@ $?
++	@$(RANLIB) $@
+ 
+ $(LUA_T): $(LUA_O) $(LUA_A)
+ 	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
+@@ -104,7 +111,7 @@
  # -- LuaJIT =========
  
  clean:
@@ -22,7 +47,7 @@ diff -Naur LuaJIT-1.1.7.orig/src/Makefile LuaJIT-1.1.7.modified/src/Makefile
  
  depend:
  	@$(CC) $(CFLAGS) -MM l*.c print.c
-@@ -166,6 +166,10 @@
+@@ -166,6 +173,10 @@
  solaris:
  	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
  
