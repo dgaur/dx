@@ -85,6 +85,28 @@ test_memset()
 
 static
 void
+test_strrchr()
+	{
+	const char *result;
+
+#define TEST_STRRCHR(string, c, expected)								\
+	result = strrchr(string, c);										\
+	TEST( !(result || expected) || (strcmp(result, expected) == 0));	
+
+	TEST_STRRCHR("abc",  'a', "abc");
+	TEST_STRRCHR("abca", 'a', "a");
+	TEST_STRRCHR("abc",  'c', "c");
+	TEST_STRRCHR("abc",  'z', NULL);
+	TEST_STRRCHR("a",    'z', NULL);
+	TEST_STRRCHR("",     'z', NULL);
+	TEST_STRRCHR("a",    0,   "");		// Trailing \0 is searched, per C99
+
+	return;
+	}
+
+
+static
+void
 test_strspn()
 	{
 	TEST( strspn("hello", "h")   == 1 );
@@ -151,6 +173,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_strrchr();
 	test_strspn();
 	test_strstr();
 	test_strtod();
