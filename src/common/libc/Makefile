@@ -29,6 +29,7 @@ LIBC_OBJECTS	:=	libc.o \
 					freopen.o \
 					fwrite.o \
 					getchar.o \
+					getenv.o \
 					gets.o \
 					hal/longjmp.o \
 					hal/setjmp.o \
