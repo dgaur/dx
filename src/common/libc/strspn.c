@@ -150,3 +150,44 @@ strcspn(const char *s1, const char *s2)
 	}
 
 
+///
+/// Locate the first occurrence, in s1, of any character in the set s2.
+///
+/// @param s1	-- the string to be searched
+/// @param s2	-- the set of interesting characters
+///
+/// @return pointer to the first occurrence in s1; or NULL if no character in
+/// s2 occurs in s1
+///
+char*
+strpbrk(const char *s1, const char *s2)
+	{
+	uintptr_t	bitmap[ WORD_COUNT ];
+	unsigned	i;
+
+	// By default, the bitmap is empty; no characters will match
+	for (i = 0; i < WORD_COUNT; i++)
+		{ bitmap[i] = 0; }
+
+	// Load the bitmap with entries from the search set
+	while(*s2)
+		{
+		SET_BIT(bitmap, *s2);
+		s2++;
+		}
+
+	// Now scan through the input string for the first character that *does*
+	// exist in the bitmap
+	while(*s1)
+		{
+		if (IS_SET(bitmap, *s1))
+			return((char*)s1);
+
+		// No match, advance to next character in input string
+		s1++;
+		}
+
+	// No matching character
+	return(NULL);
+	}
+

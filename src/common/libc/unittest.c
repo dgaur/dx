@@ -48,6 +48,13 @@ unsigned	tests_passed = 0,
 		}
 
 
+//
+// Test string comparison/equality.  Either (a) NULL, when no match is expected;
+// or (b) find an exact string match
+//
+#define STRING_MATCH(result, expected) \
+	TEST( !(result || expected) || (strcmp(result, expected) == 0));	
+
 
 static
 void
@@ -85,21 +92,35 @@ test_memset()
 
 static
 void
+test_strpbrk()
+	{
+	STRING_MATCH( strpbrk("abcdef", "a"),    "abcdef" );
+	STRING_MATCH( strpbrk("abcdef", "bxyz"), "bcdef" );
+	STRING_MATCH( strpbrk("abcdef", "xyzb"), "bcdef" );
+	STRING_MATCH( strpbrk("abcdef", "f"),    "f" );
+	STRING_MATCH( strpbrk("abcdef", "z"),    NULL );
+	STRING_MATCH( strpbrk("abcdef", "xyz"),  NULL );
+	STRING_MATCH( strpbrk("",       "a"),    NULL );
+	STRING_MATCH( strpbrk("abcdef", ""),     NULL );
+	STRING_MATCH( strpbrk("",       ""),     NULL );
+
+	return;
+	}
+
+
+static
+void
 test_strrchr()
 	{
 	const char *result;
 
-#define TEST_STRRCHR(string, c, expected)								\
-	result = strrchr(string, c);										\
-	TEST( !(result || expected) || (strcmp(result, expected) == 0));	
-
-	TEST_STRRCHR("abc",  'a', "abc");
-	TEST_STRRCHR("abca", 'a', "a");
-	TEST_STRRCHR("abc",  'c', "c");
-	TEST_STRRCHR("abc",  'z', NULL);
-	TEST_STRRCHR("a",    'z', NULL);
-	TEST_STRRCHR("",     'z', NULL);
-	TEST_STRRCHR("a",    0,   "");		// Trailing \0 is searched, per C99
+	STRING_MATCH( strrchr("abc",  'a'), "abc" );
+	STRING_MATCH( strrchr("abca", 'a'), "a" );
+	STRING_MATCH( strrchr("abc",  'c'), "c" );
+	STRING_MATCH( strrchr("abc",  'z'), NULL );
+	STRING_MATCH( strrchr("a",    'z'), NULL );
+	STRING_MATCH( strrchr("",     'z'), NULL );
+	STRING_MATCH( strrchr("a",    0),   "" );	// Find trailing \0, per C99
 
 	return;
 	}
@@ -173,6 +194,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_strpbrk();
 	test_strrchr();
 	test_strspn();
 	test_strstr();
