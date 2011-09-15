@@ -66,6 +66,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strtod.o \
 					strtol.o \
 					strtoul.o \
+					system.o \
 					uitoa.o \
 					ungetc.o \
 					vsnprintf.o
