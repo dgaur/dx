@@ -45,6 +45,8 @@ LIBC_OBJECTS	:=	libc.o \
 					puts.o \
 					printf.o \
 					rand.o \
+					remove.o \
+					rename.o \
 					sbrk.o \
 					setvbuf.o \
 					snprintf.o \
@@ -67,6 +69,8 @@ LIBC_OBJECTS	:=	libc.o \
 					strtol.o \
 					strtoul.o \
 					system.o \
+					tmpfile.o \
+					tmpnam.o \
 					uitoa.o \
 					ungetc.o \
 					vsnprintf.o
