@@ -10,6 +10,7 @@
 #include "errno.h"
 #include "stdlib.h"
 #include "string.h"
+#include "time.h"
 
 
 //
@@ -187,6 +188,89 @@ test_strtoul()
 	}
 
 
+static
+void
+test_time_conversions(	int 	hour,
+						int 	minute,
+						int 	second,
+						int 	month,
+						int 	day,
+						int 	year,
+						time_t	expected)
+	{
+	struct tm datetime =
+		{
+		.tm_hour	= hour,
+		.tm_min		= minute,
+		.tm_sec		= second,
+		.tm_mon		= month - 1,
+		.tm_mday	= day,
+		.tm_year	= year - 1900,
+		.tm_isdst	= -1
+		};
+
+
+	// Convert from broken-down time to seconds
+	time_t t = mktime(&datetime);
+	TEST(t == expected);
+	TEST(datetime.tm_hour < 24);
+	TEST(datetime.tm_min  < 60);
+	TEST(datetime.tm_sec  < 61);	// Leap seconds
+	TEST(datetime.tm_mon  < 12);
+	TEST(datetime.tm_mday < 32);
+	TEST(datetime.tm_wday < 7);
+	TEST(datetime.tm_yday < 366);
+
+
+	// Convert back from seconds to broken-down time; the broken-down time
+	// should be normalized here
+	struct tm result;
+	localtime_r(&expected, &result);
+	TEST(result.tm_hour == datetime.tm_hour);
+	TEST(result.tm_min  == datetime.tm_min);
+	TEST(result.tm_sec  == datetime.tm_sec);
+	TEST(result.tm_mon  == datetime.tm_mon);
+	TEST(result.tm_mday == datetime.tm_mday);
+	TEST(result.tm_year == datetime.tm_year);
+	TEST(result.tm_wday == datetime.tm_wday);
+	TEST(result.tm_yday == datetime.tm_yday);
+
+	return;
+	}
+
+static
+void
+test_time()
+	{
+	// Forward from epoch
+	test_time_conversions(0,  0,  0,  1,  1,  1970, 0);
+	test_time_conversions(0,  0,  1,  1,  1,  1970, 1);
+	test_time_conversions(0,  1,  0,  1,  1,  1970, 60);
+	test_time_conversions(1,  0,  0,  1,  1,  1970, 60*60);
+	test_time_conversions(0,  0,  0,  1,  2,  1970, 24*60*60);
+
+	// Backwards from epoch
+	test_time_conversions(23, 59, 59, 12, 31, 1969, -1);
+	test_time_conversions(23, 59, 00, 12, 31, 1969, -60);
+	test_time_conversions(23, 58, 59, 12, 31, 1969, -60 - 1);
+	test_time_conversions(22, 59, 59, 12, 31, 1969, -60*60 - 1);
+	test_time_conversions(23, 59, 59, 12, 30, 1969, -24*60*60 - 1);
+	test_time_conversions(0,  0,  0,  1,  1,  1900, -2208988800);
+
+	// Various well-known milestones
+	test_time_conversions(1,  46, 40,  9, 9,  2001, 1000000000);
+	test_time_conversions(1,  58, 31,  3, 18, 2005, 1111111111);
+	test_time_conversions(23, 31, 30,  2, 13, 2009, 1234567890);
+
+	// Input may not be normalized
+	test_time_conversions(0,  0,  60, 1,  1,  1970, 60);
+	test_time_conversions(0, -1,  60, 1,  1,  1970, 0);
+	test_time_conversions(0,  60, 0,  1,  1,  1970, 60*60);
+	test_time_conversions(24, 0,  0,  1,  1,  1970, 24*60*60);
+
+	return;
+	}
+
 int
 main()
 	{
@@ -200,6 +284,7 @@ main()
 	test_strstr();
 	test_strtod();
 	test_strtoul();
+	test_time();
 
 	printf("%d passed\n", tests_passed);
 	printf("%d failed\n", tests_failed);

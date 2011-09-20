@@ -12,6 +12,7 @@ LIBC_OBJECTS	:=	libc.o \
 					abort.o \
 					atoi.o \
 					clearerr.o \
+					clock.o \
 					ctype.o \
 					errno.o \
 					exit.o \
@@ -41,6 +42,7 @@ LIBC_OBJECTS	:=	libc.o \
 					memcpy.o \
 					memmove.o \
 					memset.o \
+					mktime.o \
 					putchar.o \
 					puts.o \
 					printf.o \
@@ -69,6 +71,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strtol.o \
 					strtoul.o \
 					system.o \
+					time.o \
 					tmpfile.o \
 					tmpnam.o \
 					uitoa.o \
@@ -103,7 +106,7 @@ endif
 # compile a subset of the dx libc; can only link/test the standalone routines
 # that do not require OS or system interaction.
 #
-UNIT_TEST_C_FILES := unittest.c ctype.c errno.c memset.c \
+UNIT_TEST_C_FILES := unittest.c ctype.c errno.c memset.c mktime.c \
 					 strtod.c strtoul.c strspn.c strrchr.c strstr.c
 UNIT_TEST_ASM_FILES	:= hal/setjmp.asm hal/longjmp.asm
 unittest: $(UNIT_TEST_C_FILES) $(UNIT_TEST_ASM_FILES)
