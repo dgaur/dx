@@ -573,7 +573,8 @@ vsnprintf(	char * RESTRICT			buffer,
 	// Save one character for the terminator, in case the resulting
 	// string exceeds the size of the buffer
 	//
-	buffer_length -= sizeof(char);
+	if (buffer_length > 0)
+		{ buffer_length -= sizeof(char); }
 
 
 	//
