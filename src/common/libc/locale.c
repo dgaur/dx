@@ -55,3 +55,13 @@ localeconv(void)
 	return(&current_locale);
 	}
 
+
+///
+/// Change the current locale
+///
+char*
+setlocale(int category, const char *locale)
+	{
+	// Not supported
+	return(NULL);
+	}
