@@ -82,6 +82,21 @@ LIBC_OBJECTS	:=	libc.o \
 LIBC_FILE := $(notdir $(LINK_LIBC))
 
 
+#
+# Definitions for the Lea malloc() implementation
+#
+MALLOC_DEFINES	:=  -DHAVE_MMAP=0 -DHAVE_MREMAP=0 -DNO_MALLINFO \
+					-DLACKS_FCNTL_H -DLACKS_SYS_PARAM_H \
+					-DLACKS_SYS_MMAN_H -DLACKS_STRINGS_H
+
+
+#
+# Tool settings specific to libc.  The libc implementation here is
+# incomplete; so routines here are just stubs.
+#
+CC_DEFINES		+= $(MALLOC_DEFINES) -Wno-unused-parameter
+CC_FLAGS		+= -std=c99
+
 
 #
 # Build the actual C library

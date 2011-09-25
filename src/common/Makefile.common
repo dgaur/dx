@@ -19,16 +19,7 @@ include $(DX_ROOT_DIR)/src/Makefile.src
 DX_COMMON_DIR	:= $(DX_SRC_DIR)/common
 
 
-# Definitions for the Lea malloc() implementation
-MALLOC_DEFINES	:=  -DHAVE_MMAP=0 -DHAVE_MREMAP=0 -DNO_MALLINFO \
-					-DLACKS_FCNTL_H -DLACKS_SYS_PARAM_H \
-					-DLACKS_SYS_MMAN_H -DLACKS_STRINGS_H
-
-
-
 #
 # Default tool settings
 #
 ASM_INCLUDES	+= -I$(DX_COMMON_DIR)/inc
-CC_DEFINES		+= $(MALLOC_DEFINES)
-CC_FLAGS		+= -std=c99
