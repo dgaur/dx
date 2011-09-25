@@ -14,6 +14,7 @@ LIBC_OBJECTS	:=	libc.o \
 					clearerr.o \
 					clock.o \
 					ctype.o \
+					difftime.o \
 					errno.o \
 					exit.o \
 					_Exit.o \
