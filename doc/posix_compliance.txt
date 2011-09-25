@@ -1,5 +1,5 @@
 
-*** Compliance with POSIX (IEEE 2003.1), Single Unix Specification (v3) ***
+*** Compliance with POSIX:2001 (IEEE 1003.1), Single Unix Specification (v3) ***
 
 
 In general, POSIX support is minimal.  Only enough to support Doug Lea's

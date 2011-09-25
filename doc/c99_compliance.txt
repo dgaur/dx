@@ -4,7 +4,7 @@
 
 In general, the libc implementation here is minimal and only provides partial
 support for C99; it is not a full implementation at all.  All libc and POSIX
-code lives in src/common/libc.
+code lives in src/common/libc.  fdlibm code lives in src/external/libm.
 
 Note that the libc is *SHARED* between the kernel and user applications.  The
 kernel uses some of the standalone library routines (e.g., memcpy, memset,
@@ -19,7 +19,6 @@ Decoder:
 	INCOMPLETE	-- The header and/or implemenation is incomplete.  Some types
 				   or routines may not be defined or implemented.
 	ABSENT		-- This header/implementation is not provided at all.
-
 
 
 assert.h		-- INCOMPLETE.  Provides partial/incomplete definition of
@@ -46,8 +45,8 @@ locale.h		-- INCOMPLETE.  All types and routines are defined.
 				   setlocale() is not implemented.  Related routines, e.g.,
 				   strcoll(), do not honor the locale settings.
 
-math.h			-- INCOMPLETE.  All types and routines are defined, but none
-				   are implemented.
+math.h			-- COMPLETE.  All types and routines are defined, and
+				   implemented via fdlibm.
 
 setjmp.h		-- COMPLETE.  All routines implemented.
 
@@ -78,7 +77,8 @@ string.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 tgmath.h		-- ABSENT.
 
 time.h			-- INCOMPLETE.  Defines time_t, clock_t, struct tm.  All
-				   routines defined, but none implemented.
+				   routines defined, but not all implemented.  No support
+				   for timezones or leap-seconds.
 
 wchar.h			-- ABSENT.
 
