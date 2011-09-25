@@ -54,7 +54,7 @@ unsigned	tests_passed = 0,
 // or (b) find an exact string match
 //
 #define STRING_MATCH(result, expected) \
-	TEST( !(result || expected) || (strcmp(result, expected) == 0));	
+	TEST( !(result || expected) || (strcmp(result, expected) == 0));
 
 
 static
@@ -86,6 +86,50 @@ test_memset()
 
 	for (i = 0; i < sizeof(buffer); i++)
 		{ TEST(buffer[i] == 0); }
+
+	return;
+	}
+
+
+#define TEST_STRFTIME(format, expected) \
+	strftime(buffer, sizeof(buffer), format, &datetime);	\
+	printf("Got: '%s'\n", buffer); \
+	STRING_MATCH(buffer, expected);
+
+
+static
+void
+test_strftime()
+	{
+	struct tm datetime =
+		{
+		.tm_hour	= 23,	// 11 pm
+		.tm_min		= 0,
+		.tm_sec		= 0,
+		.tm_mon		= 0,
+		.tm_mday	= 1,
+		.tm_year	= 1970 - 1900,
+		.tm_isdst	= -1
+		};
+
+	char buffer[64];
+
+	TEST_STRFTIME("%C", "70");
+	TEST_STRFTIME("%d", "01");
+	TEST_STRFTIME("%D", "01/01/70");
+	TEST_STRFTIME("%e", " 1");
+	TEST_STRFTIME("%F", "1970-01-01");
+	TEST_STRFTIME("%H", "23");
+	TEST_STRFTIME("%I", "11");
+	TEST_STRFTIME("%j", "001");
+	TEST_STRFTIME("%m", "01");
+	TEST_STRFTIME("%M", "00");
+	TEST_STRFTIME("%r", "11:00:00 PM");
+	TEST_STRFTIME("%T", "23:00:00");
+
+	// Not enough space
+	TEST(strftime(buffer, 0, "%a", &datetime) == 0);
+	printf("%d\n", strftime(buffer, 0, "%a", &datetime));
 
 	return;
 	}
@@ -278,6 +322,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_strftime();
 	test_strpbrk();
 	test_strrchr();
 	test_strspn();

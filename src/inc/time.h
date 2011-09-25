@@ -7,6 +7,7 @@
 
 #include "restrict.h"
 #include "stddef.h"		// Pick up size_t, NULL
+#include "stdint.h"
 
 
 #if defined(__cplusplus)
@@ -14,25 +15,32 @@ extern "C" {
 #endif
 
 
-#define CLOCKS_PER_SEC ((clock_t)512)	//@
+#define CLOCKS_PER_SEC ((clock_t)(1))
 
 
-typedef unsigned int clock_t;	//@
-
-typedef unsigned int time_t;	//@
+typedef uint64_t clock_t;
 
 
+//
+// Seconds elapsed since the standard POSIX epoch of Jan 1, 1970 00:00:00 +0000
+//
+typedef int64_t time_t;
+
+
+//
+// Broken-down time
+//
 struct tm
 	{
-	int tm_sec;
-	int tm_min;
-	int tm_hour;
-	int tm_mday;
-	int tm_mon;
-	int tm_year;
-	int tm_wday;
-	int tm_yday;
-	int tm_isdst;
+	int tm_sec;		// Seconds, 0 - 60 (possible leap second)
+	int tm_min;		// Minutes, 0 - 59
+	int tm_hour;	// Hours, 0 - 23
+	int tm_mday;	// Day of month, 1 - 31
+	int tm_mon;		// Month of year, 0 - 11
+	int tm_year;	// Years since 1900
+	int tm_wday;	// Day of the week, 0 (Sunday) - 6 (Saturday)
+	int tm_yday;	// Day of year, 0 - 365 (possible leap day)
+	int tm_isdst;	// Is daylight-savings-time in effect?
 	};
 
 
@@ -62,6 +70,7 @@ char *ctime(const time_t *timer);
 struct tm *gmtime(const time_t *timer);
 
 struct tm *localtime(const time_t *timer);
+struct tm *localtime_r(const time_t *timer, struct tm *result);	//POSIX, not C99
 
 size_t strftime(char * RESTRICT s,
 	size_t maxsize,

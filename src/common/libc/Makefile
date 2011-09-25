@@ -60,6 +60,7 @@ LIBC_OBJECTS	:=	libc.o \
 					strcpy.o \
 					stream.o \
 					strerror.o \
+					strftime.o \
 					strlen.o \
 					strncat.o \
 					strncpy.o \
@@ -107,7 +108,7 @@ endif
 # that do not require OS or system interaction.
 #
 UNIT_TEST_C_FILES := unittest.c ctype.c errno.c memset.c mktime.c \
-					 strtod.c strtoul.c strspn.c strrchr.c strstr.c
+					 strftime.c strtod.c strtoul.c strspn.c strrchr.c strstr.c
 UNIT_TEST_ASM_FILES	:= hal/setjmp.asm hal/longjmp.asm
 unittest: $(UNIT_TEST_C_FILES) $(UNIT_TEST_ASM_FILES)
 	@gcc -o $@ $(CC_INCLUDES) $(CC_DEFINES) $(UNIT_TEST_C_FILES) -lm
