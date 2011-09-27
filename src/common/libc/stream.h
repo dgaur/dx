@@ -5,9 +5,9 @@
 #ifndef _STREAM_H
 #define _STREAM_H
 
-#include <dx/thread_id.h>
-#include <stdint.h>
-#include <stdio.h>
+#include "dx/thread_id.h"
+#include "stdint.h"
+#include "stdio.h"
 
 
 //

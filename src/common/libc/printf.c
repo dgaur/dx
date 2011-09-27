@@ -33,7 +33,7 @@ printf(const char * RESTRICT format, ...)
 	//
 	// Write the string out on stdout
 	//
-	written = fwrite(buffer, length, sizeof(char), stdout);
+	written = maybe_write(stdout, buffer, length);
 
 
 	return(written == length ? written : EOF);

@@ -4,8 +4,12 @@
 
 #include "stdarg.h"
 #include "stdio.h"
+#include "write.h"
 
 
+///
+/// Write formatted text to output stream
+///
 int
 fprintf(FILE * RESTRICT			stream,
 		const char * RESTRICT	format, ...)
@@ -27,7 +31,7 @@ fprintf(FILE * RESTRICT			stream,
 	//
 	// Write the string out on the specified stream
 	//
-	written = fwrite(buffer, length, sizeof(char), stream);
+	written = maybe_write(stream, buffer, length);
 
 
 	return(written == length ? written : EOF);

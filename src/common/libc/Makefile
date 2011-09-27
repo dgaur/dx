@@ -78,7 +78,8 @@ LIBC_OBJECTS	:=	libc.o \
 					tmpnam.o \
 					uitoa.o \
 					ungetc.o \
-					vsnprintf.o
+					vsnprintf.o \
+					write.o
 
 LIBC_FILE := $(notdir $(LINK_LIBC))
 
@@ -90,12 +91,14 @@ MALLOC_DEFINES	:=  -DHAVE_MMAP=0 -DHAVE_MREMAP=0 -DNO_MALLINFO \
 					-DLACKS_FCNTL_H -DLACKS_SYS_PARAM_H \
 					-DLACKS_SYS_MMAN_H -DLACKS_STRINGS_H
 
+malloc.o: CC_DEFINES += $(MALLOC_DEFINES)
+
 
 #
 # Tool settings specific to libc.  The libc implementation here is
 # incomplete; so routines here are just stubs.
 #
-CC_DEFINES		+= $(MALLOC_DEFINES) -Wno-unused-parameter
+CC_DEFINES		+= -Wno-unused-parameter
 CC_FLAGS		+= -std=c99
 
 
