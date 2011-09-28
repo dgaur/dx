@@ -31,13 +31,6 @@ puts(const char *string)
 	memcpy(buffer, string, length);
 	buffer[ length ] = '\n';
 
-
-	//
-	// Write out the text
-	//
-	size_t written = maybe_write(stdout, buffer, length_with_newline);
-
-
-	return (written == length_with_newline ? (int)written : EOF);
+	return(fputs(buffer, stdout));
 	}
 
