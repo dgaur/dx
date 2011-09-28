@@ -4,7 +4,6 @@
 
 
 #include "ctype.h"
-#include "dx/types.h"
 
 
 // Bit definitions for the entries in the ctype_table[] below.  Must fit into
