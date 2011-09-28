@@ -2,11 +2,10 @@
 // puts.c
 //
 
-
-#include "dx/send_message.h"
-#include "dx/status.h"
 #include "stdio.h"
+#include "stream.h"
 #include "string.h"
+#include "write.h"
 
 
 ///
@@ -23,38 +22,22 @@ puts(const char *string)
 	{
 	size_t		length = strlen(string);
 	size_t		length_with_newline = length + 1;
-	message_s	message;
-	int			result;
-	status_t	status;
-
 
 	//
 	// Per the C99 spec, puts() automatically appends a newline to its output.
 	// Build a string containing the input string plus the newline
 	//
-	char8_t buffer[ length_with_newline ];		// No terminator
+	char buffer[ length_with_newline ];		// No terminator
 	memcpy(buffer, string, length);
 	buffer[ length ] = '\n';
 
 
 	//
-	// Send the final string to the console driver.  This is non-blocking;
-	// caller must explicitly flush the stream if necessary
+	// Write out the text
 	//
-	message.u.destination		= 1;	//@@@assumes console driver is thread 1
-	message.type				= MESSAGE_TYPE_WRITE;
-	message.id					= MESSAGE_ID_ATOMIC;
-	message.data				= buffer;
-	message.data_size			= length_with_newline;
-	message.destination_address	= NULL;
-
-	status = send_message(&message);
-	if (status == STATUS_SUCCESS)
-		{ result = length_with_newline; }
-	else
-		{ result = EOF; }
+	size_t written = maybe_write(stdout, buffer, length_with_newline);
 
 
-	return(result);
+	return (written == length_with_newline ? (int)written : EOF);
 	}
 

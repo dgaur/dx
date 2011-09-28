@@ -2,8 +2,8 @@
 // memcmp.c
 //
 
-#include "dx/types.h"
 #include "stddef.h"
+#include "string.h"
 
 
 //
@@ -23,8 +23,8 @@
 int
 memcmp(const void *buffer0, const void *buffer1, size_t count)
 	{
-	uint8_tp	byte0	= (uint8_tp)buffer0;
-	uint8_tp	byte1	= (uint8_tp)buffer1;
+	char*		byte0	= (char*)buffer0;
+	char*		byte1	= (char*)buffer1;
 	int			result	= 0;
 
 	// Compare bytes until the buffers are exhausted; or until they diverge
