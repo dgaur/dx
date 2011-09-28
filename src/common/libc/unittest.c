@@ -93,7 +93,6 @@ test_memset()
 
 #define TEST_STRFTIME(format, expected) \
 	strftime(buffer, sizeof(buffer), format, &datetime);	\
-	printf("Got: '%s'\n", buffer); \
 	STRING_MATCH(buffer, expected);
 
 
@@ -129,7 +128,6 @@ test_strftime()
 
 	// Not enough space
 	TEST(strftime(buffer, 0, "%a", &datetime) == 0);
-	printf("%d\n", strftime(buffer, 0, "%a", &datetime));
 
 	return;
 	}
