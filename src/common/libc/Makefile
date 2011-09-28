@@ -29,6 +29,8 @@ LIBC_OBJECTS	:=	libc.o \
 					fputc.o \
 					fread.o \
 					freopen.o \
+					fseek.o \
+					ftell.o \
 					fwrite.o \
 					getchar.o \
 					getenv.o \
