@@ -12,9 +12,9 @@
 
 FILE stdin_file =
 	{
-	.buffer			= NULL,			// unbuffered by default
+	.buffer			= NULL,
 	.buffer_size	= 0,
-	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.flags			= STREAM_OPEN | STREAM_ECHO,
 	.thread_id		= 3,			//@@@assumes keyboard driver is thread 3
 	.pushback		= EOF
 	};
@@ -29,9 +29,9 @@ FILE* stdin = &stdin_file;
 
 FILE stdout_file =
 	{
-	.buffer			= NULL,			// unbuffered by default
+	.buffer			= NULL,
 	.buffer_size	= 0,
-	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.flags			= STREAM_OPEN,
 	.thread_id		= 1,			//@@@assumes console driver is thread 1
 	.pushback		= EOF
 	};
@@ -46,9 +46,9 @@ FILE* stdout = &stdout_file;
 
 FILE stderr_file =
 	{
-	.buffer			= NULL,			// unbuffered by default
+	.buffer			= NULL,
 	.buffer_size	= 0,
-	.flags			= STREAM_OPEN,	// automatically ready for I/O
+	.flags			= STREAM_OPEN,
 	.thread_id		= 1,			//@@@assumes console driver is thread 1
 	.pushback		= EOF
 	};

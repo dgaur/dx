@@ -28,7 +28,7 @@ maybe_write(FILE* stream, const void* data, size_t data_size)
 		if (!stream)
 			break;
 
-		if ( !(stream->flags & STREAM_OPEN) )
+		if (!IS_WRITABLE(stream))
 			break;
 
 		if (data_size == 0)
@@ -90,7 +90,7 @@ write(	FILE*		stream,
 
 		status = send_message(&message);
 		if (status != STATUS_SUCCESS)
-			break;
+			break; //@set STREAM_ERROR?
 
 		//
 		// Success
