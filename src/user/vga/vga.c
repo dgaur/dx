@@ -11,6 +11,7 @@
 #include "dx/hal/vga.h"
 #include "dx/map_device.h"
 #include "dx/receive_message.h"
+#include "dx/send_message.h"
 #include "dx/status.h"
 #include "dx/unmap_device.h"
 #include "stdlib.h"
@@ -476,6 +477,7 @@ wait_for_messages(vga_context_sp vga)
 
 	{
 	message_s		message;
+	message_s		reply;
 	status_t		status;
 
 
@@ -504,6 +506,15 @@ wait_for_messages(vga_context_sp vga)
 
 			case MESSAGE_TYPE_RESET:
 				vga_clear(vga);
+				break;
+
+			case MESSAGE_TYPE_FLUSH:
+				// Receipt of this message implies that all previous I/O
+				// has been processeed already (although, possibly, not yet
+				// visible on the screen), so just wake the requestor directly
+				memcpy(&reply, &message, sizeof(message));
+				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
+				send_message(&reply);
 				break;
 
 			//@enable/disable/reposition cursor; set text color
