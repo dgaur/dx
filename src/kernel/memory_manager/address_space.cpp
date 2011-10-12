@@ -785,6 +785,8 @@ expand(	const void_tp		first_new_page,
 			break;
 			}
 
+		//@should zero the new page(s) to wipe any data that might have been
+		//@present when the frame was last used
 
 		//
 		// Done

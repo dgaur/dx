@@ -84,9 +84,9 @@ typedef int fpos_t;
 //
 // Predefined, well-known file streams
 //
-extern FILE* stdin; //@thread id of kbd driver
-extern FILE* stdout;//@thread id of console driver
-extern FILE* stderr; //@thread id of console driver
+extern FILE* stdin;
+extern FILE* stdout;
+extern FILE* stderr;
 
 
 
