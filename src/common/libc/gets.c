@@ -6,32 +6,35 @@
 
 
 ///
-/// Consume characters from stdin until a newline is found.
+/// Consume a line of text from stdin.  Newline is discarded, per C99.
 ///
 /// This is subject to buffer overrun problems.   In general, use fgets()
 /// instead of gets() for safety reasons.
 ///
+/// @param buffer -- the buffer in which to place the incoming characters
+///
 /// @return a pointer to the input buffer
 ///
-char
-*gets(char *buffer)
+char*
+gets(char *buffer)
 	{
 	if (buffer)
 		{
-		char *c = buffer;
+		char*	b = buffer;
+		int		c;		// Type-promotion to catch possible EOF
 
 		// Read characters until the first newline
-		*c = getchar();
-		while((*c != '\n') && (*c != EOF))
+		c = getchar();
+		while((c != '\n') && (c != EOF))
 			{
-			c++;
-			*c = getchar();
+			*b = (char)(c);
+			b++;
+			c = getchar();
 			}
 
 		// Discard the newline + terminate the string
-		*c = '\0';
+		*b = '\0';
 		}
 
 	return(buffer);
 	}
-

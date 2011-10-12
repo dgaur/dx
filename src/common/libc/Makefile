@@ -23,6 +23,7 @@ LIBC_OBJECTS	:=	libc.o \
 					ferror.o \
 					fflush.o \
 					fgetc.o \
+					fgets.o \
 					fopen.o \
 					fprintf.o \
 					fputs.o \
@@ -50,6 +51,7 @@ LIBC_OBJECTS	:=	libc.o \
 					puts.o \
 					printf.o \
 					rand.o \
+					read.o \
 					remove.o \
 					rename.o \
 					sbrk.o \
