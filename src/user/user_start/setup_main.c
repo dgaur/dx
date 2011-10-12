@@ -28,8 +28,8 @@ initialize_bss()
 	extern char*	end;		// Linker-defined, end of .bss section
 
 	// Zero the .bss section, so that any uninitialized data is set to zero
-	bss_size = (&end) - (&edata);
-	memset((&edata) + 1, 0, bss_size);
+	bss_size = (uintptr_t)(&end) - (uintptr_t)(&edata);
+	memset((&edata), 0, bss_size);
 
 	return;
 	}
