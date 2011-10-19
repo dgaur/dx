@@ -30,6 +30,7 @@ LIBC_OBJECTS	:=	libc.o \
 					fputc.o \
 					fread.o \
 					freopen.o \
+					fscanf.o \
 					fseek.o \
 					ftell.o \
 					fwrite.o \
@@ -82,6 +83,8 @@ LIBC_OBJECTS	:=	libc.o \
 					tmpnam.o \
 					uitoa.o \
 					ungetc.o \
+					vcscanf.o \
+					vfscanf.o \
 					vsnprintf.o \
 					write.o
 

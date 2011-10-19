@@ -20,8 +20,8 @@ typedef struct file
 	char*			buffer;
 	size_t			buffer_size;
 	unsigned		flags;
+	unsigned char	pushback;	// last character pushed back via ungetc()
 	thread_id_t		thread_id;
-	char			pushback;	// last character pushed back via ungetc()
 	} FILE;
 
 
