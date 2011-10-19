@@ -188,9 +188,9 @@ read_format_style(	const char *	format,
 ///
 static
 bool
-read_input_number(	const vcscanf_source_s*	source,
-					char*					text,
-					size_t					text_size)
+read_input_number(	vcscanf_source_s*	source,
+					char*				text,
+					size_t				text_size)
 	{
 	char c = EOF;
 	bool success = false;
@@ -200,8 +200,7 @@ read_input_number(	const vcscanf_source_s*	source,
 	assert(text);
 	while(text_size > 1)
 		{
-		c = source->read(source->context);
-		printf("READ d: '%c'\n", c);
+		c = source->read(source);
 
 		// Validate the input
 		if (c == EOF)
@@ -228,7 +227,7 @@ read_input_number(	const vcscanf_source_s*	source,
 
 	// Restore the input source
 	if (c != EOF)
-		{ source->pushback(c, source->context); }
+		{ source->pushback(c, source); }
 
 	return(success);
 	}
@@ -239,9 +238,9 @@ read_input_number(	const vcscanf_source_s*	source,
 ///
 static
 bool
-read_input_string(	const vcscanf_source_s*	source,
-					char*					text,
-					size_t					text_size)
+read_input_string(	vcscanf_source_s*	source,
+					char*				text,
+					size_t				text_size)
 	{
 	char c = EOF;
 	bool success = false;
@@ -249,8 +248,7 @@ read_input_string(	const vcscanf_source_s*	source,
 	assert(text);
 	while(text_size > 1)
 		{
-		c = source->read(source->context);
-		printf("READ s: '%c'\n", c);
+		c = source->read(source);
 
 		// Validate the input
 		if (c == EOF)
@@ -275,7 +273,7 @@ read_input_string(	const vcscanf_source_s*	source,
 
 	// Restore the input source
 	if (c != EOF)
-		{ source->pushback(c, source->context); }
+		{ source->pushback(c, source); }
 
 	return(success);
 	}
@@ -297,7 +295,7 @@ read_input_string(	const vcscanf_source_s*	source,
 /// @return the number of items assigned; or EOF on input failure
 ///
 int
-vcscanf(const vcscanf_source_s*	source,
+vcscanf(vcscanf_source_s*		source,
 		const char * RESTRICT	format,
 		va_list					argument_list)
 	{
@@ -312,7 +310,7 @@ vcscanf(const vcscanf_source_s*	source,
 	// string is exhausted
 	//
 	assert(source);
-	c = source->read(source->context);
+	c = source->read(source);
 
 	while((c != EOF) && (*format != '\0'))
 		{
@@ -325,7 +323,7 @@ vcscanf(const vcscanf_source_s*	source,
 		if (isspace(f))
 			{ format++; continue; }
 		if (isspace(c))
-			{ c = source->read(source->context); continue; }
+			{ c = source->read(source); continue; }
 
 
 		//
@@ -336,7 +334,7 @@ vcscanf(const vcscanf_source_s*	source,
 			if (f == (char)(c))
 				{
 				format++;
-				c = source->read(source->context);
+				c = source->read(source);
 				continue;
 				}
 			else
@@ -357,7 +355,7 @@ vcscanf(const vcscanf_source_s*	source,
 
 		// Preserve the current input character, so that the conversion routines
 		// can find it cleanly
-		source->pushback(c, source->context);
+		source->pushback(c, source);
 
 		// Parse the desired conversion/style
 		format = read_format_style(format, &style);
@@ -422,15 +420,15 @@ vcscanf(const vcscanf_source_s*	source,
 
 			// Literal '%'
 			case TYPE_PERCENT:
-				c = source->read(source->context);
+				c = source->read(source);
 				if (c != '%')
-					{ source->pushback(c, source->context); c = EOF; }
+					{ source->pushback(c, source); c = EOF; }
 				break;
 
 
 			// Unknown or unsupported conversion
 			default:
-				source->pushback(c, source->context);
+				source->pushback(c, source);
 				c = EOF;
 				break;
 
@@ -439,7 +437,7 @@ vcscanf(const vcscanf_source_s*	source,
 
 		// Reload the character that terminated the previous conversion, for
 		// the next iteration
-		c = source->read(source->context);
+		c = source->read(source);
 
 		} // while()
 
@@ -448,7 +446,7 @@ vcscanf(const vcscanf_source_s*	source,
 	// Preserve the last valid input character, if any
 	//
 	if (c != EOF)
-		{ source->pushback(c, source->context); }
+		{ source->pushback(c, source); }
 
 
 	return(items_matched > 0 ? items_matched : EOF);

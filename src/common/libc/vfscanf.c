@@ -2,10 +2,47 @@
 // vfscanf.c
 //
 
+#include "assert.h"
 #include "stdarg.h"
 #include "stdio.h"
+#include "stream.h"
 #include "vcscanf.h"
 
+
+/// Callback for reading a character from the input stream
+static
+int
+vfscanf_pushback(int c, struct vcscanf_source* source)
+	{
+	assert(source);
+	assert(source->context);
+
+	return(ungetc(c, (FILE*)(source->context)));
+	}
+
+
+/// Callback for reading a character from the input stream
+static
+int
+vfscanf_read(struct vcscanf_source* source)
+	{
+	assert(source);
+	assert(source->context);
+
+	return(fgetc((FILE*)(source->context)));
+	}
+
+
+/// Callback for reading the position within the input stream
+static
+long
+vfscanf_tell(struct vcscanf_source* source)
+	{
+	assert(source);
+	assert(source->context);
+
+	return(ftell((FILE*)(source->context)));
+	}
 
 
 ///
@@ -23,12 +60,13 @@ vfscanf(FILE * RESTRICT			stream,
 		const char * RESTRICT	format,
 		va_list					argument_list)
 	{
-	vcscanf_source_s	source =
+	// Callbacks for handling stream input
+	vcscanf_source_s source =
 		{
 		stream,
-		(vcscanf_pushback_fp)ungetc,
-		(vcscanf_read_fp)fgetc,
-		(vcscanf_tell_fp)ftell
+		vfscanf_pushback,
+		vfscanf_read,
+		vfscanf_tell
 		};
 
 	int	items_matched;

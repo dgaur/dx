@@ -9,19 +9,23 @@
 #include "stdarg.h"
 
 
+// Forward reference
+struct vcscanf_source;
+
+
 /// Callback for pushing a character back to the input source; this is intended
 /// to look like ungetc()
-typedef int (*vcscanf_pushback_fp)(int c, void* context);
+typedef int (*vcscanf_pushback_fp)(int c, struct vcscanf_source* source);
 
 
 /// Callback for reading a character from the input source; this is intended
 /// to look like fgetc()
-typedef int (*vcscanf_read_fp)(void* context);
+typedef int (*vcscanf_read_fp)(struct vcscanf_source* source);
 
 
 /// Callback for reading the position within the input source; this is intended
 /// to look like ftell()
-typedef long (*vcscanf_tell_fp)(void* context);
+typedef long (*vcscanf_tell_fp)(struct vcscanf_source* source);
 
 
 ///
@@ -41,7 +45,7 @@ typedef vcscanf_source_sp *		vcscanf_source_spp;
 
 
 int
-vcscanf(const vcscanf_source_s*	source,
+vcscanf(vcscanf_source_s*		source,
 		const char * RESTRICT	format,
 		va_list					argument_list);
 
