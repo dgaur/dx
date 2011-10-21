@@ -91,6 +91,26 @@ test_memset()
 	}
 
 
+static
+void
+test_sscanf()
+	{
+	int d;
+	sscanf("abc 1", "abc %d", &d);
+	TEST(d == 1);
+
+	double f;
+	sscanf("abc 1", "abc %lf", &f);
+	TEST(APPROX_EQUAL(f, 1.0));
+
+	char s[32];
+	sscanf("%abc", "%% %s", s);
+	STRING_MATCH(s, "abc");
+
+	return;
+	}
+
+
 #define TEST_STRFTIME(format, expected) \
 	strftime(buffer, sizeof(buffer), format, &datetime);	\
 	STRING_MATCH(buffer, expected);
@@ -320,6 +340,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_sscanf();
 	test_strftime();
 	test_strpbrk();
 	test_strrchr();
