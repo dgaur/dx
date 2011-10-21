@@ -39,7 +39,7 @@
 	// stack layout, type promotion, etc, that often break down in certain
 	// edge cases.  So use compiler intrinsics where possible.
 	//
-	typedef char*	va_list;
+	typedef __builtin_va_list	va_list;
 
 	#define va_end(argument_list) \
 		__builtin_va_end(argument_list)
