@@ -133,9 +133,24 @@ endif
 # compile a subset of the dx libc; can only link/test the standalone routines
 # that do not require OS or system interaction.
 #
-UNIT_TEST_C_FILES := unittest.c ctype.c errno.c memset.c mktime.c \
-					 sscanf.c strftime.c strtod.c strtoul.c strspn.c \
-					 strrchr.c strstr.c vcscanf.c vsscanf.c
+UNIT_TEST_C_FILES :=	unittest.c \
+						ctype.c \
+						errno.c \
+						itoa.c \
+						memset.c \
+						mktime.c \
+						sscanf.c \
+						strftime.c \
+						strtod.c \
+						strtoul.c \
+						strspn.c \
+						strrchr.c \
+						strrev.c \
+						strstr.c \
+						uitoa.c \
+						vcscanf.c \
+						vsnprintf.c \
+						vsscanf.c
 UNIT_TEST_ASM_FILES	:= hal/setjmp.asm hal/longjmp.asm
 unittest: $(UNIT_TEST_C_FILES) $(UNIT_TEST_ASM_FILES)
 	@gcc -o $@ $(CC_INCLUDES) $(CC_DEFINES) $(UNIT_TEST_C_FILES) -lm

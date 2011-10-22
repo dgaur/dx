@@ -93,6 +93,37 @@ test_memset()
 
 static
 void
+test_snprintf()
+	{
+	char buf[64];
+
+	snprintf(buf, sizeof(buf), "hello");
+	STRING_MATCH(buf, "hello");
+
+	snprintf(buf, sizeof(buf), "%d", 10);
+	STRING_MATCH(buf, "10");
+
+	snprintf(buf, sizeof(buf), "%p", 16);
+	STRING_MATCH(buf, "0x10");
+
+	snprintf(buf, sizeof(buf), "%#x", 16);
+	STRING_MATCH(buf, "0x10");
+
+	snprintf(buf, sizeof(buf), "%s", "hello");
+	STRING_MATCH(buf, "hello");
+
+	snprintf(buf, sizeof(buf), "%c", 'a');
+	STRING_MATCH(buf, "a");
+
+	snprintf(buf, sizeof(buf), "%%");
+	STRING_MATCH(buf, "%");
+
+	return;
+	}
+
+
+static
+void
 test_sscanf()
 	{
 	int d;
@@ -340,6 +371,7 @@ main()
 
 	test_ctype();
 	test_memset();
+	test_snprintf();
 	test_sscanf();
 	test_strftime();
 	test_strpbrk();
