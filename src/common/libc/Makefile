@@ -139,6 +139,7 @@ UNIT_TEST_C_FILES :=	unittest.c \
 						itoa.c \
 						memset.c \
 						mktime.c \
+						snprintf.c \
 						sscanf.c \
 						strftime.c \
 						strtod.c \

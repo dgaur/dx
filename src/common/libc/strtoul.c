@@ -76,9 +76,9 @@ strtoul(const char * RESTRICT	nptr,
 		if (isdigit(c))
 			c -= '0';
 		else if (isupper(c))
-			c -= 'A';
+			c = c - 'A' + 10;
 		else if (islower(c))
-			c -= 'a';
+			c = c - 'a' + 10;
 		else
 			break;	// Invalid character
 

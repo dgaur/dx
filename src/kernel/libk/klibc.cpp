@@ -22,9 +22,11 @@ uint32_t	PRINTF_BUFFER_LENGTH = 128;
 
 
 ///
-/// Kernel-specific implementation of atoi(), mainly to avoid linking all of
-/// the strtol() machinery.  This implementation is incomplete: assumes only
-/// decimal inputs, minimal error checking.
+/// Kernel-specific implementation of strtoul(), mainly to avoid linking all of
+/// the libc machinery.  This is only intended to support vsnprintf() from the
+/// common libc; which supports printf() below; and is therefore rather
+/// incomplete: it assumes only positive, decimal inputs; no support for
+/// leading whitespace; minimal error checking, etc.
 ///
 /// Converts a string of decimal digits into the corresponding
 /// integer value.  Assumes a standard ASCII character set, in
@@ -35,36 +37,28 @@ uint32_t	PRINTF_BUFFER_LENGTH = 128;
 /// Returns the corresponding integer value or zero if the string
 /// does not contain a valid number.
 ///
-int
-atoi(const char *c)
+unsigned long int
+strtoul(const char * RESTRICT	nptr,
+		char ** RESTRICT		endptr,
+		int)
 	{
 	int value = 0;
 
-	if (c)
+	ASSERT(nptr);
+
+	// Parse the actual decimal digits
+	while(*nptr >= '0' && *nptr <= '9')
 		{
-		bool_t	negative	= false;
+		// Add the next digit to the intermediate value
+		value *= 10;
+		value += (*nptr - '0');
 
-		// Parse the sign, if any
-		if (*c == '+')
-			{ c++; }
-		else if (*c == '-')
-			{ negative = true; c++; }
-
-		// Parse the actual decimal digits
-		while(*c >= '0' && *c <= '9')
-			{
-			// Add the next digit to the intermediate value
-			value *= 10;
-			value += (*c - '0');
-
-			// Advance to the next digit, if any
-			c++;
-			}
-
-		// Fix the sign if necessary
-		if (negative)
-			{ value = -value; }
+		// Advance to the next digit, if any
+		nptr++;
 		}
+
+	if (endptr)
+		*endptr = (char*)(nptr);
 
 	return(value);
 	}

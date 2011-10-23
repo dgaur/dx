@@ -53,8 +53,17 @@ unsigned	tests_passed = 0,
 // Test string comparison/equality.  Either (a) NULL, when no match is expected;
 // or (b) find an exact string match
 //
-#define STRING_MATCH(result, expected) \
-	TEST( !(result || expected) || (strcmp(result, expected) == 0));
+#define STRING_MATCH(result, expected)									\
+	if (!result && !expected)											\
+		{ tests_passed++; }												\
+	else if (strcmp(result, expected) == 0)								\
+		{ tests_passed++; }												\
+	else																\
+		{																\
+		printf("TEST FAILED at line %d: expected '%s', read '%s'\n",	\
+			__LINE__, expected, result);								\
+		tests_failed++;													\
+		}																\
 
 
 static
@@ -103,6 +112,9 @@ test_snprintf()
 	snprintf(buf, sizeof(buf), "%d", 10);
 	STRING_MATCH(buf, "10");
 
+	snprintf(buf, sizeof(buf), "%o", 8);
+	STRING_MATCH(buf, "10");
+
 	snprintf(buf, sizeof(buf), "%p", 16);
 	STRING_MATCH(buf, "0x10");
 
@@ -112,8 +124,14 @@ test_snprintf()
 	snprintf(buf, sizeof(buf), "%s", "hello");
 	STRING_MATCH(buf, "hello");
 
+	snprintf(buf, sizeof(buf), "%8s", "hello");
+	STRING_MATCH(buf, "   hello");
+
 	snprintf(buf, sizeof(buf), "%c", 'a');
 	STRING_MATCH(buf, "a");
+
+	snprintf(buf, sizeof(buf), "%4c", 'a');
+	STRING_MATCH(buf, "   a");
 
 	snprintf(buf, sizeof(buf), "%%");
 	STRING_MATCH(buf, "%");

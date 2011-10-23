@@ -151,16 +151,12 @@ parse_format_style(	const char *	format,
 	// output.  The actual padding bytes are determined by the 0 or ' ' (blank)
 	// flag field, if any.
 	//
-	//@should be isdigit() and strtoul(), but bloats kernel usage
-	if (*format >= '1' && *format <= '9')
+	char *end;
+	unsigned long width = strtoul(format, &end, 10);
+	if (width > 0)
 		{
-		// Parse the actual width value
-		style->width = atoi(format);
-
-		// Determine the size of the width value itself, in characters, in
-		// order to continue parsing the format string
-		while(*format >= '0' && *format <= '9')
-			{ format++; }
+		style->width = width;
+		format = end;
 		}
 
 
@@ -377,7 +373,7 @@ print_pad(	char *			buffer,
 
 		// Generate the actual pad text
 		char pad[ pad_length + 1 ];
-		memset(pad, pad_length, style->pad_character);
+		memset(pad, style->pad_character, pad_length);
 		pad[pad_length] = 0;
 
 		// Insert the actual pad characters
