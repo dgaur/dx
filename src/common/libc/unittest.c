@@ -269,20 +269,6 @@ test_strstr()
 
 static
 void
-test_strtod()
-	{
-	TEST( APPROX_EQUAL(strtod("1.0", NULL),     1.0) );
-	TEST( APPROX_EQUAL(strtod("1.23", NULL),    1.23) );
-	TEST( APPROX_EQUAL(strtod("-1.0", NULL),    -1.0) );
-	TEST( APPROX_EQUAL(strtod("1.23e+4", NULL), 1.23e+4) );
-	TEST( APPROX_EQUAL(strtod("1.23e-4", NULL), 1.23e-4) );
-
-	return;
-	}
-
-
-static
-void
 test_strtoul()
 	{
 	TEST( strtoul("  1", NULL, 0) == 1 );
@@ -396,7 +382,6 @@ main()
 	test_strrchr();
 	test_strspn();
 	test_strstr();
-	test_strtod();
 	test_strtoul();
 	test_time();
 

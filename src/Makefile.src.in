@@ -101,6 +101,8 @@ LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
 # Additional user libraries, not linked or shared with the kernel.  May be
 # linked with user executables as needed.
 #
+LINK_LIBGDTOA	:= $(DX_SRC_DIR)/external/libgdtoa/libgdtoa.a
+LINK_LIBLUA		:= $(DX_SRC_DIR)/external/lua/src/liblua.a
 LINK_LIBM		:= $(DX_SRC_DIR)/common/libm/libm.a
 LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
 
@@ -109,7 +111,7 @@ LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
 # The aggregate collection of required user-mode libraries.  May be extended
 # via child Makefiles as needed
 #
-LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_COMMON_LIBS)
+LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_COMMON_LIBS) $(LINK_LIBGDTOA)
 
 
 #

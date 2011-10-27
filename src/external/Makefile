@@ -8,10 +8,11 @@ include ../Makefile.src
 #
 # Subtrees that may be built
 #
-LIBM := libm
-LIBLUA := lua
+LIBGDTOA	:= libgdtoa
+LIBLUA		:= lua
+LIBM		:= libm
 
-EXTERNAL_SUBDIRS	:= $(LIBM) $(LIBLUA)
+EXTERNAL_SUBDIRS	:= $(LIBGDTOA) $(LIBM) $(LIBLUA)
 
 
 #
@@ -19,6 +20,16 @@ EXTERNAL_SUBDIRS	:= $(LIBM) $(LIBLUA)
 #
 .PHONY: all
 all: $(EXTERNAL_SUBDIRS)
+
+
+#
+# Float/double conversion library (strtod, etc)
+#
+$(LIBGDTOA): gdtoa.tgz gdtoa.patch
+	@echo Unpacking libgdtoa ...
+	@tar xzf $< --transform="s/gdtoa/$(LIBGDTOA)/"		# Only directory name
+	@cd $@ && patch -p1 < ../gdtoa.patch
+	@$(MAKE) -C $@
 
 
 #

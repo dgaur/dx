@@ -75,7 +75,6 @@ LIBC_OBJECTS	:=	libc.o \
 					strrev.o \
 					strspn.o \
 					strstr.o \
-					strtod.o \
 					strtol.o \
 					strtoul.o \
 					system.o \
@@ -142,7 +141,6 @@ UNIT_TEST_C_FILES :=	unittest.c \
 						snprintf.c \
 						sscanf.c \
 						strftime.c \
-						strtod.c \
 						strtoul.c \
 						strspn.c \
 						strrchr.c \

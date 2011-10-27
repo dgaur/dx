@@ -4,3 +4,5 @@ and license from the rest of the dx source.
 
 Changes to this code are handled via the patches in this same directory.  The
 tarballs themselves should match those distributed by the original authors.
+
+See dx/README for additional notes on 3rd-party source.

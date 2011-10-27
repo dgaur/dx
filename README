@@ -42,4 +42,8 @@ This is the dx operating system, version 0.0.5, released 2011-08-20
 
 	* LuaJIT, v1.1.7, from www.luajit.org.  See dx/src/external/lua.
 
+	* David Gay's gdtoa library, from http://www.netlib.org/fp.  See
+	  dx/src/external/libgdtoa.
+
+
 
