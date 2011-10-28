@@ -103,7 +103,7 @@ LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
 #
 LINK_LIBGDTOA	:= $(DX_SRC_DIR)/external/libgdtoa/libgdtoa.a
 LINK_LIBLUA		:= $(DX_SRC_DIR)/external/lua/src/liblua.a
-LINK_LIBM		:= $(DX_SRC_DIR)/common/libm/libm.a
+LINK_LIBM		:= $(DX_SRC_DIR)/external/libm/libm.a
 LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
 
 
@@ -147,6 +147,7 @@ $(LINK_USER_LIBS):
 	@echo Linking $@ ...
 	@$(LINK) $(LINK_FLAGS) $(LINK_TEXT_SECTION) \
 		$(filter-out $(MAKEFILE_LIST), $^) \
+		$(LINK_EXPLICIT_LIBS) \
 		$(LINK_USER_LIBS)
 
 %.dep: %.asm $(MAKEFILE_LIST)
