@@ -136,6 +136,15 @@ test_snprintf()
 	snprintf(buf, sizeof(buf), "%%");
 	STRING_MATCH(buf, "%");
 
+	snprintf(buf, sizeof(buf), "%.1f", 2.0);
+	STRING_MATCH(buf, "2.0");
+
+	snprintf(buf, sizeof(buf), "%.1f", 2.5);
+	STRING_MATCH(buf, "2.5");
+
+	snprintf(buf, sizeof(buf), "%.1f", -2.0);
+	STRING_MATCH(buf, "-2.0");
+
 	return;
 	}
 

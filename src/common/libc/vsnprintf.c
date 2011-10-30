@@ -48,9 +48,10 @@
 //
 // String prefixes for identifying hex and octal values (e.g., "0x1234")
 //
-const char * HEX_PREFIX		= "0x";
-const char * NO_PREFIX		= "";
-const char * OCTAL_PREFIX	= "0";
+const char * FRACTIONAL_PREFIX	= "0.";
+const char * HEX_PREFIX			= "0x";
+const char * NO_PREFIX			= "";
+const char * OCTAL_PREFIX		= "0";
 
 
 //
@@ -341,7 +342,7 @@ print_float_argument(	char *			buffer,
 	int			negative;
 	size_t		pad_length;
 	size_t		prefix_length = 0;
-	char*		text;
+	char*		digits;
 
 
 
@@ -357,14 +358,69 @@ print_float_argument(	char *			buffer,
 	if (style->flags & FLAG_BEST_FORMAT)
 		{
 		//@use precision + exponent to determine best format
-		text = fcvt(argument, precision, &decimal_point, &negative);
+		digits = fcvt(argument, precision, &decimal_point, &negative);
 		}
 	else if (style->flags & FLAG_SCIENTIFIC)
-		{ text = ecvt(argument, precision, &decimal_point, &negative); }
+		{ digits = ecvt(argument, precision, &decimal_point, &negative); }
 	else
-		{ text = fcvt(argument, precision, &decimal_point, &negative); }
+		{ digits = fcvt(argument, precision, &decimal_point, &negative); }
 
-	size_t text_length = strlen(text);
+
+	char text[ precision + (decimal_point < 0 ? -decimal_point : 0) + 8 ];
+	char *d = text;
+
+
+	//
+	// Insert sign or align with whitespace, as requested
+	//
+	if (negative)
+		{ *d = '-'; d++; }
+	else if (style->flags & FLAG_EXPLICIT_SIGN)
+		{ *d = '+'; d++; }
+	else if (style->flags & FLAG_ALIGN_SIGN)
+		{ *d = ' '; d++; }
+
+#if 0
+	if (decimal_point < 0)
+		{
+		style->prefix = FRACTIONAL_PREFIX;
+		style->flags |= FLAG_PAD;
+		style->pad_character = '0';
+		prefix_length = strlen(FRACTIONAL_PREFIX);
+		//@width = max(width, precision + (-decimal_point))?
+		decimal_point = INT_MAX;
+		}
+#endif
+
+	//
+	// Insert a decimal point into the output string, if necessary
+	//
+	int digits_length = (int)strlen(digits);
+	if (digits_length <= decimal_point)
+		{
+		// No decimal point within digit string, so just copy it directly
+		strncpy(d, digits, digits_length);
+		d += digits_length;
+		}
+
+	else
+		{
+		// Copy the integral portion @@could be zero?
+		strncpy(d, digits, decimal_point);
+		d += decimal_point;
+
+		// Insert the decimal point
+		*d = '.';
+		d++;
+
+		// Copy the fractional portion
+		unsigned characters_left = digits_length - decimal_point;
+		strncpy(d, digits+decimal_point, characters_left);
+		d += characters_left;
+		}
+
+	*d = '\0';
+	size_t text_length = d - text;
 
 
 	//
