@@ -13,9 +13,12 @@
 //
 // Format flags
 //
-#define FLAG_ALTERNATE_OUTPUT	0x00000001
-#define FLAG_PAD				0x00000002
-
+#define FLAG_ALTERNATE_OUTPUT	0x00000001	/// '#' flag
+#define FLAG_PAD				0x00000002	/// pad output
+#define FLAG_EXPLICIT_SIGN		0x00000004	/// '+' flag
+#define FLAG_ALIGN_SIGN			0x00000008	/// ' ' flag
+#define FLAG_SCIENTIFIC			0x00000010	// Scientific notation, for '%e'
+#define FLAG_BEST_FORMAT		0x00000020	// Best representation, for '%f'
 
 //
 // Type bits
@@ -36,6 +39,13 @@
 
 
 //
+// Precision not specified in a conversion code; to distinguish this from
+// formats with an explicit precision of zero
+//
+#define NO_PRECISION			(-1)
+
+
+//
 // String prefixes for identifying hex and octal values (e.g., "0x1234")
 //
 const char * HEX_PREFIX		= "0x";
@@ -51,6 +61,7 @@ typedef struct format_style
 	unsigned		base;				/// Base for integer conversion
 	unsigned		flags;				/// Mask of FLAG_* bits
 	char			pad_character;		/// Padding character, if any
+	int				precision;			/// Numeric precision
 	const char*		prefix;				/// Prefix for integer representation
 	unsigned		type;				/// Type of the corresponding argument
 	unsigned		width;				/// Minimum field width, padded
@@ -89,6 +100,8 @@ const char*
 parse_format_style(	const char *	format,
 					format_style_sp	style	)
 	{
+	char *end;
+
 	//
 	// Assume that no modifiers are given, so initialize some
 	// reasonable defaults
@@ -96,6 +109,7 @@ parse_format_style(	const char *	format,
 	style->base				= 0;
 	style->flags			= 0;
 	style->pad_character	= ' ';
+	style->precision		= NO_PRECISION;
 	style->prefix			= NO_PREFIX;
 	style->type				= 0;
 	style->width			= 0;
@@ -104,23 +118,20 @@ parse_format_style(	const char *	format,
 	//
 	// Now parse the format string to determine the various attributes
 	// of the output.  The format string will have the following form:
-	//	% FLAGS WIDTH FORMATCODE
+	//	% FLAGS WIDTH . PRECISION FORMATCODE
 	//
 	// where:
-	//	FLAGS is:		#, 0 or ' '(blank)
+	//	FLAGS is:		#, 0, + or blank
 	//	WIDTH is:		any positive number
+	//	PRECISION is:	any positive number
 	//	FORMATCODE is:	c, d, i, p, s, u, x or %
 	//
-	// Only FORMATCODE is required.  Both FLAGS + WIDTH are optional.
-	//
-	// Other standard printf() modifiers (e.g., precision, etc)
-	// are not supported
+	// Only FORMATCODE is required.  All others are optional.
 	//
 
 
 	//
-	// Parse the format FLAGS, if any.  Recognized flags are: #, 0 and blank.
-	// Other standard flags (+, -) are not supported.
+	// Parse the format FLAGS, if any.  Recognized flags are: #, 0, + and blank.
 	//
 	for(;;)
 		{
@@ -129,11 +140,18 @@ parse_format_style(	const char *	format,
 			style->flags |= FLAG_ALTERNATE_OUTPUT;
 
 		// Pad the formatted output
-		else if (*format == '0' || *format == ' ')
+		else if (*format == '0')
 			{
 			style->flags |= FLAG_PAD;
-			style->pad_character = *format;
+			style->pad_character = '0';
 			}
+
+		else if (*format == '+')
+			style->flags |= FLAG_EXPLICIT_SIGN;
+
+		else if (*format == ' ')
+			style->flags |= FLAG_ALIGN_SIGN;
+
 
 		// else, no more flags in this format string, so bail out here
 		else
@@ -148,10 +166,9 @@ parse_format_style(	const char *	format,
 	//
 	// Parse the WIDTH field, if present.  The width is assumed to be a
 	// non-zero number, representing the minimum width/pad of the formatted
-	// output.  The actual padding bytes are determined by the 0 or ' ' (blank)
-	// flag field, if any.
+	// output.  The actual padding bytes are determined by the flag field,
+	// if any.
 	//
-	char *end;
 	unsigned long width = strtoul(format, &end, 10);
 	if (width > 0)
 		{
@@ -161,19 +178,27 @@ parse_format_style(	const char *	format,
 
 
 	//
-	// Parse the actual conversion CODE; this identifies the underlying
-	// data type of the argument.  Supported codes are:
-	//	c : character
-	//	d : signed decimal
-	//	i : signed decimal
-	//	o : unsigned octal
-	//	p : pointer address
-	//	s : string
-	//	u : unsigned decimal
-	//	x : unsigned hexadecimal
-	//	% : literal % sign
+	// Parse the PRECISION field, if present.  The precision is assumed to be a
+	// non-zero number, representing some minimum number of digits or characters
+	// in the formatted output.
 	//
-	// Other codes are not recognized and will be displayed as is.
+	if (*format == '.')
+		{
+		// Consume the '.' that introduces the precision field
+		format++;
+
+		unsigned long precision = strtoul(format, &end, 10);
+		if (precision > 0)
+			{
+			style->precision = precision;
+			format = end;
+			}
+		}
+
+
+	//
+	// Parse the actual conversion CODE; this identifies the underlying
+	// data type of the argument
 	//
 	switch(*format)
 		{
@@ -220,6 +245,24 @@ parse_format_style(	const char *	format,
 			style->base = 16;
 			style->prefix = HEX_PREFIX;
 			style->type |= TYPE_UNSIGNED_INT;
+			break;
+
+
+		//
+		// Floating point formats
+		//
+		case 'e':
+			style->flags |= FLAG_SCIENTIFIC;
+			style->type |= TYPE_FLOAT;
+			break;
+
+		case 'f':
+			style->type |= TYPE_FLOAT;
+			break;
+
+		case 'g':
+			style->flags |= FLAG_BEST_FORMAT;
+			style->type |= TYPE_FLOAT;
 			break;
 
 
@@ -281,14 +324,77 @@ print_character_argument(	char *			buffer,
 
 
 ///
-/// Writes the given argument to the buffer, if possible, in the
+/// Writes the given floating-point argument to the buffer, if possible, in the
 /// appropriate base, according to the specified style.
 ///
 /// Returns the number of characters written.
 ///
 static
 size_t
-print_numeric_argument(	char *			buffer,
+print_float_argument(	char *			buffer,
+						size_t			buffer_length,
+						double			argument,
+						format_style_sp	style)
+	{
+	int			decimal_point;
+	size_t		length = 0;
+	int			negative;
+	size_t		pad_length;
+	size_t		prefix_length = 0;
+	char*		text;
+
+
+
+	//
+	// By default, precision is 6 digits if unspecified, per C99
+	//
+	int precision = (style->precision == NO_PRECISION ? 6 : style->precision);
+
+
+	//
+	// Convert the argument to its corresponding string representation
+	//
+	if (style->flags & FLAG_BEST_FORMAT)
+		{
+		//@use precision + exponent to determine best format
+		text = fcvt(argument, precision, &decimal_point, &negative);
+		}
+	else if (style->flags & FLAG_SCIENTIFIC)
+		{ text = ecvt(argument, precision, &decimal_point, &negative); }
+	else
+		{ text = fcvt(argument, precision, &decimal_point, &negative); }
+
+	size_t text_length = strlen(text);
+
+
+	//
+	// Pad the output to the desired width, if necessary
+	//
+	pad_length = print_pad(buffer, buffer_length, style, prefix_length,
+		text_length);
+	length += pad_length;
+	buffer += pad_length;
+	buffer_length -= pad_length;
+
+
+	//
+	// Print the actual value
+	//
+	length += print_text(buffer, buffer_length, text, text_length);
+
+	return(length);
+	}
+
+
+///
+/// Writes the given integral argument to the buffer, if possible, in the
+/// appropriate base, according to the specified style.
+///
+/// Returns the number of characters written.
+///
+static
+size_t
+print_integer_argument(	char *			buffer,
 						size_t			buffer_length,
 						uint32_t		argument,
 						format_style_sp	style)
@@ -324,6 +430,7 @@ print_numeric_argument(	char *			buffer,
 
 	text_length = strlen(text);
 
+	//@handle ALIGN_SIGN and EXPLICIT_SIGN here
 
 	//
 	// Pad the output to the desired width, if necessary
@@ -396,14 +503,18 @@ print_string_argument(	char *			buffer,
 						const char *	string,
 						format_style_sp	style)
 	{
-	size_t	length;
-	size_t	string_length = strlen(string);
+	//
+	// Allow for null strings
+	//
+	if (!string)
+		{ string = "(null)"; }
 
 
 	//
 	// Pad the output out to the desired width, if necessary
 	//
-	length = print_pad(buffer, buffer_length, style, 0, string_length);
+	size_t string_length = strlen(string);
+	size_t length = print_pad(buffer, buffer_length, style, 0, string_length);
 	buffer += length;
 	buffer_length -= length;
 
@@ -512,7 +623,15 @@ vsnprintf(	char * RESTRICT			buffer,
 			case TYPE_UNSIGNED_INT:
 				{
 				int d = va_arg(argument_list, int);
-				output_length = print_numeric_argument(buffer, buffer_length, d,
+				output_length = print_integer_argument(buffer, buffer_length, d,
+					&style);
+				break;
+				}
+
+			case TYPE_FLOAT:
+				{
+				float f = va_arg(argument_list, double);	// float -> double
+				output_length = print_float_argument(buffer, buffer_length, f,
 					&style);
 				break;
 				}

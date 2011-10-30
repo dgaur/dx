@@ -16,6 +16,8 @@ Decoder:
 
 errno.h			-- COMPLETE.  Defines C99 errno and all standard error values.
 
+stdlib.h		-- INCOMPLETE.  Includes POSIX ecvt() and fcvt() routines.
+
 sys/types.h		-- INCOMPLETE.  Provides size_t.  Nothing else.
 
 unistd.h		-- INCOMPLETE.  Provides sbrk(), which isn't actually part of

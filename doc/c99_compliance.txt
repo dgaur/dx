@@ -70,7 +70,7 @@ stdlib.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes itoa() and uitoa() as extensions.  abs(), min(),
 				   max() are all defined as macros.  strtol() and strtoul()
 				   are incomplete, do not handle error conditions correctly.
-				   strtod() is incomplete.
+				   Includes POSIX ecvt() and fcvt() routines.
 
 string.h		-- INCOMPLETE.  All routines defined, but not all implemented.
 				   Includes strrev() as an extension.

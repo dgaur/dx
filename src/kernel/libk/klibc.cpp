@@ -22,6 +22,19 @@ uint32_t	PRINTF_BUFFER_LENGTH = 128;
 
 
 ///
+/// No kernel support for rendering floating-point output.  These are
+/// kernel-specific implementations of ecvt() and fcvt(), intended to support
+/// vsnprintf() from the common libc, without linking in all of the libgdtoa
+/// machinery
+///
+char* ecvt(double, int, int*, int*)
+	{ return (char*)("<float>"); }
+
+char* fcvt(double, int, int*, int*)
+	{ return (char*)("<float>"); }
+
+
+///
 /// Kernel-specific implementation of strtoul(), mainly to avoid linking all of
 /// the libc machinery.  This is only intended to support vsnprintf() from the
 /// common libc; which supports printf() below; and is therefore rather

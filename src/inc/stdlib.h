@@ -56,6 +56,13 @@ unsigned long long int strtoull(
 
 
 //
+// POSIX floating-point conversions; not part of C99
+//
+char* ecvt(double number, int ndigits, int *decpt, int *sign);
+char* fcvt(double number, int ndigits, int *decpt, int *sign);
+
+
+//
 // Maximum string lengths for itoa(). In general, representing numbers
 // from 0 to (N-1) in radix R requires ceiling(base-R-logarithm of N)
 // characters.  Plus one character for base 10 to include the leading
