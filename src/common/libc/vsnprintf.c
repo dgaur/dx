@@ -2,6 +2,7 @@
 // vsnprintf.c
 //
 
+#include "limits.h"
 #include "stdarg.h"
 #include "stdbool.h"
 #include "stdio.h"
@@ -338,12 +339,12 @@ print_float_argument(	char *			buffer,
 						format_style_sp	style)
 	{
 	int			decimal_point;
-	size_t		length = 0;
+	size_t		length;
 	int			negative;
+	char*		buffer_start = buffer;
 	size_t		pad_length;
 	size_t		prefix_length = 0;
 	char*		digits;
-
 
 
 	//
@@ -353,7 +354,8 @@ print_float_argument(	char *			buffer,
 
 
 	//
-	// Convert the argument to its corresponding string representation
+	// Convert the argument to its corresponding raw string representation,
+	// without any sign, decimal point, exponent, etc
 	//
 	if (style->flags & FLAG_BEST_FORMAT)
 		{
@@ -365,80 +367,105 @@ print_float_argument(	char *			buffer,
 	else
 		{ digits = fcvt(argument, precision, &decimal_point, &negative); }
 
-
-	char text[ precision + (decimal_point < 0 ? -decimal_point : 0) + 8 ];
-	char *d = text;
+	int digits_length = (int)strlen(digits);
 
 
 	//
 	// Insert sign or align with whitespace, as requested
 	//
+	char first = 0;
 	if (negative)
-		{ *d = '-'; d++; }
+		{ first = '-'; }
 	else if (style->flags & FLAG_EXPLICIT_SIGN)
-		{ *d = '+'; d++; }
+		{ first = '+'; }
 	else if (style->flags & FLAG_ALIGN_SIGN)
-		{ *d = ' '; d++; }
+		{ first = ' '; }
+	if (first)
+		{
+		length = print_text(buffer, buffer_length, &first, sizeof(first));
+		buffer += length;
+		buffer_length -= length;
+		prefix_length++;
+		}
 
-#if 0
+
+	//
+	// Will an explicit decimal point be needed?
+	//
+	bool need_decimal_point;
+	if (digits_length <= decimal_point)
+		need_decimal_point = false;
+	else
+		need_decimal_point = true;
+
+
+	//
+	// If the value has no integral component (i.e., abs(value) < 1.0), then
+	// automatically insert leading zero's and decimal point
+	//
 	if (decimal_point < 0)
 		{
-		style->prefix = FRACTIONAL_PREFIX;
+		// Insert an integer prefix of zero ("0.")
+		prefix_length += strlen(FRACTIONAL_PREFIX);
+		length = print_text(buffer, buffer_length, FRACTIONAL_PREFIX,
+			prefix_length);
+		buffer += length;
+		buffer_length -= length;
+
+		// Pad with zero's now, if necessary.  Widen the minimum field width
+		// to account for the required number of leading zeros
 		style->flags |= FLAG_PAD;
 		style->pad_character = '0';
-		prefix_length = strlen(FRACTIONAL_PREFIX);
-		//@width = max(width, precision + (-decimal_point))?
-		decimal_point = INT_MAX;
+		style->width = max(style->width, digits_length + (-decimal_point) +
+			prefix_length);
+
+		// Already inserted the decimal point
+		need_decimal_point = false;
 		}
-#endif
-
-	//
-	// Insert a decimal point into the output string, if necessary
-	//
-	int digits_length = (int)strlen(digits);
-	if (digits_length <= decimal_point)
-		{
-		// No decimal point within digit string, so just copy it directly
-		strncpy(d, digits, digits_length);
-		d += digits_length;
-		}
-
-	else
-		{
-		// Copy the integral portion @@could be zero?
-		strncpy(d, digits, decimal_point);
-		d += decimal_point;
-
-		// Insert the decimal point
-		*d = '.';
-		d++;
-
-		// Copy the fractional portion
-		unsigned characters_left = digits_length - decimal_point;
-		strncpy(d, digits+decimal_point, characters_left);
-		d += characters_left;
-		}
-
-	*d = '\0';
-	size_t text_length = d - text;
 
 
 	//
-	// Pad the output to the desired width, if necessary
+	// Pad the output to the desired width; or insert leading zeros; if
+	// necessary
 	//
 	pad_length = print_pad(buffer, buffer_length, style, prefix_length,
-		text_length);
-	length += pad_length;
+		digits_length + (need_decimal_point ? 1 : 0));
 	buffer += pad_length;
 	buffer_length -= pad_length;
 
 
 	//
-	// Print the actual value
+	// Insert a decimal point into the output string, if necessary
 	//
-	length += print_text(buffer, buffer_length, text, text_length);
+	if (need_decimal_point)
+		{
+		// Copy the integral portion
+		length = print_text(buffer, buffer_length, digits, decimal_point);
+		buffer += length;
+		buffer_length -= length;
 
-	return(length);
+		// Insert the actual decimal point
+		length = print_text(buffer, buffer_length, ".", 1);
+		buffer += length;
+		buffer_length -= length;
+
+		// Copy the fractional portion
+		unsigned characters_left = digits_length - decimal_point;
+		length = print_text(buffer, buffer_length, digits+decimal_point,
+			characters_left);
+		buffer += length;
+		buffer_length -= length;
+		}
+	else
+		{
+		// No decimal point occurs within digit string, so just copy it directly
+		length = print_text(buffer, buffer_length, digits, digits_length);
+		buffer += length;
+		buffer_length -= length;
+		}
+
+
+	return (size_t)(buffer - buffer_start);
 	}
 
 

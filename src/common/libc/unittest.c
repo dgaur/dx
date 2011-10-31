@@ -127,6 +127,9 @@ test_snprintf()
 	snprintf(buf, sizeof(buf), "%8s", "hello");
 	STRING_MATCH(buf, "   hello");
 
+	snprintf(buf, sizeof(buf), "%s", NULL);
+	STRING_MATCH(buf, "(null)");
+
 	snprintf(buf, sizeof(buf), "%c", 'a');
 	STRING_MATCH(buf, "a");
 
@@ -144,6 +147,21 @@ test_snprintf()
 
 	snprintf(buf, sizeof(buf), "%.1f", -2.0);
 	STRING_MATCH(buf, "-2.0");
+
+	snprintf(buf, sizeof(buf), "%+.1f", 2.0);
+	STRING_MATCH(buf, "+2.0");
+
+	snprintf(buf, sizeof(buf), "% .1f", 2.0);
+	STRING_MATCH(buf, " 2.0");
+
+	snprintf(buf, sizeof(buf), "%.1f", 0.0);
+	STRING_MATCH(buf, "0.0");
+
+	snprintf(buf, sizeof(buf), "%.3f", 0.062);	// 1/16
+	STRING_MATCH(buf, "0.062");
+
+	snprintf(buf, sizeof(buf), "%.3f", 0.008);	// 1/128
+	STRING_MATCH(buf, "0.008");
 
 	return;
 	}
