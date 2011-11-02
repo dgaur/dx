@@ -338,11 +338,10 @@ print_float_argument(	char *			buffer,
 						double			argument,
 						format_style_sp	style)
 	{
+	const char*	buffer_start = buffer;
 	int			decimal_point;
 	size_t		length;
 	int			negative;
-	char*		buffer_start = buffer;
-	size_t		pad_length;
 	size_t		prefix_length = 0;
 	char*		digits;
 
@@ -428,7 +427,7 @@ print_float_argument(	char *			buffer,
 	// Pad the output to the desired width; or insert leading zeros; if
 	// necessary
 	//
-	pad_length = print_pad(buffer, buffer_length, style, prefix_length,
+	size_t pad_length = print_pad(buffer, buffer_length, style, prefix_length,
 		digits_length + (need_decimal_point ? 1 : 0));
 	buffer += pad_length;
 	buffer_length -= pad_length;

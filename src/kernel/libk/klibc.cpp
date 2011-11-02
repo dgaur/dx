@@ -27,11 +27,19 @@ uint32_t	PRINTF_BUFFER_LENGTH = 128;
 /// vsnprintf() from the common libc, without linking in all of the libgdtoa
 /// machinery
 ///
-char* ecvt(double, int, int*, int*)
-	{ return (char*)("<float>"); }
+char* ecvt(double, int, int* decimal_point, int* sign)
+	{
+	*decimal_point = 1024;
+	*sign = 0;
+	return (char*)("<float>");
+	}
 
-char* fcvt(double, int, int*, int*)
-	{ return (char*)("<float>"); }
+char* fcvt(double, int, int* decimal_point, int* sign)
+	{
+	*decimal_point = 1024;
+	*sign = 0;
+	return (char*)("<float>");
+	}
 
 
 ///
