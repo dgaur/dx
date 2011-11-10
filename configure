@@ -16,9 +16,14 @@
 # cygwin.  Should probably work under *BSD, too, but not tested.  Other
 # OS/environments are not supported.
 #
-# The script assumes that it can find 'cat', 'which' and 'sed' in the current
-# PATH.  It (probably?) relies on some specific 'bash' features.  All other
-# dependencies should be resolved by the script itself.
+# The script assumes the following tools are already in the current PATH:
+#	- cat
+#	- chmod
+#	- rm
+#	- sed
+#	- which
+# All other dependencies should be resolved by the script itself.  The script
+# (probably?) also relies on some specific 'bash' features.
 #
 # See also the documentation under ${DX_ROOT_DIR}/doc/build_process
 #
@@ -326,6 +331,7 @@ for output_file in ${OUTPUT_FILES}; do
 	# Create + fixup the output file with the detected tool settings
 	log "Generating: ${output_file}"
 	${SED} -f ${SED_PROGRAM} --posix ${input_file} > ${output_file}
+	chmod -w ${output_file}
 done
 
 
