@@ -4,7 +4,12 @@
 
 
 * PENDING-RELEASE:
-	More additions to libc.
+
+* Version 0.0.6, released 2011-11-09:
+	Significant additions to libc, still aimed at porting Lua.  Incorporated
+	and updated some third-party sources (libm, libgdtoa) for the same.  Couple
+	bug fixes.  No major changes or additions in externally-visible
+	functionality.
 
 
 * Version 0.0.5, released 2011-08-20:
