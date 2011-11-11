@@ -36,7 +36,7 @@ etc/virtualbox/*/Logs/*
 etc/virtualbox/*/*.vbox-prev
 
 # External/third-party libraries
-external/libm
-external/lua
 external/libgdtoa
+external/liblua
+external/libm
 

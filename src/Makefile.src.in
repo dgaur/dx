@@ -105,7 +105,7 @@ LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
 # linked with user executables as needed, via LINK_EXTRA_LIBS
 #
 LINK_LIBGDTOA	:= $(DX_SRC_DIR)/external/libgdtoa/libgdtoa.a
-LINK_LIBLUA		:= $(DX_SRC_DIR)/external/lua/src/liblua.a
+LINK_LIBLUA		:= $(DX_SRC_DIR)/external/liblua/src/liblua.a
 LINK_LIBM		:= $(DX_SRC_DIR)/external/libm/libm.a
 LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
 

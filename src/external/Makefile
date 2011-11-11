@@ -9,7 +9,7 @@ include ../Makefile.src
 # Subtrees that may be built
 #
 LIBGDTOA	:= libgdtoa
-LIBLUA		:= lua
+LIBLUA		:= liblua
 LIBM		:= libm
 
 EXTERNAL_SUBDIRS	:= $(LIBGDTOA) $(LIBM) $(LIBLUA)
@@ -49,7 +49,7 @@ $(LIBLUA): LuaJIT-1.1.7.tar.gz LuaJIT-1.1.7.patch
 	@echo Unpacking lua ...
 	@$(TAR) xzf $< --transform="s/LuaJIT-1.1.7/$(LIBLUA)/g"
 	@cd $@ && $(PATCH) -p1 < ../LuaJIT-1.1.7.patch
-	@$(MAKE) -C lua/src dx CC="$(CC)" \
+	@$(MAKE) -C $(LIBLUA)/src dx CC="$(CC)" \
 		MYCFLAGS="-nostdinc $(CC_DEFINES) $(CC_INCLUDES)" \
 		MAKEFLAGS=
 
