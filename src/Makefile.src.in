@@ -94,14 +94,15 @@ LINK_START_FILE	:= $(DX_SRC_DIR)/user/user_start/user_start.o
 
 
 #
-# The dx run-time library.  Must be linked with all user-mode executables
+# The dx run-time library; provides all system calls to kernel.  Must be linked
+# with all user-mode executables
 #
 LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
 
 
 #
 # Additional user libraries, not linked or shared with the kernel.  May be
-# linked with user executables as needed.
+# linked with user executables as needed, via LINK_EXTRA_LIBS
 #
 LINK_LIBGDTOA	:= $(DX_SRC_DIR)/external/libgdtoa/libgdtoa.a
 LINK_LIBLUA		:= $(DX_SRC_DIR)/external/lua/src/liblua.a
@@ -110,17 +111,18 @@ LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
 
 
 #
-# The aggregate collection of required user-mode libraries.  May be extended
-# via child Makefiles as needed
+# The aggregate collection of required user-mode libraries.  All user-mode
+# executables need these.
 #
 LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_COMMON_LIBS) $(LINK_LIBGDTOA)
 
 
 #
 # As a nicety, rebuild any of the well-known libraries from anywhere in the
-# tree; this is mainly useful when building individual subdirectories
+# tree; this is mainly useful when building individual subdirectories.  Assumes
+# that external sources/libraries have already been unpacked.
 #
-$(LINK_USER_LIBS):
+$(LINK_USER_LIBS) $(LINK_EXTRA_LIBS):
 	@echo "Automatically rebuilding: $@"
 	@$(MAKE) -C $(dir $@)
 
@@ -145,11 +147,11 @@ $(LINK_USER_LIBS):
 	@echo Archiving $@ ...
 	@$(AR) $(AR_FLAGS) $@ $(filter-out $(MAKEFILE_LIST), $^)
 
-%.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(MAKEFILE_LIST)
+%.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(LINK_EXTRA_LIBS) $(MAKEFILE_LIST)
 	@echo Linking $@ ...
 	@$(LINK) $(LINK_FLAGS) $(LINK_TEXT_SECTION) \
 		$(filter-out $(MAKEFILE_LIST), $^) \
-		$(LINK_EXPLICIT_LIBS) \
+		$(LINK_EXTRA_LIBS) \
 		$(LINK_USER_LIBS)
 
 %.dep: %.asm $(MAKEFILE_LIST)

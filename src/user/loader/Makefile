@@ -78,7 +78,7 @@ CC_FLAGS  += -fno-reorder-functions
 #
 # Use the .tar library for unpacking the ramdisk
 #
-LINK_USER_LIBS += $(LINK_LIBTAR)
+LINK_EXTRA_LIBS += $(LINK_LIBTAR)
 
 
 #
