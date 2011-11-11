@@ -39,7 +39,7 @@
 # documentation)
 #
 OPTIONAL_TOOLS="DEBUGFS DOXYGEN E2FSCK MKISOFS"
-REQUIRED_TOOLS="AR ASM CC CP CXX LD NM OBJCOPY OBJDUMP SED SHELL STRIP TAR"
+REQUIRED_TOOLS="AR ASM CC CP CXX LD NM OBJCOPY OBJDUMP PATCH SED SHELL STRIP TAR"
 
 
 
@@ -155,6 +155,7 @@ cat >${CONFIGURE_LOG} <<-END_OF_LOG_HEADER
 DX pseudo-configure script
 Last invoked: `date`
 Last invoked as: $0 $*
+PATH was: `echo ${PATH}`
 
 END_OF_LOG_HEADER
 
@@ -261,6 +262,7 @@ MKISOFS=${MKISOFS:-mkisofs}
 NM=${NM:-nm}
 OBJCOPY=${OBJCOPY:-objcopy}
 OBJDUMP=${OBJDUMP:-objdump}
+PATCH=${PATCH:-patch}
 SED=${SED:-sed}
 SHELL=${SHELL:-bash}
 STRIP=${STRIP:-strip}

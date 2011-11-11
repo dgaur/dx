@@ -37,8 +37,10 @@ LINK		:= @LD@
 NM			:= @NM@
 OBJCOPY		:= @OBJCOPY@
 OBJDUMP		:= @OBJDUMP@
+PATCH		:= @PATCH@
 SHELL		:= @SHELL@
 STRIP		:= @STRIP@
+TAR			:= @TAR@
 
 
 

@@ -27,8 +27,8 @@ all: $(EXTERNAL_SUBDIRS)
 #
 $(LIBGDTOA): gdtoa.tgz gdtoa.patch
 	@echo Unpacking libgdtoa ...
-	@tar xzf $< --transform="s/gdtoa/$(LIBGDTOA)/"		# Only directory name
-	@cd $@ && patch -p1 < ../gdtoa.patch
+	@$(TAR) xzf $< --transform="s/gdtoa/$(LIBGDTOA)/"	# Only directory name
+	@cd $@ && $(PATCH) -p1 < ../gdtoa.patch
 	@$(MAKE) -C $@
 
 
@@ -37,8 +37,8 @@ $(LIBGDTOA): gdtoa.tgz gdtoa.patch
 #
 $(LIBM): fdlibm53.tar.gz fdlibm53.patch
 	@echo Unpacking libm ...
-	@tar xzf $< --transform="s/fdlibm53/$(LIBM)/g"
-	@cd $@ && patch -p1 < ../fdlibm53.patch
+	@$(TAR) xzf $< --transform="s/fdlibm53/$(LIBM)/g"
+	@cd $@ && $(PATCH) -p1 < ../fdlibm53.patch
 	@$(MAKE) -C $@
 
 
@@ -47,8 +47,8 @@ $(LIBM): fdlibm53.tar.gz fdlibm53.patch
 #
 $(LIBLUA): LuaJIT-1.1.7.tar.gz LuaJIT-1.1.7.patch
 	@echo Unpacking lua ...
-	@tar xzf $< --transform="s/LuaJIT-1.1.7/$(LIBLUA)/g"
-	@cd $@ && patch -p1 < ../LuaJIT-1.1.7.patch
+	@$(TAR) xzf $< --transform="s/LuaJIT-1.1.7/$(LIBLUA)/g"
+	@cd $@ && $(PATCH) -p1 < ../LuaJIT-1.1.7.patch
 	@$(MAKE) -C lua/src dx CC="$(CC)" \
 		MYCFLAGS="-nostdinc $(CC_DEFINES) $(CC_INCLUDES)" \
 		MAKEFLAGS=
