@@ -38,9 +38,10 @@ all: $(ROOT_SUBDIRS)
 #
 # Build the child subdirectories individually
 #
+PARALLEL_JOBS := $(shell grep -c processor /proc/cpuinfo)
 .PHONY: $(ROOT_SUBDIRS)
 $(ROOT_SUBDIRS):
-	@$(MAKE) -C $@ all
+	@$(MAKE) -C $@ -j $(PARALLEL_JOBS) -l $(PARALLEL_JOBS) all
 
 
 

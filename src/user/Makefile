@@ -4,9 +4,9 @@
 
 
 #
-# Inherit the global OS build settings
+# Inherit the various user settings
 #
-include $(DX_ROOT_DIR)/Makefile.dx
+include Makefile.user
 
 
 
@@ -32,17 +32,19 @@ RAMDISK_LISTING		:= ramdisk.lst
 # find the user loader in the first entry
 #@@the order also determines assignment of thread ids
 #
-RAMDISK_CONTENTS :=	loader.bin \
+RAMDISK_FILES :=	loader.bin \
 					vga.exe \
 					shell.exe \
 					keyboard.exe
+RAMDISK_PATHS :=	$(foreach file, $(RAMDISK_FILES), \
+						$(abspath $(basename $(file))/$(file)))
 
 
 #
-# By default, build the entire tree and the ramdisk
+# The ramdisk should collect all of the necessary user binaries
 #
 .PHONY: all
-all: $(USER_SUBDIRS) $(RAMDISK_FILE)
+all: $(RAMDISK_FILE)
 
 
 
@@ -70,16 +72,14 @@ $(USER_SUBDIRS):
 #	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
 #	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
 #
-vpath %.exe $(USER_DAEMONS)
-vpath %.bin $(USER_DAEMONS)
-$(RAMDISK_FILE): $(RAMDISK_CONTENTS)
+$(RAMDISK_FILE): $(USER_SUBDIRS)
 	@echo Building $@ ...
 	@mkdir -p $(RAMDISK_BOOT_TREE)
-	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(abspath $^)
-	@tar chzf $@ \
-		$(foreach file, $(RAMDISK_CONTENTS), $(RAMDISK_BOOT_TREE)/$(file)) \
+	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(RAMDISK_PATHS)
+	@$(TAR) chzf $@ \
+		$(foreach file, $(RAMDISK_FILES), $(RAMDISK_BOOT_TREE)/$(file)) \
 		--transform="s,^,/,"
-	@tar tvzf $@ > $(RAMDISK_LISTING)
+	@$(TAR) tvzf $@ > $(RAMDISK_LISTING)
 
 
 
