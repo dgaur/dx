@@ -78,6 +78,16 @@ endif
 
 
 #
+# Child trees
+#
+DX_SRC_COMMON_DIR	:= $(DX_SRC_DIR)/common
+DX_SRC_EXTERNAL_DIR	:= $(DX_SRC_DIR)/external
+DX_SRC_KERNEL_DIR	:= $(DX_SRC_DIR)/kernel
+DX_SRC_USER_DIR		:= $(DX_SRC_DIR)/user
+
+
+
+#
 # Common library code, shared between kernel + user space
 #
 LINK_LIBC			:= $(DX_SRC_DIR)/common/libc/libc.a
@@ -90,24 +100,24 @@ LINK_COMMON_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
 # The default entry point for all user-mode executables.  Must be linked into
 # all executables
 #
-LINK_START_FILE	:= $(DX_SRC_DIR)/user/user_start/user_start.o
+LINK_START_FILE	:= $(DX_SRC_USER_DIR)/user_start/user_start.o
 
 
 #
 # The dx run-time library; provides all system calls to kernel.  Must be linked
 # with all user-mode executables
 #
-LINK_LIBDX		:= $(DX_SRC_DIR)/user/libdx/libdx.a
+LINK_LIBDX		:= $(DX_SRC_USER_DIR)/libdx/libdx.a
 
 
 #
 # Additional user libraries, not linked or shared with the kernel.  May be
 # linked with user executables as needed, via LINK_EXTRA_LIBS
 #
-LINK_LIBGDTOA	:= $(DX_SRC_DIR)/external/libgdtoa/libgdtoa.a
-LINK_LIBLUA		:= $(DX_SRC_DIR)/external/liblua/src/liblua.a
-LINK_LIBM		:= $(DX_SRC_DIR)/external/libm/libm.a
-LINK_LIBTAR		:= $(DX_SRC_DIR)/user/libtar/libtar.a
+LINK_LIBGDTOA	:= $(DX_SRC_EXTERNAL_DIR)/libgdtoa/libgdtoa.a
+LINK_LIBLUA		:= $(DX_SRC_EXTERNAL_DIR)/liblua/src/liblua.a
+LINK_LIBM		:= $(DX_SRC_EXTERNAL_DIR)/libm/libm.a
+LINK_LIBTAR		:= $(DX_SRC_USER_DIR)/libtar/libtar.a
 
 
 #
