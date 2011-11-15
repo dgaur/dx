@@ -85,13 +85,13 @@ in Linux/BSD is supported, with 32b tools.
 
 
 * Makefile.inc:
-	Every kernel subdirectory contains a file named Makefile.inc, which
-	describes the dependencies for the code in that directory.  Adding or
+	Every kernel and user leaf directory contains a file named Makefile.inc,
+	which describes the dependencies for the code in that directory.  Adding or
 	deleting a file in a directory typically only requires updating
 	Makefile.inc.
 
 	Makefile.inc is included by multiple makefiles: the Makefile in the
-	same directory; and the Makefile in parent kernel directory.
+	same directory; and the Makefile in parent directory.
 
 	The local directory name is encoded within each Makefile.inc, so moving
 	or renaming directories will require editing Makefile.inc.

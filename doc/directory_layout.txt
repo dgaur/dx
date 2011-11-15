@@ -25,6 +25,9 @@ source tree.
 				  applications.  Currently, this only contains a small C
 				  library
 
+		/external
+				- Third party libraries, linked into user applications.
+
 		/inc	- Global #include files shared across the kernel, applications,
 				  libraries, etc
 
@@ -44,6 +47,7 @@ source tree.
 			/inc			- User headers
 			/keyboard		- Keyboard driver
 			/libdx			- Library of system calls to dx kernel
+			/libtar			- Library for parsing .tar files
 			/loader			- Loader for initializing user-space from ramdisk
 			/user_start		- Startup files for all user-mode applications
 			/vga			- VGA driver
