@@ -2,13 +2,8 @@
 # Makefile
 #
 
+include Makefile.inc
 include ../Makefile.user
-
-
-LOADER_BIN		:= loader.bin
-LOADER_EXE		:= loader.exe
-LOADER_DISASM	:= $(LOADER_BIN).disasm
-LOADER_OBJECTS	:= loader.o loader_environment.o loader_main.o
 
 
 .PHONY: all
@@ -86,7 +81,6 @@ LINK_EXTRA_LIBS += $(LINK_LIBTAR)
 # here
 #
 $(LOADER_EXE): $(LOADER_OBJECTS)
-
 
 
 #

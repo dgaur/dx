@@ -3,27 +3,19 @@
 #
 
 include ../Makefile.user
+include Makefile.inc
 
 
-LIBTAR_OBJECTS	:=	libtar.o
+all: $(LOCAL_LIB)
 
-LIBTAR_FILE = $(notdir $(LINK_LIBTAR))
-
-
-
-#
-# Build the actual tar library
-#
-all: $(LIBTAR_FILE)
-
-$(LIBTAR_FILE):	$(LIBTAR_OBJECTS)
+$(LOCAL_LIB):	$(LOCAL_OBJECTS)
 
 
 
 #
 # Generate/include the dependencies for the local objects
 #
-LOCAL_DEPENDENCIES := $(LIBTAR_OBJECTS:%.o=%.dep)
+LOCAL_DEPENDENCIES := $(LOCAL_OBJECTS:%.o=%.dep)
 ifeq ($(filter clean, $(MAKECMDGOALS)),)
 -include $(LOCAL_DEPENDENCIES)
 endif
@@ -34,7 +26,7 @@ endif
 # Clean the local directory
 #
 clean:
-	@rm -f $(LIBTAR_FILE)
-	@rm -f $(LIBTAR_OBJECTS)
+	@rm -f $(LOCAL_FILE)
+	@rm -f $(LOCAL_OBJECTS)
 	@rm -f $(LOCAL_DEPENDENCIES)
 

@@ -3,17 +3,15 @@
 #
 
 include ../Makefile.user
+include Makefile.inc
 
 
-START_OBJECT = $(notdir $(LINK_START_FILE))
-
-
-all: $(START_OBJECT)
+all: $(LOCAL_LIB)
 
 
 # Link the startup files into a single object
-$(START_OBJECT): setup_main.o start.o 
-	@echo Linking $(START_OBJECT) ...
+$(LOCAL_LIB): $(LOCAL_OBJECTS)
+	@echo Linking $@
 	@$(LINK) -r $(LINK_FLAGS) $^
 
 

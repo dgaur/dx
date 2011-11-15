@@ -13,10 +13,22 @@ include Makefile.user
 #
 # Subtrees that may be built
 #
-USER_LIBS		:= libdx libtar user_start
-USER_DAEMONS	:= keyboard loader shell vga
-USER_SUBDIRS	:= $(USER_LIBS) $(USER_DAEMONS)
+# @@The order is important here: the kernel expects find the user loader in
+# the first entry; the order also determines assignment of thread ids@@
+#
+USER_LIB_DIRS	:= libdx libtar user_start
+USER_EXE_DIRS	:= loader vga shell keyboard
+USER_DIRS		:= $(USER_LIB_DIRS) $(USER_EXE_DIRS)
 
+
+#
+# Generate the list of files that should be included in the ramdisk
+#
+RAMDISK_FILES	:=
+USER_LIBS		:=
+USER_EXES		:=
+CHILD_MAKEFILES	:= $(foreach DIR, $(USER_DIRS), $(DIR)/Makefile.inc)
+include $(CHILD_MAKEFILES)
 
 
 #
@@ -28,19 +40,6 @@ RAMDISK_LISTING		:= ramdisk.lst
 
 
 #
-# The contents of the ramdisk.  The order is important here: the kernel expects
-# find the user loader in the first entry
-#@@the order also determines assignment of thread ids
-#
-RAMDISK_FILES :=	loader.bin \
-					vga.exe \
-					shell.exe \
-					keyboard.exe
-RAMDISK_PATHS :=	$(foreach file, $(RAMDISK_FILES), \
-						$(abspath $(basename $(file))/$(file)))
-
-
-#
 # The ramdisk should collect all of the necessary user binaries
 #
 .PHONY: all
@@ -49,18 +48,24 @@ all: $(RAMDISK_FILE)
 
 
 #
-# Most, if not all, of the usermode components depend on the usermode
+# Most, if not all, of the usermode executables depend on the usermode
 # libraries, so build those first
 #
-$(USER_DAEMONS): $(USER_LIBS)
+$(USER_EXES): $(USER_LIBS)
 
+
+#
+# Build the libraries + executables individually
+#
+$(USER_LIBS) $(USER_EXES):
+	@$(MAKE) -C $(dir $@) all
 
 
 #
 # Build the child subdirectories individually
 #
-.PHONY: $(USER_SUBDIRS)
-$(USER_SUBDIRS):
+.PHONY: $(USER_DIRS)
+$(USER_DIRS):
 	@$(MAKE) -C $@ all
 
 
@@ -72,12 +77,12 @@ $(USER_SUBDIRS):
 #	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
 #	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
 #
-$(RAMDISK_FILE): $(USER_SUBDIRS)
+$(RAMDISK_FILE): $(RAMDISK_FILES)
 	@echo Building $@ ...
 	@mkdir -p $(RAMDISK_BOOT_TREE)
-	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(RAMDISK_PATHS)
+	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $(RAMDISK_FILES))
 	@$(TAR) chzf $@ \
-		$(foreach file, $(RAMDISK_FILES), $(RAMDISK_BOOT_TREE)/$(file)) \
+		$(foreach file, $(notdir $(RAMDISK_FILES)), $(RAMDISK_BOOT_TREE)/$(file)) \
 		--transform="s,^,/,"
 	@$(TAR) tvzf $@ > $(RAMDISK_LISTING)
 
@@ -92,7 +97,7 @@ clean:
 	@rm -rf $(RAMDISK_BOOT_TREE)
 	@rm -f $(RAMDISK_FILE)
 	@rm -f $(RAMDISK_LISTING)
-	@for dir in $(USER_SUBDIRS); do \
+	@for dir in $(USER_DIRS); do \
 		$(MAKE) -C $$dir clean; \
 	done
 
