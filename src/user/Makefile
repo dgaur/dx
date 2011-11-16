@@ -11,10 +11,11 @@ include Makefile.user
 
 
 #
-# Subtrees that may be built
+# The various user-mode components (subtrees) that may be built here
 #
-# @@The order is important here: the kernel expects find the user loader in
-# the first entry; the order also determines assignment of thread ids@@
+# @@The order of EXE_DIRS is important here: the kernel expects find the user
+# loader in the first entry; and the order also determines assignment of
+# thread ids@@
 #
 USER_LIB_DIRS	:= libdx libtar user_start
 USER_EXE_DIRS	:= loader vga shell keyboard
@@ -24,7 +25,6 @@ USER_DIRS		:= $(USER_LIB_DIRS) $(USER_EXE_DIRS)
 #
 # Generate the list of files that should be included in the ramdisk
 #
-RAMDISK_FILES	:=
 USER_LIBS		:=
 USER_EXES		:=
 CHILD_MAKEFILES	:= $(foreach DIR, $(USER_DIRS), $(DIR)/Makefile.inc)
@@ -43,7 +43,7 @@ RAMDISK_LISTING		:= ramdisk.lst
 # The ramdisk should collect all of the necessary user binaries
 #
 .PHONY: all
-all: $(RAMDISK_FILE)
+all: $(RAMDISK_FILE) $(RAMDISK_LISTING)
 
 
 
@@ -77,14 +77,20 @@ $(USER_DIRS):
 #	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
 #	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
 #
-$(RAMDISK_FILE): $(RAMDISK_FILES)
+$(RAMDISK_FILE): $(USER_EXES)
 	@echo Building $@ ...
 	@mkdir -p $(RAMDISK_BOOT_TREE)
-	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $(RAMDISK_FILES))
+	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $^)
 	@$(TAR) chzf $@ \
-		$(foreach file, $(notdir $(RAMDISK_FILES)), $(RAMDISK_BOOT_TREE)/$(file)) \
+		$(foreach file, $(notdir $^), $(RAMDISK_BOOT_TREE)/$(file)) \
 		--transform="s,^,/,"
-	@$(TAR) tvzf $@ > $(RAMDISK_LISTING)
+
+
+#
+# Record the contents of the ramdisk
+#
+$(RAMDISK_LISTING): $(RAMDISK_FILE)
+	@$(TAR) tvzf $< > $@
 
 
 
