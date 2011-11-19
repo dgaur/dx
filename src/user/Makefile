@@ -13,19 +13,16 @@ include Makefile.user
 #
 # The various user-mode components (subtrees) that may be built here
 #
-# @@The order of EXE_DIRS is important here: the kernel expects find the user
+# @@The order is important here: the kernel expects find the user
 # loader in the first entry; and the order also determines assignment of
 # thread ids@@
 #
-USER_LIB_DIRS	:= libdx libtar user_start
-USER_EXE_DIRS	:= loader vga shell keyboard
-USER_DIRS		:= $(USER_LIB_DIRS) $(USER_EXE_DIRS)
+USER_DIRS	:= loader vga shell keyboard
 
 
 #
 # Generate the list of files that should be included in the ramdisk
 #
-USER_LIBS		:=
 USER_EXES		:=
 CHILD_MAKEFILES	:= $(foreach DIR, $(USER_DIRS), $(DIR)/Makefile.inc)
 include $(CHILD_MAKEFILES)
@@ -48,16 +45,9 @@ all: $(RAMDISK_FILE) $(RAMDISK_LISTING)
 
 
 #
-# Most, if not all, of the usermode executables depend on the usermode
-# libraries, so build those first
+# Build the executables individually
 #
-$(USER_EXES): $(USER_LIBS)
-
-
-#
-# Build the libraries + executables individually
-#
-$(USER_LIBS) $(USER_EXES):
+$(USER_EXES):
 	@$(MAKE) -C $(dir $@) all
 
 

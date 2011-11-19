@@ -2,7 +2,7 @@
 # Makefile
 #
 
-include ../Makefile.common
+include ../Makefile.lib
 
 
 #

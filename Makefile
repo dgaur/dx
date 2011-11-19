@@ -63,7 +63,7 @@ clean:
 #
 .PHONY: distclean
 distclean: clean
-	@$(MAKE) -C src/external $@
+	@$(MAKE) -C src/lib $@
 	@rm -f $(DX_ARCHIVE_FILE)
 	@./configure --distclean
 

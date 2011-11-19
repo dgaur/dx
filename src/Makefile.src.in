@@ -80,51 +80,37 @@ endif
 #
 # Child trees
 #
-DX_SRC_COMMON_DIR	:= $(DX_SRC_DIR)/common
-DX_SRC_EXTERNAL_DIR	:= $(DX_SRC_DIR)/external
 DX_SRC_KERNEL_DIR	:= $(DX_SRC_DIR)/kernel
+DX_SRC_LIB_DIR		:= $(DX_SRC_DIR)/lib
 DX_SRC_USER_DIR		:= $(DX_SRC_DIR)/user
 
 
 
 #
-# Common library code, shared between kernel + user space
+# The various supporting libraries.  Mostly user code, but some shared by
+# the kernel, too
 #
-LINK_LIBC			:= $(DX_SRC_DIR)/common/libc/libc.a
+LINK_LIBC			:= $(DX_SRC_LIB_DIR)/libc/libc.a
+LINK_LIBDX			:= $(DX_SRC_LIB_DIR)/libdx/libdx.a
 LINK_LIBGCC			:= $(shell $(CC) $(CC_FLAGS) --print-libgcc-file-name)
-LINK_COMMON_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
-
-
-
-#
-# The default entry point for all user-mode executables.  Must be linked into
-# all executables
-#
-LINK_START_FILE	:= $(DX_SRC_USER_DIR)/user_start/user_start.o
+LINK_LIBGDTOA		:= $(DX_SRC_LIB_DIR)/libgdtoa/libgdtoa.a
+LINK_LIBLUA			:= $(DX_SRC_LIB_DIR)/liblua/src/liblua.a
+LINK_LIBM			:= $(DX_SRC_LIB_DIR)/libm/libm.a
+LINK_LIBTAR			:= $(DX_SRC_LIB_DIR)/libtar/libtar.a
+LINK_START_FILE		:= $(DX_SRC_LIB_DIR)/user_start/user_start.o
 
 
 #
-# The dx run-time library; provides all system calls to kernel.  Must be linked
-# with all user-mode executables
+# The kernel requires only libc and gcc support
 #
-LINK_LIBDX		:= $(DX_SRC_USER_DIR)/libdx/libdx.a
+LINK_KERNEL_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
 
 
 #
-# Additional user libraries, not linked or shared with the kernel.  May be
-# linked with user executables as needed, via LINK_EXTRA_LIBS
+# All user executables require at least libc, gcc support, libdx (system calls).
+# Additional libraries may be requested via LINK_EXTRA_LIBS.
 #
-LINK_LIBGDTOA	:= $(DX_SRC_EXTERNAL_DIR)/libgdtoa/libgdtoa.a
-LINK_LIBLUA		:= $(DX_SRC_EXTERNAL_DIR)/liblua/src/liblua.a
-LINK_LIBM		:= $(DX_SRC_EXTERNAL_DIR)/libm/libm.a
-LINK_LIBTAR		:= $(DX_SRC_USER_DIR)/libtar/libtar.a
-
-
-#
-# The aggregate collection of required user-mode libraries.  All user-mode
-# executables need these.
-#
-LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_COMMON_LIBS) $(LINK_LIBGDTOA)
+LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_LIBC) $(LINK_LIBGDTOA) $(LINK_LIBGCC)
 
 
 #

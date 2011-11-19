@@ -1,0 +1,6 @@
+#
+# Makefile.lib
+#
+
+include $(DX_ROOT_DIR)/src/Makefile.src
+
