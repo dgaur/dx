@@ -265,6 +265,7 @@ OBJDUMP=${OBJDUMP:-objdump}
 PATCH=${PATCH:-patch}
 SED=${SED:-sed}
 SHELL=${SHELL:-bash}
+SIZET_DEFINITION=${SIZET_DEFINITION}
 STRIP=${STRIP:-strip}
 TAR=${TAR:-tar}
 
@@ -294,6 +295,51 @@ done
 
 
 #
+# As a nicety, attempt to determine the cross-compiler's preferred definition
+# of size_t.  Typically, it's either 'unsigned long' or 'unsigned int'.  See
+# the definitions in src/inc/size_t.h
+#
+TEST_FILE=test_file.cpp
+cat >${TEST_FILE} <<END_OF_SOURCE
+#ifdef SIZET_IS_ULONG
+	typedef unsigned long size_t;
+#elif SIZET_IS_UINT
+	typedef unsigned int  size_t;
+#endif
+
+
+void*
+operator new(size_t n)
+	{ return (void*)(n + 1234); }
+
+int
+main(int argc, char** argv)
+	{
+	void* x = operator new(32);
+	return(x ? 0 : 1);
+	}
+END_OF_SOURCE
+
+for option in SIZET_IS_UINT SIZET_IS_ULONG; do
+	# Attempt to compile the sample source, using the next definition of size_t
+	${CXX} -c -Wall -D${option} ${TEST_FILE} > /dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		log "Using definition of size_t: ${option}"
+		SIZET_DEFINITION=${option}
+		break
+	fi
+done
+
+rm ${TEST_FILE}
+
+if [ -z "${SIZET_DEFINITION}" ]; then
+	log "Error: unable to determine preferred type of size_t"
+	exit 1
+fi
+
+
+
+#
 # Generate a sed script to insert the various tool definitions
 #
 log
@@ -301,7 +347,7 @@ log "Generating translation script ..."
 
 SED_PROGRAM="$0.sed.$$"
 echo > ${SED_PROGRAM}
-for tool in ${REQUIRED_TOOLS} ${OPTIONAL_TOOLS}; do
+for tool in ${REQUIRED_TOOLS} ${OPTIONAL_TOOLS} SIZET_DEFINITION; do
 	# The script is a series of "s/tool-pattern/tool-path/" commands
 	eval "echo \"s,@${tool}@,\$${tool},g\" >> ${SED_PROGRAM}"
 done
