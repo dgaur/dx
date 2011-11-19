@@ -35,7 +35,7 @@ This is the dx operating system, version 0.0.6, released 2011-11-09
 	copyright (c) 2005 - 2011, Dan Gaur; except:
 
 	* Doug Lea's malloc.c implementation, v2.8.5, from
-	  http://g.oswego.edu/dl/html/malloc.html.  See dx/src/common/libc/malloc.c.
+	  http://g.oswego.edu/dl/html/malloc.html.  See dx/src/lib/libc/malloc.c.
 	  Public domain.
 
 	* The "freely distributable libm" math library, v5.3, from
