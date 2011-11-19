@@ -21,17 +21,10 @@ source tree.
 
 	/src		- All source code (kernel, user, libraries, etc)
 
-		/common	- Common library code shared between the kernel + user
-				  applications.  Currently, this only contains a small C
-				  library
-
-		/external
-				- Third party libraries, linked into user applications.
-
 		/inc	- Global #include files shared across the kernel, applications,
 				  libraries, etc
 
-		/kernel	- dx kernel code
+		/kernel				- dx kernel code
 			/boot			- Kernel boot + init logic
 			/device_proxy	- Device proxy subsystem for user mode drivers
 			/drivers		- Builtin kernel drivers
@@ -43,13 +36,21 @@ source tree.
 			/thread_manager	- Thread creation + deletion
 
 
-		/user	- User-mode code.
+		/lib				- Various support libraries
+			/libc			- C library, shared between kernel and user space
+			/libdx			- Library of system calls to dx kernel
+			/libgdtoa		- double-precision library.  Third-party source.
+			/liblua			- LuaJIT.  Third-party source.
+			/libm			- "Freely distributable math library".  Third-party
+							  source
+			/libtar			- Library for parsing .tar files
+			/user_start		- Startup files for all user-mode applications
+
+
+		/user				- User-mode code.
 			/inc			- User headers
 			/keyboard		- Keyboard driver
-			/libdx			- Library of system calls to dx kernel
-			/libtar			- Library for parsing .tar files
 			/loader			- Loader for initializing user-space from ramdisk
-			/user_start		- Startup files for all user-mode applications
 			/vga			- VGA driver
 
 

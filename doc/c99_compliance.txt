@@ -3,8 +3,11 @@
 
 
 In general, the libc implementation here is minimal and only provides partial
-support for C99; it is not a full implementation at all.  All libc and POSIX
-code lives in src/common/libc.  fdlibm code lives in src/external/libm.
+support for C99; it is not a full implementation at all.
+
+Most libc and POSIX code lives in src/lib/libc.  The fdlibm (math library) code
+lives in src/lib/libm.  The libgdtoa (float/double coversion routines) code
+is in src/lib/libgdtoa.
 
 Note that the libc is *SHARED* between the kernel and user applications.  The
 kernel uses some of the standalone library routines (e.g., memcpy, memset,

@@ -40,13 +40,13 @@ This is the dx operating system, version 0.0.6, released 2011-11-09
 
 	* The "freely distributable libm" math library, v5.3, from
 	  http://www.netlib.org/fdlibm or http://www.validlab.com/software.
-	  See dx/src/external/libm.
+	  See dx/src/lib/libm.
 
-	* LuaJIT, v1.1.7, from www.luajit.org.  See dx/src/external/lua.  Released
+	* LuaJIT, v1.1.7, from www.luajit.org.  See dx/src/lib/liblua.  Released
 	  under MIT license.
 
 	* David Gay's gdtoa library, from http://www.netlib.org/fp.  See
-	  dx/src/external/libgdtoa.
+	  dx/src/lib/libgdtoa.
 
 
 
