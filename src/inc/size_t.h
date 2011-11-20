@@ -13,15 +13,14 @@
 // headers) as necessary
 //
 // Various versions + installations of gcc expect size_t to be either
-// "unsigned long" or "unsigned int".  Would be nice if configure script could
-// figure this out, but cross-tools make this difficult.
+// "unsigned long" or "unsigned int".  See 'configure' script.
 //
 #ifdef SIZET_IS_ULONG
 	typedef unsigned long size_t;
 #elif SIZET_IS_UINT
 	typedef unsigned int  size_t;
 #else
-	#error "Definition of size_t is unknown.  See Makefile.src"
+	#error "Definition of size_t is unknown.  See configure + Makefile.src"
 #endif
 
 
