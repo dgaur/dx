@@ -4,6 +4,8 @@
 
 
 * PENDING-RELEASE:
+
+* Version 0.0.7, released 2011-11-19:
 	Various improvements to the build and release process.  No functional
 	changes.
 
