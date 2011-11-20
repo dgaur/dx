@@ -188,6 +188,19 @@ fi
 #
 for argument in $*; do
 	case ${argument} in
+
+		-c|--check)
+			# Verify that the source tree has been properly configured
+			for file in ${OUTPUT_FILES}; do
+				if [ ! -e ${file} ]; then
+					echo "Must run 'configure' before building."
+					exit 1
+				fi
+			done
+			exit 0
+			;;
+
+
 		-d|--debug)
 			# Enable debug support
 			set -x
@@ -299,8 +312,10 @@ done
 # of size_t.  Typically, it's either 'unsigned long' or 'unsigned int'.  See
 # the definitions in src/inc/size_t.h
 #
-TEST_FILE=test_file.cpp
-cat >${TEST_FILE} <<END_OF_SOURCE
+TEST_OBJ=test_file.o
+TEST_SRC=test_file.cpp
+
+cat >${TEST_SRC} <<END_OF_SOURCE
 #ifdef SIZET_IS_ULONG
 	typedef unsigned long size_t;
 #elif SIZET_IS_UINT
@@ -322,7 +337,7 @@ END_OF_SOURCE
 
 for option in SIZET_IS_UINT SIZET_IS_ULONG; do
 	# Attempt to compile the sample source, using the next definition of size_t
-	${CXX} -c -Wall -D${option} ${TEST_FILE} > /dev/null 2>&1
+	${CXX} -c -Wall -D${option} -o ${TEST_OBJ} ${TEST_SRC} > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		log "Using definition of size_t: ${option}"
 		SIZET_DEFINITION=${option}
@@ -330,7 +345,8 @@ for option in SIZET_IS_UINT SIZET_IS_ULONG; do
 	fi
 done
 
-rm ${TEST_FILE}
+rm ${TEST_SRC}
+rm ${TEST_OBJ}
 
 if [ -z "${SIZET_DEFINITION}" ]; then
 	log "Error: unable to determine preferred type of size_t"

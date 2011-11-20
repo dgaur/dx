@@ -41,6 +41,7 @@ all: $(ROOT_SUBDIRS)
 PARALLEL_JOBS := $(shell grep -c processor /proc/cpuinfo)
 .PHONY: $(ROOT_SUBDIRS)
 $(ROOT_SUBDIRS):
+	@./configure --check
 	@$(MAKE) -C $@ -j $(PARALLEL_JOBS) -l $(PARALLEL_JOBS) all
 
 
@@ -50,6 +51,7 @@ $(ROOT_SUBDIRS):
 #
 .PHONY: clean
 clean:
+	@./configure --check
 	@echo Cleaning top-level tree ...
 	@for dir in $(ROOT_SUBDIRS); do \
 		$(MAKE) -C $$dir clean; \
