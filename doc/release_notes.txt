@@ -4,6 +4,9 @@
 
 
 * PENDING-RELEASE:
+	Various improvements to the build and release process.  No functional
+	changes.
+
 
 * Version 0.0.6, released 2011-11-09:
 	Significant additions to libc, still aimed at porting Lua.  Incorporated
