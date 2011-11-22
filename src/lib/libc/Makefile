@@ -153,7 +153,7 @@ UNIT_TEST_C_FILES :=	unittest.c \
 						vsscanf.c
 UNIT_TEST_ASM_FILES	:= hal/setjmp.asm hal/longjmp.asm
 unittest: $(UNIT_TEST_C_FILES) $(UNIT_TEST_ASM_FILES)
-	@gcc -o $@ $(CC_INCLUDES) $(CC_DEFINES) $(UNIT_TEST_C_FILES) -lm
+	@gcc -o $@ $(CC_INCLUDES) $(CC_DEFINES) $(UNIT_TEST_C_FILES) -lm -fno-builtin
 
 
 #

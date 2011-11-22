@@ -90,11 +90,12 @@ test_memset()
 	{
 	int i;
 	char buffer[ 100 ];
+	char c	= 0x1;
 
-	memset(buffer, 0, sizeof(buffer));
+	memset(buffer, c, sizeof(buffer));
 
 	for (i = 0; i < sizeof(buffer); i++)
-		{ TEST(buffer[i] == 0); }
+		{ TEST(buffer[i] == c); }
 
 	return;
 	}
@@ -120,6 +121,9 @@ test_snprintf()
 
 	snprintf(buf, sizeof(buf), "%#x", 16);
 	STRING_MATCH(buf, "0x10");
+
+	snprintf(buf, sizeof(buf), "%#010x", 16);
+	STRING_MATCH(buf, "0x00000010");
 
 	snprintf(buf, sizeof(buf), "%s", "hello");
 	STRING_MATCH(buf, "hello");

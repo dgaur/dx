@@ -29,7 +29,7 @@ memset(	void *	buffer,
 	// target character
 	for (i = 0, word = 0; i < sizeof(word); i++)
 		{
-		word <<= sizeof(char);
+		word <<= (8 * sizeof(char));
 		word |=  (unsigned char)character;
 		}
 
