@@ -7,7 +7,12 @@
 #include "dx/types.h"
 #include "dx/version.h"
 #include "stdio.h"
+#include "stdlib.h"
 #include "string.h"
+
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
 
 
 static void_t help();
@@ -121,6 +126,10 @@ help()
 int
 main()
 	{
+	lua_State *lua = luaL_newstate();
+	luaL_openlibs(lua);
+
+
 	//
 	// Initial banner
 	//
@@ -137,6 +146,7 @@ main()
 		prompt();
 		gets(command);
 		execute(command);
+		fflush(stdout);
 		}
 
 	return(STATUS_SUCCESS);

@@ -67,8 +67,8 @@ initialize_environment()
 		// Allocate enough pages to span the initial heap
 		//
 		//@is this enough?, must be larger than any misaligned ELF section
-		//@in ramdisk executables
-		heap_size = 64 * PAGE_SIZE;
+		//@in ramdisk executables.  shell + lualibs needs 70 pages.
+		heap_size = 96 * PAGE_SIZE;
 		status = expand_address_space(ADDRESS_SPACE_ID_USER_LOADER, heap,
 			heap_size, 0);
 		if (status != STATUS_SUCCESS)

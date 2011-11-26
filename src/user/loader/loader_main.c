@@ -7,6 +7,7 @@
 #include "dx/libtar.h"
 #include "dx/user_space_layout.h"
 #include "stdint.h"
+#include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -71,7 +72,14 @@ unpack_ramdisk(const uint8_t* ramdisk)
 			{ continue; }
 
 		// This is one of the boot-time daemons, so start it now
-		create_process_from_image(entry.file, entry.file_size, CAPABILITY_ALL);
+		status_t status = create_process_from_image(entry.file,
+													entry.file_size,
+													CAPABILITY_ALL);
+		if (status != STATUS_SUCCESS)
+			{
+			// This is typically fatal, but useful for debugging
+			printf("Warning: loader unable to start daemon: %d\n", (int)status);
+			}
 		}
 
 

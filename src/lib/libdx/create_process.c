@@ -156,7 +156,8 @@ create_process_from_image(	const uint8_t*		image,
 		// Install the initial heap for this address space
 		//
 		//@malloc() needs > 1 page for init?
-		heap_size = 4 * PAGE_SIZE;	//@allow the caller to specify?
+		//@lualibs need > 8 pages
+		heap_size = 12 * PAGE_SIZE;	//@allow the caller to specify?
 		status = send_heap(address_space, heap, heap_size);
 		if (status != STATUS_SUCCESS)
 			break;
@@ -303,8 +304,7 @@ send_bss(	address_space_id_t			address_space,
 			// .bss fits within the remainder of this page.  No additional
 			// pages required.  The .bss should be less than a page here, since
 			// otherwise it would spill over onto (and consume) another page
-			assert(program_header->memory_size < PAGE_SIZE);
-			assert(program_header->file_size + program_header->memory_size <
+			assert(program_header->memory_size - program_header->file_size <
 				PAGE_SIZE);
 
 			status = STATUS_SUCCESS;

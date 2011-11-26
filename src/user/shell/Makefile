@@ -14,6 +14,13 @@ $(LOCAL_EXE): $(LOCAL_OBJECTS)
 
 
 #
+# Include Lua support
+#
+CC_INCLUDES		+= -I$(dir $(LINK_LIBLUA))
+LINK_EXTRA_LIBS	+= $(LINK_LIBLUA) $(LINK_LIBM)
+
+
+#
 # Generate/include the dependencies for the local objects
 #
 LOCAL_DEPENDENCIES := $(LOCAL_OBJECTS:%.o=%.dep)

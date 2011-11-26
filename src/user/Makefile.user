@@ -24,7 +24,7 @@ USER_KERNEL_BOUNDARY = $(shell echo "USER_KERNEL_BOUNDARY" | \
 #
 # Custom tool settings for user tree
 #
-ASM_INCLUDES		+= -I$(DX_SRC_USER_DIR)/inc -I$(DX_SRC_EXTERNAL_DIR)/lua/src
+ASM_INCLUDES		+= -I$(DX_SRC_USER_DIR)/inc
 CC_FLAGS			+= -std=c99
 LINK_TEXT_SECTION	= -Ttext $(USER_KERNEL_BOUNDARY)
 
