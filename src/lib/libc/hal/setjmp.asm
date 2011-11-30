@@ -27,7 +27,7 @@ setjmp:
 	movl	8(%esp), %edi
 
 	// Stack is now:
-	//	*(esp) = caller's context
+	//	*(esp) = caller's context; longjmp() returns here
 	//	8(esp) = pointer to jmp_buf
 	//	4(esp) = return address
 	//	0(esp) = previous value of %edi
@@ -45,9 +45,10 @@ setjmp:
 	movl	%eax, EDI_OFFSET(%edi)
 
 	// Compute + save the value of %esp.  The longjmp() logic must push the
-	// jmp_buf pointer and the correct return address back on the stack
+	// jmp_buf pointer and the address of the original setjmp() callsite
+	// back onto the stack
 	movl	%esp, %eax
-	addl	$16, %eax		// Skip: %edi, return address, jmp_buf
+	addl	$12, %eax		// Discard: %edi, return address, jmp_buf
 	movl	%eax, ESP_OFFSET(%edi)
 
 	// Save the return address; this is where execution will resume after
