@@ -45,8 +45,10 @@ all: $(RAMDISK_FILE) $(RAMDISK_LISTING)
 
 
 #
-# Build the executables individually
+# Build the executables individually.  Always try to rebuild these when
+# collecting the ramdisk, since the dependencies are unknown here
 #
+.PHONY: $(USER_EXES)
 $(USER_EXES):
 	@$(MAKE) -C $(dir $@) all
 
