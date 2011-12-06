@@ -16,8 +16,7 @@ $(LOCAL_EXE): $(LOCAL_OBJECTS)
 #
 # Include Lua support
 #
-CC_INCLUDES		+= -I$(dir $(LINK_LIBLUA))
-LINK_EXTRA_LIBS	+= $(LINK_LIBLUA) $(LINK_LIBM)
+CC_INCLUDES += -I$(dir $(LINK_LIBLUA))
 
 
 #

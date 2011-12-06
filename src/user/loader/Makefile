@@ -71,12 +71,6 @@ CC_FLAGS  += -fno-reorder-functions
 
 
 #
-# Use the .tar library for unpacking the ramdisk
-#
-LINK_EXTRA_LIBS += $(LINK_LIBTAR)
-
-
-#
 # The user loader.  The custom entry point must be at the head of .text section
 # here
 #

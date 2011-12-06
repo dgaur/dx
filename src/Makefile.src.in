@@ -110,7 +110,7 @@ LINK_KERNEL_LIBS	:= $(LINK_LIBC) $(LINK_LIBGCC)
 # All user executables require at least libc, gcc support, libdx (system calls).
 # Additional libraries may be requested via LINK_EXTRA_LIBS.
 #
-LINK_USER_LIBS	:= $(LINK_LIBDX) $(LINK_LIBC) $(LINK_LIBGDTOA) $(LINK_LIBGCC)
+LINK_USER_LIBS	:= $(LINK_LIBC) $(LINK_LIBDX) $(LINK_LIBGDTOA) $(LINK_LIBGCC)
 
 
 #
@@ -146,9 +146,9 @@ $(LINK_USER_LIBS) $(LINK_EXTRA_LIBS):
 %.exe: %.o $(LINK_START_FILE) $(LINK_USER_LIBS) $(LINK_EXTRA_LIBS) $(MAKEFILE_LIST)
 	@echo Linking $@ ...
 	@$(LINK) $(LINK_FLAGS) $(LINK_TEXT_SECTION) \
-		$(filter-out $(MAKEFILE_LIST), $^) \
-		$(LINK_EXTRA_LIBS) \
-		$(LINK_USER_LIBS)
+		$(filter %.o, $^) $(LINK_EXTRA_LIBS) \
+		--start-group $(LINK_LIBC) $(LINK_LIBDX) $(LINK_LIBGDTOA) --end-group \
+		$(LINK_LIBGCC)
 
 %.dep: %.asm $(MAKEFILE_LIST)
 	@echo Generating dependencies for $< ...
