@@ -2,12 +2,9 @@
 // shell.c
 //
 
-#include "dx/read_kernel_stats.h"
 #include "dx/status.h"
 #include "dx/types.h"
-#include "dx/version.h"
 #include "stdio.h"
-#include "stdlib.h"
 #include "string.h"
 
 #include "lua.h"
@@ -15,109 +12,36 @@
 #include "lualib.h"
 
 
-static void_t help();
-static void_t prompt();
-
-
-
-///
-/// Dump the kernel stats
-///
-//@this should eventually be a standalone executable, separate from the shell
 static
-void_t
-dump_stats()
-	{
-	kernel_stats_s	kernel_stats;
-	status_t		status;
+const
+char8_t* shell_code =
+	"															\
+	function help()												\
+		print('No help available')								\
+		return 0												\
+	end															\
+																\
+	function prompt()											\
+		io.write('$ ')											\
+	end;														\
+																\
+	print('dx boot shell')										\
+	local handler = { help=help }								\
+																\
+	while(1) do													\
+		prompt()												\
+		command = io.read()										\
+		h = handler[command]									\
+		if h then												\
+			h()													\
+		elseif (#command > 0) then								\
+			print('Unknown command \"' .. command .. '\"')		\
+		end														\
+	end															\
+																\
+	return 0													\
+	";
 
-	status = read_kernel_stats(&kernel_stats);
-	if (status == STATUS_SUCCESS)
-		{
-		printf(	"Memory:\n"
-				"    total physical %u (MB)\n"
-				"    paged physical %u (MB)\n"
-				"    paged regions  %u\n"
-				"    address spaces %u\n"
-				"    COW faults     %u\n"
-				"    page faults    %u\n\n",
-				(unsigned)kernel_stats.total_memory_size/(1024*1024),
-				(unsigned)kernel_stats.paged_memory_size/(1024*1024),
-				(unsigned)kernel_stats.paged_region_count,
-				(unsigned)kernel_stats.address_space_count,
-				(unsigned)kernel_stats.cow_fault_count,
-				(unsigned)kernel_stats.page_fault_count);
-
-		printf(	"Messaging:\n"
-				"    total          %u\n"
-				"    pending        %u\n"
-				"    incomplete     %u\n"
-				"    tx error       %u\n"
-				"    rx error       %u\n\n",
-				(unsigned)kernel_stats.message_count,	//@32b/64b printf()
-				(unsigned)kernel_stats.pending_count,
-				(unsigned)kernel_stats.incomplete_count,
-				(unsigned)kernel_stats.send_error_count,
-				(unsigned)kernel_stats.receive_error_count);
-
-		printf(	"Scheduling:\n"
-				"    lottery        %u\n"
-				"    idle           %u\n"
-				"    direct         %u\n\n",
-				(unsigned)kernel_stats.lottery_count,
-				(unsigned)kernel_stats.idle_count,
-				(unsigned)kernel_stats.direct_handoff_count);
-
-		printf(	"Threads:\n"
-				"    total          %u\n\n",
-				(unsigned)kernel_stats.thread_count);
-		}
-	else
-		{
-		printf("Unable to read kernel stats\n");
-		}
-
-	return;
-	}
-
-
-
-///
-/// Execute a single command
-///
-static
-void_t
-execute(const char8_t* command)
-	{
-	if (strcmp(command, "help") == 0)
-		{ help(); }
-
-	else if (strcmp(command, "stats") == 0)
-		{ dump_stats(); }
-
-	else if (strcmp(command, "version") == 0)
-		{ printf("dx v%s (%s)\n", DX_VERSION, DX_BUILD_TYPE); }
-
-	else if (strlen(command))
-		{ printf("Unknown command: '%s'\n", command); }
-
-	return;
-	}
-
-
-///
-/// Display a brief help message
-///
-static
-void_t
-help()
-	{
-	printf(	"help    -- show this help message\n"
-			"stats   -- show kernel statistics\n"
-			"version -- show the current system version\n"
-			"\n");
-	return;
-	}
 
 
 ///
@@ -126,40 +50,62 @@ help()
 int
 main()
 	{
-	lua_State *lua = luaL_newstate();
-	luaL_openlibs(lua);
+	lua_State*	lua		= NULL;
+	status_t	status	= STATUS_INVALID_IMAGE;
 
-
-	//
-	// Initial banner
-	//
-	printf("dx v%s (%s) boot shell\n", DX_VERSION, DX_BUILD_TYPE);
-
-
-	//
-	// Main execution loop
-	//
-	for(;;)
+	do
 		{
-		char command[128];
+		//
+		// Initialize the luajit engine
+		//
+		lua = luaL_newstate();
+		if (!lua)
+			{
+			printf("Unable to allocate memory\n");
+			status = STATUS_INSUFFICIENT_MEMORY;
+			break;
+			}
 
-		prompt();
-		gets(command);
-		execute(command);
-		fflush(stdout);
-		}
 
-	return(STATUS_SUCCESS);
+		//
+		// Load the default/builtin libraries (OS, strings, jit, etc)
+		//
+		luaL_openlibs(lua);
+
+
+		//
+		// Load the source
+		//
+		int error = luaL_loadbuffer(lua, shell_code, strlen(shell_code),
+			"shell");
+		if (error)
+			{
+			printf("Unable to load buffer: %s\n", lua_tostring(lua, -1));
+			lua_pop(lua, 1);  // Pop the error message
+
+			status = STATUS_INVALID_IMAGE;
+			break;
+			}
+
+
+		//
+		// Launch the actual script
+		//
+		error = lua_pcall(lua, 0, 1, 0);	// No inputs, one exit code
+		if (error)
+			{
+			printf("Run-time error: %s\n", lua_tostring(lua, -1));
+			lua_pop(lua, 1);  // Pop the error message
+
+			status = STATUS_INVALID_IMAGE;
+			break;
+			}
+
+		status = lua_tointeger(lua, -1);
+
+		} while(0);
+
+	return(status);
 	}
 
 
-///
-/// Display the console prompt
-///
-static
-void_t
-prompt()
-	{
-	printf("$ ");
-	return;
-	}
