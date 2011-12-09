@@ -16,7 +16,7 @@
 /// messages are discarded; and the owner thread is killed
 ///
 const
-uint32_t MAILBOX_DEFAULT_LIMIT	= 32;
+uint32_t MAILBOX_DEFAULT_LIMIT	= 64;
 
 
 
