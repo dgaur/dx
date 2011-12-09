@@ -157,7 +157,7 @@ create_process_from_image(	const uint8_t*		image,
 		//
 		//@malloc() needs > 1 page for init?
 		//@lualibs need > 8 pages, and >4 at run-time
-		heap_size = 16 * PAGE_SIZE;	//@allow the caller to specify?
+		heap_size = 24 * PAGE_SIZE;	//@allow the caller to specify?
 		status = send_heap(address_space, heap, heap_size);
 		if (status != STATUS_SUCCESS)
 			break;
