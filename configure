@@ -101,11 +101,11 @@ $0 [--distclean] [-?|-h|--help] [--host=<HOST-SPEC>] [TOOL-DEFINITIONS]
 
     -h, --help displays this help message
 
-    --host=<HOST-SPEC> enables cross-compilation support.  Required for
-        platforms that do not natively support ELF file format (typically, only
-        cygwin?).  HOST-SPEC should be the usual "cpu-vendor-os" triplet.  For
-        example, if your cross compiler is i686-pc-elf-gcc, then use
-        --host=i686-pc-elf
+    --host=<HOST-SPEC> enables cross-compilation support.  Required on
+        platforms where the default executable format is not 32b ELF
+        (e.g, cygwin, 64b Linux, etc).  HOST-SPEC should be the usual
+        "cpu-vendor-os" triplet.  For example, if your cross compiler is
+        i686-pc-elf-gcc, then use '--host=i686-pc-elf'.
 
     TOOL-DEFINITIONS are paths + overrides for specifying tools and tool
         locations.  For example, if you have gcc installed under
@@ -147,40 +147,9 @@ function log
 #
 
 
-#
-# Reset/restart the log file
-#
-cat >${CONFIGURE_LOG} <<-END_OF_LOG_HEADER
-
-DX pseudo-configure script
-Last invoked: `date`
-Last invoked as: $0 $*
-PATH was: `echo ${PATH}`
-
-END_OF_LOG_HEADER
-
-
-
-#
-# The 'which' tool is required; this script cannot proceed without it
-#
-WHICH=`which which 2>/dev/null`
-if [ -z "${WHICH}" ]; then
-	log "Unable to find 'which' tool, required for configure operation"
-	exit 2
-fi
-
-
-
-#
-# Attempt to locate 'sed', for parsing --host values.  If not found, user can
-# still override with SED=/path/to/sed on command line before --host value.
-#
-SED=`which sed 2>/dev/null`
-if [ -z "${SED}" ]; then
-	log "Unable to find 'sed' tool; expecting SED= on command line"
-fi
-
+# Assume no cross-compiling, by default
+CROSS_COMPILE_PREFIX=
+HOST=
 
 
 #
@@ -220,24 +189,8 @@ for argument in $*; do
 
 
 		--host=*)
-			# Ensure sed is available first
-			if [ -z "${SED}" ]; then
-				log "Error: Cannot process --host without 'sed'"
-				log "Try adding 'SED=/path/to/sed' definition to command line"
-				exit 1
-			fi
-
-			# Assume the --host value is the prefix on the cross-tools (e.g.,
-			# i386-elf-gcc)
-			CROSS_COMPILE_PREFIX=`echo ${argument} | \
-				${SED} 's/--host=\(.*\)/\1-/' -`
-
-			if [ ${CROSS_COMPILE_PREFIX} != "-" ]; then
-				log "OK, will look for cross-tools (${CROSS_COMPILE_PREFIX})"
-			else
-				log "Bad --host value"
-				help
-			fi
+			# Enable cross-compiling
+			HOST=${argument}
 			;;
 
 
@@ -250,12 +203,67 @@ for argument in $*; do
 
 
 		*)
-			log "Unrecognized argument: ${argument}"
+			echo "Unrecognized argument: ${argument}"
 			help
 			;;
 	esac
 done
 
+
+
+#
+# At this point, actually want to search for tools and generate the various
+# output files
+#
+
+
+#
+# Reset/restart the log file
+#
+cat >${CONFIGURE_LOG} <<-END_OF_LOG_HEADER
+
+DX pseudo-configure script
+Last invoked: `date`
+Last invoked as: $0 $*
+PATH was: `echo ${PATH}`
+
+END_OF_LOG_HEADER
+
+
+#
+# The 'which' tool is required; this script cannot proceed without it
+#
+WHICH=`which which 2>/dev/null`
+if [ -z "${WHICH}" ]; then
+	log "Unable to find 'which' tool, required for configure operation"
+	exit 2
+fi
+
+
+#
+# Compute cross-compiler prefix, if necessary
+#
+if [ -n "${HOST}" ]; then
+
+	# Ensure sed is available first
+	SED=${SED:-`which sed 2>/dev/null`}
+	if [ -z "${SED}" ]; then
+		log "Error: Cannot process '--host' prefix without 'sed'"
+		log "Try adding 'SED=/path/to/sed' definition to command line"
+		exit 1
+	fi
+
+	# Assume the --host value is the prefix on the cross-tools (e.g.,
+	# i386-elf-gcc)
+	CROSS_COMPILE_PREFIX=`echo ${HOST} | ${SED} 's/--host=\(.*\)/\1-/' -`
+
+	if [ ${CROSS_COMPILE_PREFIX} != "-" ]; then
+		log "OK, will look for cross-tools (${CROSS_COMPILE_PREFIX})"
+	else
+		log "Bad --host value"
+		help
+	fi
+fi
 
 
 #
@@ -335,10 +343,12 @@ main(int argc, char** argv)
 	}
 END_OF_SOURCE
 
+# Attempt to compile the sample source, using each definition of size_t
 for option in SIZET_IS_UINT SIZET_IS_ULONG; do
-	# Attempt to compile the sample source, using the next definition of size_t
 	${CXX} -c -Wall -D${option} -o ${TEST_OBJ} ${TEST_SRC} > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
+		# The compiler will accept this definition of size_t; so save it for
+		# later use and continue
 		log "Using definition of size_t: ${option}"
 		SIZET_DEFINITION=${option}
 		break
