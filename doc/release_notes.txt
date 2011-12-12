@@ -5,6 +5,11 @@
 
 * PENDING-RELEASE:
 
+* Version 0.1.0, released 2011-12-11:
+	Initial lua integration.  No changes in externally-visible functionality,
+	but liblua is now viable and the user shell is built with lua.
+
+
 * Version 0.0.7, released 2011-11-19:
 	Various improvements to the build and release process.  No functional
 	changes.
