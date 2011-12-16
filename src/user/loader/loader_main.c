@@ -4,7 +4,9 @@
 
 #include "dx/capability.h"
 #include "dx/create_process.h"
+#include "dx/delete_message.h"
 #include "dx/libtar.h"
+#include "dx/receive_message.h"
 #include "dx/user_space_layout.h"
 #include "stdint.h"
 #include "stdio.h"
@@ -29,6 +31,7 @@ typedef directory_entry_sp *   directory_entry_spp;
 
 static void_t				start_daemons(const directory_entry_s* entry);
 static directory_entry_s*	unpack_ramdisk(const uint8_t* ramdisk);
+static void_t				wait_for_messages();
 
 
 
@@ -66,6 +69,14 @@ main()
 		//
 		start_daemons(ramdisk_entries);
 
+
+		//@register with vfs; repeat if necessary
+
+		//
+		// Temporarily answer filesystem requests (from the ramdisk only,
+		// obviously), until the full file-system becomes available
+		//
+		wait_for_messages();
 
 		} while(0);
 
@@ -168,3 +179,50 @@ unpack_ramdisk(const uint8_t* ramdisk)
 	return(files);
 	}
 
+
+///
+/// Wait for incoming filesystem requests + dispatch them as appropriate.
+///
+static
+void_t
+wait_for_messages()
+	{
+	message_s		message;
+	bool			mounted = TRUE;
+	message_s		reply;
+	status_t		status;
+
+
+	//
+	// Message loop.  Listen for incoming messages + dispatch them as
+	// appropriate
+	//
+	while(mounted)
+		{
+		// Wait for the next request
+		status = receive_message(&message, WAIT_FOR_MESSAGE);
+
+		if (status != STATUS_SUCCESS)
+			continue;
+
+
+		// Dispatch the request as needed
+		switch(message.type)
+			{
+			case MESSAGE_TYPE_UNMOUNT_FILESYSTEM:
+				//@unregister with vfs
+				mounted = FALSE;
+				break;
+
+			case MESSAGE_TYPE_NULL:
+			default:
+				break;
+			}
+
+
+		// Done with this request
+		delete_message(&message);
+		}
+
+	return;
+	}

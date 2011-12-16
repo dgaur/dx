@@ -55,4 +55,7 @@ typedef message_type_tp *			message_type_tpp;
 //@stream_input?
 //@end_of_stream?
 
+#define MESSAGE_TYPE_MOUNT_FILESYSTEM		SYSTEM_MESSAGE(50)
+#define MESSAGE_TYPE_UNMOUNT_FILESYSTEM		SYSTEM_MESSAGE(51)
+
 #endif
