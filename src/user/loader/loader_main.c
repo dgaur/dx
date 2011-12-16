@@ -12,7 +12,24 @@
 #include "string.h"
 
 
-static void_t	unpack_ramdisk(const uint8_t* ramdisk);
+///
+/// A directory entry in the ramdisk.  Just a linear list, in the assumption
+/// that the ramdisk will be relatively small and not require a more efficient
+/// structure
+///
+typedef struct directory_entry
+	{
+	tar_entry_s				tar;
+	struct directory_entry*	next;
+	} directory_entry_s;
+
+typedef directory_entry_s *    directory_entry_sp;
+typedef directory_entry_sp *   directory_entry_spp;
+
+
+static void_t				start_daemons(const directory_entry_s* entry);
+static directory_entry_s*	unpack_ramdisk(const uint8_t* ramdisk);
+
 
 
 ///
@@ -25,63 +42,129 @@ static void_t	unpack_ramdisk(const uint8_t* ramdisk);
 int
 main()
 	{
-	//@this assumes rdisk at U/K boundary.  Could infer from %esp?  or start
-	//@address % TAR_BLOCK_SIZE?  pass ptr via argc, argv?
-	uint8_t* ramdisk = (uint8_t*)(USER_KERNEL_BOUNDARY);
-	unpack_ramdisk(ramdisk);
+	status_t status;
 
-	return(0);
+	do
+		{
+		//
+		// Locate the actual ramdisk image in memory
+		//
+		//@this assumes rdisk at U/K boundary.  Could infer from %esp?  or start
+		//@address % TAR_BLOCK_SIZE?  pass ptr via argc, argv?
+		uint8_t* ramdisk_image = (uint8_t*)(USER_KERNEL_BOUNDARY);
+
+
+		//
+		// Parse + cache the contents of the ramdisk
+		//
+		directory_entry_sp ramdisk_entries = unpack_ramdisk(ramdisk_image);
+		if (!ramdisk_entries)
+			{ status = STATUS_INVALID_IMAGE; break; }
+
+		//
+		// Launch any boot-time daemons
+		//
+		start_daemons(ramdisk_entries);
+
+
+		} while(0);
+
+	return(status);
 	}
 
 
 ///
-/// Unpack the contents of the ramdisk + launch each entry as a new process.
-/// On return, all of the ramdisk entries are executing.
+/// Launch all boot daemons within the ramdisk.  On return, all of the ramdisk
+/// daemons + drivers are executing.
 ///
-/// @param ramdisk -- pointer to the start of the ramdisk/tarball image
+/// @param entry -- list of ramdisk entries
 ///
 static
 void_t
-unpack_ramdisk(const uint8_t* ramdisk)
+start_daemons(const directory_entry_s* entry)
 	{
-	tar_entry_s	entry;
-
-
 	//
 	// First entry is the loader itself (i.e., this code).  Skip over it, since
 	// obviously it's already running
 	//
-	tar_read(ramdisk, &entry);
+	entry = entry->next;
 
 
 	//
 	// Walk through the rest of the ramdisk and launch the various drivers
 	// and boot-time daemons
 	//
-	while(tar_read(entry.next, &entry) == STATUS_SUCCESS)
+	while(entry)
 		{
 		// Skip over directories, special files, empty files, etc
-		if (entry.file_size == 0)
+		if (entry->tar.file_size == 0)
 			{ continue; }
-		if (entry.header->type != TAR_TYPE_REGULAR_FILE0 &&
-			entry.header->type != TAR_TYPE_REGULAR_FILE1)
+		if (entry->tar.header->type != TAR_TYPE_REGULAR_FILE0 &&
+			entry->tar.header->type != TAR_TYPE_REGULAR_FILE1)
 			{ continue; }
 
 		// Only launch the boot-time daemons; ignore other executables for now
-		if (memcmp(entry.header->name, "/boot", 5) != 0)
+		if (memcmp(entry->tar.header->name, "/boot", 5) != 0)
 			{ continue; }
 
 		// This is one of the boot-time daemons, so start it now
-		status_t status = create_process_from_image(entry.file,
-													entry.file_size,
+		status_t status = create_process_from_image(entry->tar.file,
+													entry->tar.file_size,
 													CAPABILITY_ALL);
 		if (status != STATUS_SUCCESS)
 			{
 			// This is typically fatal, but useful for debugging
 			printf("Warning: loader unable to start daemon: %d\n", (int)status);
 			}
-		}
 
+		entry = entry->next;
+		}
 
 	return;
 	}
+
+
+///
+/// Unpack and record the contents of the ramdisk
+///
+/// @param ramdisk -- pointer to the start of the ramdisk/tarball image
+///
+/// @return list of directory entries, representing the contents of the ramdisk
+/// image; or NULL on error
+///
+static
+directory_entry_sp
+unpack_ramdisk(const uint8_t* ramdisk)
+	{
+	directory_entry_sp	files	= NULL;
+	directory_entry_sp	last	= NULL;
+
+
+	//
+	// Scan the entire ramdisk
+	//
+	while(!tar_is_exhausted(ramdisk))
+		{
+		//
+		// Create a directory entry for this ramdisk object
+		//
+		directory_entry_sp entry = malloc(sizeof(*entry));
+		if (!entry)
+			{ break; }
+
+		ramdisk = tar_read(ramdisk, &entry->tar);
+		entry->next = NULL;
+
+		//
+		// Append this entry to the list of ramdisk files
+		//
+		if (last)
+			{ last->next = entry; }
+		else
+			{ files = entry; }
+		last = entry;
+		}
+
+	return(files);
+	}
+

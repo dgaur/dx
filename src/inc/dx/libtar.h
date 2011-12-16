@@ -66,14 +66,16 @@ typedef struct tar_entry
 	tar_header_sp	header;
 	uint8_tp		file;
 	size_t			file_size;
-	const uint8_t*	next;
 	} tar_entry_s;
 
 typedef tar_entry_s *    tar_entry_sp;
 typedef tar_entry_sp *   tar_entry_spp;
 
 
-status_t
+bool
+tar_is_exhausted(const uint8_t* image);
+
+const uint8_t*
 tar_read(const uint8_t* image, tar_entry_sp entry);
 
 

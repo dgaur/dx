@@ -49,23 +49,35 @@ read_file_size(const tar_header_sp header)
 
 
 ///
+/// Is this the end of the .tar image?
+///
+/// @param image -- pointer to current location within .tar image
+///
+/// @return TRUE if image is exhausted; FALSE if more .tar entries are present
+///
+bool
+tar_is_exhausted(const uint8_t* image)
+	{
+	tar_header_sp header = (tar_header_sp)(image);
+
+	// A zero-length record marks the end of the .tar image.  No more .tar
+	// entries beyond this point
+	return (!header || read_file_size(header) == 0);
+	}
+
+
+///
 /// Read the next entry in a TAR file.
 ///
 /// @param image	-- pointer to current location within .tar image
 /// @param entry	-- on return, contains pointers to .tar payload
 ///
-/// @return STATUS_SUCCESS if the next entry is successfully read; non-zero
-/// otherwise
+/// @return pointer to next entry; or NULL on error or end of .tar archive
 ///
-status_t
+const uint8_t*
 tar_read(const uint8_t* image, tar_entry_sp entry)
 	{
-	uint32_t		block_count;
-	uint8_tp		file;
-	size_t			file_size;
-	tar_header_sp	header;
-	const uint8_t*	next;
-	status_t		status = STATUS_INVALID_DATA;
+	const uint8_t*	next = NULL;
 
 	do
 		{
@@ -78,8 +90,8 @@ tar_read(const uint8_t* image, tar_entry_sp entry)
 		//
 		// Extract the (fixed-size) header and (variable-size) payload
 		//
-		header	= (tar_header_sp)(image);
-		file	= (uint8_tp)(header) + TAR_BLOCK_SIZE;
+		tar_header_sp	header	= (tar_header_sp)(image);
+		uint8_tp		file	= (uint8_tp)(header) + TAR_BLOCK_SIZE;
 
 
 		//
@@ -87,17 +99,17 @@ tar_read(const uint8_t* image, tar_entry_sp entry)
 		// size of this entry is zero, then assume this is the end of the
 		// image.
 		//
-		file_size = read_file_size(header);
+		size_t file_size = read_file_size(header);
 		if (file_size == 0)
-			{ status = -ENODATA; break; }
-			
+			{ break; }
+
 
 		//
 		// Locate the .tar entry for the next iteration
 		//
-		block_count	= calculate_block_count(file_size);
-		next		= file + (block_count * TAR_BLOCK_SIZE);
-		
+		uint32_t block_count = calculate_block_count(file_size);
+		next = file + (block_count * TAR_BLOCK_SIZE);
+
 
 		//
 		// Success
@@ -105,13 +117,10 @@ tar_read(const uint8_t* image, tar_entry_sp entry)
 		entry->header		= header;
 		entry->file			= file;
 		entry->file_size	= file_size;
-		entry->next			= next;
-
-		status = STATUS_SUCCESS;
 
 		} while(0);
 
 
-	return(status);
+	return(next);
 	}
 
