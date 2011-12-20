@@ -19,7 +19,7 @@ typedef struct file
 
 	char*			buffer;
 	size_t			buffer_size;
-	unsigned		flags;
+	uintptr_t		flags;
 	unsigned char	pushback;	// last character pushed back via ungetc()
 	thread_id_t		thread_id;
 	} FILE;
@@ -50,5 +50,10 @@ typedef struct file
 
 
 
+FILE*
+initialize_stream(thread_id_t thread_id, uintptr_t flags);
+
+uintptr_t
+parse_stream_mode(const char* mode);
 
 #endif

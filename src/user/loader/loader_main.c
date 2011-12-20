@@ -7,6 +7,8 @@
 #include "dx/delete_message.h"
 #include "dx/libtar.h"
 #include "dx/receive_message.h"
+#include "dx/send_message.h"
+#include "dx/stream_message.h"
 #include "dx/user_space_layout.h"
 #include "stdint.h"
 #include "stdio.h"
@@ -70,7 +72,7 @@ main()
 		start_daemons(ramdisk_entries);
 
 
-		//@register with vfs; repeat if necessary
+		//@mount filesystem; register with vfs; repeat if necessary
 
 		//
 		// Temporarily answer filesystem requests (from the ramdisk only,
@@ -81,6 +83,38 @@ main()
 		} while(0);
 
 	return(status);
+	}
+
+
+static
+void
+open_file(const message_s* request)
+	{
+	message_s			reply;
+	open_stream_reply_s reply_data;
+
+	reply_data.cookie	= 0;
+	reply_data.status	= STATUS_IO_ERROR;
+
+	do
+		{
+		//@validate path + flags here
+		//@validate sender/permissions here
+		//@allocate context, return status + cookie
+		} while(0);
+
+
+	//
+	// Always send a response here, even on error, since the caller is likely
+	// blocked on the reply
+	//
+	initialize_reply(request, &reply);
+	reply.data = &reply_data;
+	reply.data_size = sizeof(reply_data);
+	send_message(&reply);
+
+
+	return;
 	}
 
 
@@ -189,7 +223,6 @@ wait_for_messages()
 	{
 	message_s		message;
 	bool			mounted = TRUE;
-	message_s		reply;
 	status_t		status;
 
 
@@ -209,7 +242,12 @@ wait_for_messages()
 		// Dispatch the request as needed
 		switch(message.type)
 			{
+			case MESSAGE_TYPE_OPEN:
+				open_file(&message);
+				break;
+
 			case MESSAGE_TYPE_UNMOUNT_FILESYSTEM:
+				//@verify sender permissions/capabilities
 				//@unregister with vfs
 				mounted = FALSE;
 				break;
