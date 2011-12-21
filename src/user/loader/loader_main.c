@@ -33,8 +33,35 @@ typedef directory_entry_sp *   directory_entry_spp;
 
 static void_t				start_daemons(const directory_entry_s* entry);
 static directory_entry_s*	unpack_ramdisk(const uint8_t* ramdisk);
-static void_t				wait_for_messages();
+static void_t				wait_for_messages(const directory_entry_s* entry);
 
+
+
+///
+/// Find a named file within the ramdisk, if possible
+///
+/// @param filename			-- the desired file
+/// @param ramdisk_entries	-- list of files within the ramdisk
+///
+/// @return pointer to the matching ramdisk entry; or NULL if no such file
+/// exists
+///
+static
+const directory_entry_s*
+find_file(const char* filename, const directory_entry_s* ramdisk_entries)
+	{
+	const directory_entry_s* entry = ramdisk_entries;
+
+	while(entry)
+		{
+		if (strcmp(entry->tar.header->name, filename) == 0)
+			{ break; }
+
+		entry = entry->next;
+		}
+
+	return(entry);
+	}
 
 
 ///
@@ -78,7 +105,7 @@ main()
 		// Temporarily answer filesystem requests (from the ramdisk only,
 		// obviously), until the full file-system becomes available
 		//
-		wait_for_messages();
+		wait_for_messages(ramdisk_entries);
 
 		} while(0);
 
@@ -88,7 +115,8 @@ main()
 
 static
 void
-open_file(const message_s* request)
+open_file(	const message_s*			request,
+			const directory_entry_s*	ramdisk_entries)
 	{
 	message_s			reply;
 	open_stream_reply_s reply_data;
@@ -98,7 +126,28 @@ open_file(const message_s* request)
 
 	do
 		{
-		//@validate path + flags here
+		//
+		// Extract the message payload
+		//
+		open_stream_request_sp	request_data;
+		if (request->data_size < sizeof(*request_data))
+			{ reply_data.status = STATUS_INVALID_DATA; break; }
+
+		request_data = request->data;
+		request_data->file[ FILENAME_MAX ] = 0;	// Ensure name is terminated
+
+
+		//
+		// Validate the path + mode here.  Assume the ramdisk is read-only
+		//
+		if (request_data->flags & (STREAM_WRITE | STREAM_APPEND))
+			{ reply_data.status = STATUS_ACCESS_DENIED; break; }
+
+		const directory_entry_s* entry = find_file(request_data->file,
+			ramdisk_entries);
+		if (!entry)
+			{ reply_data.status = STATUS_FILE_DOES_NOT_EXIST; break; }
+
 		//@validate sender/permissions here
 		//@allocate context, return status + cookie
 		} while(0);
@@ -217,9 +266,11 @@ unpack_ramdisk(const uint8_t* ramdisk)
 ///
 /// Wait for incoming filesystem requests + dispatch them as appropriate.
 ///
+/// @param ramdisk_entries -- list of files in the ramdisk
+///
 static
 void_t
-wait_for_messages()
+wait_for_messages(const directory_entry_s* ramdisk_entries)
 	{
 	message_s		message;
 	bool			mounted = TRUE;
@@ -243,7 +294,7 @@ wait_for_messages()
 		switch(message.type)
 			{
 			case MESSAGE_TYPE_OPEN:
-				open_file(&message);
+				open_file(&message, ramdisk_entries);
 				break;
 
 			case MESSAGE_TYPE_UNMOUNT_FILESYSTEM:
