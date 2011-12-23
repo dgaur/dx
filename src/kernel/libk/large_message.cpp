@@ -155,11 +155,12 @@ deliver_payload()
 		// Allocate a block of free pages for mapping the payload
 		page = thread.address_space.allocate_large_payload_block(
 			frame.read_count());
-		TRACE(ALL,"Delivering large payload to thread %#x at auto target %p\n",
-			thread.id, page);
 
 		// The recipient's payload appears at the same offset as the sender's
 		receiver_payload = uint8_tp(page) + PAGE_OFFSET(sender_payload);
+		TRACE(ALL,"Delivering large payload to thread %#x at auto target %p "
+			"(page %p)\n",
+			thread.id, receiver_payload, page);
 		}
 	else
 		{

@@ -366,6 +366,7 @@ commit_frame(	void_tp					page,
 	uint32_t	page_count	= frame.read_count();
 	status_t	status		= STATUS_SUCCESS;
 
+	ASSERT(is_aligned(page, PAGE_SIZE));
 	ASSERT(page != NULL);
 	ASSERT(page_count > 0);
 
@@ -511,6 +512,9 @@ copy_on_write(const void_tp address)
 		unshare_frame(address);
 		status = entry->commit_frame(frame, MEMORY_USER_DEFAULT);
 		ASSERT(status == STATUS_SUCCESS);
+		ASSERT(entry->is_present());
+		ASSERT(entry->is_writable());
+		ASSERT(!entry->is_copy_on_write());
 
 
 		//
@@ -819,17 +823,16 @@ free_large_payload_block(const void_tp block)
 	{
 	status_t status;
 
-	ASSERT(block);
-	ASSERT(is_aligned(block, PAGE_SIZE));
-
-	uintptr_t b = uintptr_t(block);
-	ASSERT(b >= LARGE_PAYLOAD_POOL_BASE);
-	ASSERT(b <  USER_BASE);
+	// Locate the base of the memory block; the sender's original data may not
+	// have been page-aligned
+	uintptr_t page = PAGE_BASE(block);
+	ASSERT(page >= LARGE_PAYLOAD_POOL_BASE);
+	ASSERT(page <  USER_BASE);
 
 	// Return this block back to the pool from which it was allocated
-	uint32_t index = (b - LARGE_PAYLOAD_POOL_BASE) / PAYLOAD_POOL_SIZE;
+	uint32_t index = (page - LARGE_PAYLOAD_POOL_BASE) / PAYLOAD_POOL_SIZE;
 	if (index < LARGE_PAYLOAD_POOL_COUNT)
-		{ status = large_payload_pool[index]->free_block(block); }
+		{ status = large_payload_pool[index]->free_block(void_tp(page)); }
 	else
 		{
 		TRACE(ALL, "Unable to free payload block at %p\n", block);
