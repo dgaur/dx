@@ -95,8 +95,9 @@ expand(page_table_entry_cr directory_entry)
 /// @param address		-- the target virtual address
 /// @param auto_expand	-- if no page table currently maps the target address,
 ///						   automatically create a new one?  Should typically be
-///						   TRUE if the caller intends to modify or overwrite
-///						   the returned page table entry; FALSE if not.
+///						   EXPAND_TREE if the caller intends to modify or
+///						   overwrite the returned page table entry; or
+///						   ONLY_SEARCH if not.
 ///
 /// @return a pointer to the page table entry that maps the target address.
 /// The caller is responsible for examining the returned entry to determine

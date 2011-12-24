@@ -221,7 +221,8 @@ allocate_medium_payload_block()
 		//
 		// Locate the page table entry that maps this block
 		//
-		page_table_entry_cp entry = page_directory->find_entry(block, TRUE);
+		page_table_entry_cp entry = page_directory->find_entry(block,
+			EXPAND_TREE);
 		if (!entry)
 			{
 			TRACE(ALL, "Unable to create/find entry for payload block\n");
@@ -318,7 +319,8 @@ commit_frame(	void_tp				page,
 	for (uint32_t i = 0; i < page_count; i++)
 		{
 		// Locate the page table entry for this next page
-		page_table_entry_cp entry = page_directory->find_entry(page, TRUE);
+		page_table_entry_cp entry = page_directory->find_entry(page,
+			EXPAND_TREE);
 		if (!entry)
 			{
 			status = STATUS_INSUFFICIENT_MEMORY;
@@ -381,7 +383,8 @@ commit_frame(	void_tp					page,
 		shared_frame_cr	current_frame = frame[i];
 
 		// Locate the page table entry for this next page
-		page_table_entry_cp entry = page_directory->find_entry(page, TRUE);
+		page_table_entry_cp entry = page_directory->find_entry(page,
+			EXPAND_TREE);
 		if (!entry)
 			{
 			status = STATUS_INSUFFICIENT_MEMORY;
@@ -457,7 +460,7 @@ copy_on_write(const void_tp address)
 
 		ASSERT(copy_page);
 		page_table_entry_cp copy_entry =
-			page_directory->find_entry(copy_page, TRUE);
+			page_directory->find_entry(copy_page, EXPAND_TREE);
 		if (!copy_entry)
 			{
 			TRACE(ALL, "Unable to find page table entry for copy-buffer\n");

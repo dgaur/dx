@@ -13,6 +13,12 @@
 #include "new.hpp"
 
 
+//
+// Aliases for page_directory_c::find_entry()
+//
+#define EXPAND_TREE		TRUE	/// Automatically expand page dir/table
+#define ONLY_SEARCH		FALSE	/// Only search the page table, do not expand
+
 
 ///
 /// Every page directory has exactly 1024 entries.  See the Intel documentation
@@ -70,7 +76,7 @@ class   page_directory_c
 
 		page_table_entry_cp
 			find_entry(	const void_tp	address,
-						bool_t			auto_expand = FALSE);
+						bool_t			auto_expand = ONLY_SEARCH);
 
 		page_table_entry_cp
 			find_present_entry(void_tpp address);
