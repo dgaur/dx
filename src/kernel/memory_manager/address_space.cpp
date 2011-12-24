@@ -1086,6 +1086,7 @@ void_t address_space_c::
 unshare_frame(const void_tp address)
 	{
 	void_tp page = void_tp(PAGE_BASE(address));
+	page_table_entry_cp entry = page_directory->find_entry(page);
 
 	// Remove this entry from the pool of shared frames
 	if (shared_frame_table.is_valid(page))
@@ -1096,17 +1097,32 @@ unshare_frame(const void_tp address)
 		// Ignore the kernel superpages, since these must always be present +
 		// mapped; and really these entries are just aliases injected by the
 		// share_kernel_frames() logic
-		page_table_entry_cp entry = page_directory->find_entry(page);
 		ASSERT(entry);
+		ASSERT(entry->is_present());
 		if (!entry->is_super_page())
 			{ entry->unshare_frame(page); }
 
 		// This address no longer needs/holds a reference to the shared frame
 		remove_reference(shared_frame);
 		}
+	else if (entry->is_present())
+		{
+		// The current thread modified a shared page; so this (new) frame is no
+		// longer shared, but still must be freed
+		ASSERT(!entry->is_copy_on_write());
+		ASSERT(!entry->is_shared());
+		ASSERT(!entry->is_super_page());
+
+		physical_address_t frame = entry->decommit_frame(page);
+		ASSERT(frame != INVALID_FRAME);
+		__page_frame_manager->free_frames(&frame, 1);
+		}
 	else
 		{
-		TRACE(ALL, "Page %p is not shared in address space %#x\n", page, id);
+		// Thread has no page mapped here at all.  This is a unit test; or
+		// probably a buggy application
+		TRACE(ALL, "Page %p is not shared, not present, in address space %#x\n",
+			page, id);
 		}
 
 	return;

@@ -238,7 +238,9 @@ class   page_table_entry_c
 		///
 		/// This entry is no longer being shared.  Other address spaces may
 		/// retain references to this frame, but the current address space
-		/// does not
+		/// does not.  Assumes that the underlying frame will be released
+		/// appropriately, via some other means (e.g., when its reference
+		/// count falls to zero).
 		///
 		inline
 		void_t
