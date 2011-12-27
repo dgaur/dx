@@ -85,7 +85,8 @@
 
 
 //
-// Sizes of the various memory pools, in bytes
+// Sizes of the various memory pools, in bytes.  The logic in memory_pool_c
+// limits each pool to 1024 entries
 //
 #define		KERNEL_POOL8192_SIZE	16 * 8192		// 16 blocks of 8KB each
 #define		KERNEL_POOL1024_SIZE	64 * 1024		// 64 blocks of 1KB each
