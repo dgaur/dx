@@ -2,6 +2,7 @@
 // loader_main.c
 //
 
+#include "assert.h"
 #include "dx/capability.h"
 #include "dx/create_process.h"
 #include "dx/delete_message.h"
@@ -31,26 +32,62 @@ typedef directory_entry_s *    directory_entry_sp;
 typedef directory_entry_sp *   directory_entry_spp;
 
 
-static void_t				start_daemons(const directory_entry_s* entry);
+///
+/// An open file descriptor.  One of these for each file held 'open' by a
+/// client process.
+///
+typedef struct open_file
+	{
+	const directory_entry_s*	entry;
+	uint8_tp					data;
+	size_t						data_offset;
+	uintptr_t					flags;
+	thread_id_t					thread;
+	} open_file_s;
+
+typedef open_file_s *    open_file_sp;
+typedef open_file_sp *   open_file_spp;
+
+#define OPEN_FILE_COUNT_MAX	32
+
+
+///
+/// Internal loader context
+///
+typedef struct loader_context
+	{
+	open_file_sp		open_file[ OPEN_FILE_COUNT_MAX ];
+	uintptr_t			open_file_count;
+	uintptr_t			open_file_index;
+	directory_entry_sp	ramdisk_entries;
+	} loader_context_s;
+
+typedef loader_context_s *    loader_context_sp;
+typedef loader_context_sp *   loader_context_spp;
+
+
+
+
+static void_t				start_daemons(const loader_context_s* context);
 static directory_entry_s*	unpack_ramdisk(const uint8_t* ramdisk);
-static void_t				wait_for_messages(const directory_entry_s* entry);
+static void_t				wait_for_messages(loader_context_sp context);
 
 
 
 ///
 /// Find a named file within the ramdisk, if possible
 ///
-/// @param filename			-- the desired file
-/// @param ramdisk_entries	-- list of files within the ramdisk
+/// @param context	-- loader context
+/// @param filename	-- the desired file
 ///
 /// @return pointer to the matching ramdisk entry; or NULL if no such file
 /// exists
 ///
 static
 const directory_entry_s*
-find_file(const char* filename, const directory_entry_s* ramdisk_entries)
+find_file(const loader_context_s* context, const char* filename)
 	{
-	const directory_entry_s* entry = ramdisk_entries;
+	const directory_entry_s* entry = context->ramdisk_entries;
 
 	while(entry)
 		{
@@ -74,10 +111,20 @@ find_file(const char* filename, const directory_entry_s* ramdisk_entries)
 int
 main()
 	{
-	status_t status;
+	loader_context_sp	loader_context = NULL;
+	status_t			status;
 
 	do
 		{
+		//
+		// Allocate storage for the ramdisk/loader context
+		//
+		loader_context = malloc(sizeof(*loader_context));
+		if (!loader_context)
+			{ status = STATUS_INSUFFICIENT_MEMORY; break; }
+		memset(loader_context, 0, sizeof(*loader_context));
+
+
 		//
 		// Locate the actual ramdisk image in memory
 		//
@@ -89,25 +136,35 @@ main()
 		//
 		// Parse + cache the contents of the ramdisk
 		//
-		directory_entry_sp ramdisk_entries = unpack_ramdisk(ramdisk_image);
-		if (!ramdisk_entries)
+		loader_context->ramdisk_entries = unpack_ramdisk(ramdisk_image);
+		if (!loader_context->ramdisk_entries)
 			{ status = STATUS_INVALID_IMAGE; break; }
+
 
 		//
 		// Launch any boot-time daemons
 		//
-		start_daemons(ramdisk_entries);
+		start_daemons(loader_context);
 
 
 		//@mount filesystem; register with vfs; repeat if necessary
+
 
 		//
 		// Temporarily answer filesystem requests (from the ramdisk only,
 		// obviously), until the full file-system becomes available
 		//
-		wait_for_messages(ramdisk_entries);
+		wait_for_messages(loader_context);
 
 		} while(0);
+
+
+	//
+	// Cleanup
+	//
+	if (loader_context)
+		{ free(loader_context); }	//@open_file structs, too
+
 
 	return(status);
 	}
@@ -115,8 +172,8 @@ main()
 
 static
 void
-open_file(	const message_s*			request,
-			const directory_entry_s*	ramdisk_entries)
+open_file(	loader_context_sp	context,
+			const message_s*	request)
 	{
 	message_s			reply;
 	open_stream_reply_s reply_data;
@@ -127,7 +184,7 @@ open_file(	const message_s*			request,
 	do
 		{
 		//
-		// Extract the message payload
+		// Extract the message payload, which should be open_stream_request_s
 		//
 		open_stream_request_sp	request_data;
 		if (request->data_size < sizeof(*request_data))
@@ -143,13 +200,57 @@ open_file(	const message_s*			request,
 		if (request_data->flags & (STREAM_WRITE | STREAM_APPEND))
 			{ reply_data.status = STATUS_ACCESS_DENIED; break; }
 
-		const directory_entry_s* entry = find_file(request_data->file,
-			ramdisk_entries);
+		const directory_entry_s* entry = find_file(context, request_data->file);
 		if (!entry)
 			{ reply_data.status = STATUS_FILE_DOES_NOT_EXIST; break; }
 
+
 		//@validate sender/permissions here
-		//@allocate context, return status + cookie
+
+
+		//
+		// Find a free slot in the open file table, if possible
+		//
+		if (context->open_file_count >= OPEN_FILE_COUNT_MAX)
+			{ reply_data.status = STATUS_INSUFFICIENT_MEMORY; break; }
+
+		unsigned free_slot = context->open_file_index;
+		for(;;)
+			{
+			if (context->open_file[ free_slot ] == NULL)
+				{ break; }
+
+			free_slot++;
+			if (free_slot >= OPEN_FILE_COUNT_MAX)
+				free_slot = 0;
+			}
+
+		assert(free_slot < OPEN_FILE_COUNT_MAX);
+		context->open_file_count++;
+		context->open_file_index = free_slot;
+
+
+		//
+		// Allocate context for this file stream
+		//
+		open_file_sp file = malloc(sizeof(*file));
+		if (!file)
+			{ reply_data.status = STATUS_INSUFFICIENT_MEMORY; break; }
+		file->entry			= entry;
+		file->data			= entry->tar.file;
+		file->data_offset	= 0;
+		file->flags			= request_data->flags;
+		file->thread		= request->u.source;
+
+
+		//
+		// Success.  Save this context for later file I/O.  The client thread
+		// can now start to issue I/O on this file stream
+		//
+		context->open_file[ free_slot ] = file;
+		reply_data.cookie = free_slot;
+		reply_data.status = STATUS_SUCCESS;
+
 		} while(0);
 
 
@@ -171,17 +272,17 @@ open_file(	const message_s*			request,
 /// Launch all boot daemons within the ramdisk.  On return, all of the ramdisk
 /// daemons + drivers are executing.
 ///
-/// @param entry -- list of ramdisk entries
+/// @param context -- the loader context
 ///
 static
 void_t
-start_daemons(const directory_entry_s* entry)
+start_daemons(const loader_context_s* context)
 	{
 	//
 	// First entry is the loader itself (i.e., this code).  Skip over it, since
 	// obviously it's already running
 	//
-	entry = entry->next;
+	const directory_entry_s* entry = context->ramdisk_entries->next;
 
 
 	//
@@ -266,11 +367,11 @@ unpack_ramdisk(const uint8_t* ramdisk)
 ///
 /// Wait for incoming filesystem requests + dispatch them as appropriate.
 ///
-/// @param ramdisk_entries -- list of files in the ramdisk
+/// @param context -- loader context
 ///
 static
 void_t
-wait_for_messages(const directory_entry_s* ramdisk_entries)
+wait_for_messages(loader_context_sp context)
 	{
 	message_s		message;
 	bool			mounted = TRUE;
@@ -294,7 +395,7 @@ wait_for_messages(const directory_entry_s* ramdisk_entries)
 		switch(message.type)
 			{
 			case MESSAGE_TYPE_OPEN:
-				open_file(&message, ramdisk_entries);
+				open_file(context, &message);
 				break;
 
 			case MESSAGE_TYPE_UNMOUNT_FILESYSTEM:
