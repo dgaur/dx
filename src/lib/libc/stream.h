@@ -15,10 +15,9 @@
 ///
 typedef struct file
 	{
-	//@file descriptor?
-
 	char*			buffer;
 	size_t			buffer_size;
+	uintptr_t		cookie;
 	uintptr_t		flags;
 	unsigned char	pushback;	// last character pushed back via ungetc()
 	thread_id_t		thread_id;
@@ -51,7 +50,7 @@ typedef struct file
 
 
 FILE*
-initialize_stream(thread_id_t thread_id, uintptr_t flags);
+initialize_stream(thread_id_t thread_id, uintptr_t cookie, uintptr_t flags);
 
 uintptr_t
 parse_stream_mode(const char* mode);

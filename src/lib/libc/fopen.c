@@ -85,7 +85,7 @@ fopen(const char* filename, const char* mode)
 		//
 		// Initialize a new stream descriptor for this file
 		//
-		file = initialize_stream(target_thread, flags);
+		file = initialize_stream(target_thread, reply_data->cookie, flags);
 		if (!file)
 			{
 			//@send CLOSE message here
