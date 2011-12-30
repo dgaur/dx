@@ -40,7 +40,7 @@ typedef struct open_file
 	{
 	const directory_entry_s*	entry;
 	uint8_tp					data;
-	size_t						data_offset;
+	size_t						data_offset;	//@fpos_t?
 	uintptr_t					flags;
 	thread_id_t					thread;
 	} open_file_s;
@@ -214,20 +214,20 @@ open_file(	loader_context_sp	context,
 		if (context->open_file_count >= OPEN_FILE_COUNT_MAX)
 			{ reply_data.status = STATUS_INSUFFICIENT_MEMORY; break; }
 
-		unsigned free_slot = context->open_file_index;
+		unsigned slot = context->open_file_index;
 		for(;;)
 			{
-			if (context->open_file[ free_slot ] == NULL)
+			if (context->open_file[ slot ] == NULL)
 				{ break; }
 
-			free_slot++;
-			if (free_slot >= OPEN_FILE_COUNT_MAX)
-				free_slot = 0;
+			slot++;
+			if (slot >= OPEN_FILE_COUNT_MAX)
+				slot = 0;
 			}
 
-		assert(free_slot < OPEN_FILE_COUNT_MAX);
+		assert(slot < OPEN_FILE_COUNT_MAX);
 		context->open_file_count++;
-		context->open_file_index = free_slot;
+		context->open_file_index = slot;
 
 
 		//
@@ -247,8 +247,8 @@ open_file(	loader_context_sp	context,
 		// Success.  Save this context for later file I/O.  The client thread
 		// can now start to issue I/O on this file stream
 		//
-		context->open_file[ free_slot ] = file;
-		reply_data.cookie = free_slot;
+		context->open_file[ slot ] = file;
+		reply_data.cookie = slot;
 		reply_data.status = STATUS_SUCCESS;
 
 		} while(0);
@@ -375,6 +375,7 @@ wait_for_messages(loader_context_sp context)
 	{
 	message_s		message;
 	bool			mounted = TRUE;
+	message_s		reply;
 	status_t		status;
 
 
@@ -402,6 +403,13 @@ wait_for_messages(loader_context_sp context)
 				//@verify sender permissions/capabilities
 				//@unregister with vfs
 				mounted = FALSE;
+				break;
+
+			case MESSAGE_TYPE_FLUSH:
+				// The ramdisk is read-only; no I/O needs to be flushed here
+				initialize_reply(&message, &reply);
+				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
+				send_message(&reply);
 				break;
 
 			case MESSAGE_TYPE_NULL:
