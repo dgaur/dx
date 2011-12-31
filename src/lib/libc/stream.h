@@ -20,7 +20,7 @@ typedef struct file
 	uintptr_t		cookie;
 	uintptr_t		flags;
 	unsigned char	pushback;	// last character pushed back via ungetc()
-	thread_id_t		thread_id;
+	thread_id_t		thread_id;	// thread that handles the I/O on this stream
 	} FILE;
 
 

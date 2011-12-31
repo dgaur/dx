@@ -75,6 +75,76 @@ static void_t				wait_for_messages(loader_context_sp context);
 
 
 ///
+/// Close an existing file stream, usually in response to MESSAGE_TYPE_CLOSE
+/// from fclose().
+///
+/// @param context	-- the loader context
+/// @param request	-- the request message, from fopen()
+///
+static
+void
+close_file(	loader_context_sp	context,
+			const message_s*	request)
+	{
+	message_s	reply;
+	status_t	status = STATUS_INVALID_STREAM;
+
+
+	do
+		{
+		//
+		// Lookup the victim stream, if possible.  Expected protocol here is:
+		//	* request->type is MESSAGE_TYPE_CLOSE
+		//	* request->id is meaningful, not atomic
+		//	* request->data contains stream cookie
+		//
+		uintptr_t slot = (uintptr_t)(request->data);
+		if (slot >= OPEN_FILE_COUNT_MAX)
+			{ break; }
+
+		open_file_sp file = context->open_file[ slot ];
+		if (!file)
+			{ break; }
+
+
+		//
+		// Does this thread actually own this stream?
+		//
+		//@@@this assumes the thread that calls fopen() also calls fclose(),
+		//@@@maybe not true in multithreaded client
+		if (file->thread != request->u.source)
+			{ break; }
+
+
+		//
+		// Discard the context for this stream; the caller can no longer use
+		// this stream, unless it first re-opens the file
+		//
+		assert(context->open_file_count > 0);
+		context->open_file_count--;
+		context->open_file[ slot ] = NULL;
+		free(file);
+
+		} while(0);
+
+
+	//
+	// Always send a response here, even on error, since the caller is likely
+	// blocked on the reply.  Expected protocol here is:
+	//	* reply->type is MESSAGE_TYPE_CLOSE_COMPLETE
+	//	* reply->id is meaningful, wakes requestor thread
+	//	* reply->data contains returned status value
+	//
+	initialize_reply(request, &reply);
+	reply.type = MESSAGE_TYPE_CLOSE_COMPLETE;
+	reply.data = (void*)(status);
+	send_message(&reply);
+
+	return;
+	}
+
+
+///
 /// Find a named file within the ramdisk, if possible
 ///
 /// @param context	-- loader context
@@ -170,6 +240,15 @@ main()
 	}
 
 
+///
+/// Open a new file stream.  This is typically invoked due to a
+/// MESSAGE_TYPE_OPEN request, which itself is usually triggered by fopen().
+/// Locate the file, if possible; allocate a new context for it; return a
+/// handle to the requestor.
+///
+/// @param context	-- the loader context
+/// @param request	-- the request message, from fopen()
+///
 static
 void
 open_file(	loader_context_sp	context,
@@ -184,8 +263,12 @@ open_file(	loader_context_sp	context,
 	do
 		{
 		//
-		// Extract the message payload, which should be open_stream_request_s
+		// Extract the message payload.  The expected protocol here is:
+		//	* request->type is MESSAGE_TYPE_OPEN
+		//	* request->id is meaningful, not atomic
+		//	* request->data points to an open_stream_request_s structure
 		//
+		assert(request->id != MESSAGE_ID_ATOMIC);
 		open_stream_request_sp	request_data;
 		if (request->data_size < sizeof(*request_data))
 			{ reply_data.status = STATUS_INVALID_DATA; break; }
@@ -251,14 +334,23 @@ open_file(	loader_context_sp	context,
 		reply_data.cookie = slot;
 		reply_data.status = STATUS_SUCCESS;
 
+
+		//@possible DOS here: how to reclaim file handles when clients crash
+		//@or exit without cleaning up?
+
+
 		} while(0);
 
 
 	//
 	// Always send a response here, even on error, since the caller is likely
-	// blocked on the reply
+	// blocked on the reply.  Expected protocol here is:
+	//	* reply->type is MESSAGE_TYPE_OPEN_COMPLETE
+	//	* reply->id is meaningful, wakes requestor thread
+	//	* reply->data points to an open_stream_reply_s structure
 	//
 	initialize_reply(request, &reply);
+	reply.type = MESSAGE_TYPE_OPEN_COMPLETE;
 	reply.data = &reply_data;
 	reply.data_size = sizeof(reply_data);
 	send_message(&reply);
@@ -395,6 +487,17 @@ wait_for_messages(loader_context_sp context)
 		// Dispatch the request as needed
 		switch(message.type)
 			{
+			case MESSAGE_TYPE_CLOSE:
+				close_file(context, &message);
+				break;
+
+			case MESSAGE_TYPE_FLUSH:
+				// The ramdisk is read-only; no I/O needs to be flushed here
+				initialize_reply(&message, &reply);
+				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
+				send_message(&reply);
+				break;
+
 			case MESSAGE_TYPE_OPEN:
 				open_file(context, &message);
 				break;
@@ -403,13 +506,6 @@ wait_for_messages(loader_context_sp context)
 				//@verify sender permissions/capabilities
 				//@unregister with vfs
 				mounted = FALSE;
-				break;
-
-			case MESSAGE_TYPE_FLUSH:
-				// The ramdisk is read-only; no I/O needs to be flushed here
-				initialize_reply(&message, &reply);
-				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
-				send_message(&reply);
 				break;
 
 			case MESSAGE_TYPE_NULL:

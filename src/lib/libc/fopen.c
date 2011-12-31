@@ -2,6 +2,7 @@
 // fopen.c
 //
 
+#include "assert.h"
 #include "dx/message.h"
 #include "dx/message_type.h"
 #include "dx/status.h"
@@ -74,6 +75,7 @@ fopen(const char* filename, const char* mode)
 		//
 		// Parse the reply
 		//
+		assert(reply.type == MESSAGE_TYPE_OPEN_COMPLETE);
 		if (reply.data_size < sizeof(open_stream_reply_s))
 			{ errno = STATUS_IO_ERROR; break; }
 
