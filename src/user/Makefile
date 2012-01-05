@@ -17,7 +17,7 @@ include Makefile.user
 # loader in the first entry; and the order also determines assignment of
 # thread ids@@
 #
-USER_DIRS	:= loader vga shell keyboard
+USER_DIRS	:= loader vga shell keyboard console
 
 
 #
