@@ -61,14 +61,10 @@ FILE* stderr = &stderr_file;
 ///
 /// Allocate + initialize a stream descriptor
 ///
-/// @param thread_id	-- thread which will handle I/O on this stream
-/// @param cookie		-- opaque context for target thread
-/// @param flags		-- initial FILE flags
-///
 /// @return the new FILE object; or NULL on error
 ///
 FILE*
-initialize_stream(thread_id_t thread_id, uintptr_t cookie, uintptr_t flags)
+allocate_stream()
 	{
 	FILE* file = NULL;
 
@@ -82,9 +78,6 @@ initialize_stream(thread_id_t thread_id, uintptr_t cookie, uintptr_t flags)
 			{ break; }
 
 		memset(file, 0, sizeof(*file));
-		file->cookie	= cookie;
-		file->flags		= flags;
-		file->thread_id	= thread_id;
 
 		} while(0);
 

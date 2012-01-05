@@ -45,6 +45,14 @@ fopen(const char* filename, const char* mode)
 			{ errno = STATUS_INVALID_DATA; break; }
 
 
+		//
+		// Allocate a new stream descriptor for this file
+		//
+		FILE* f = allocate_stream();
+		if (!f)
+			{ errno = STATUS_INSUFFICIENT_MEMORY; break; }
+
+
 		//@retrieve thread id of target FS from VFS driver
 		thread_id_t target_thread = 0; //@assume loader for now
 
@@ -85,21 +93,13 @@ fopen(const char* filename, const char* mode)
 
 
 		//
-		// Initialize a new stream descriptor for this file
+		// Success.  Save all pertinent context; caller can now start issuing
+		// I/O on this stream
 		//
-		file = initialize_stream(target_thread, reply_data->cookie, flags);
-		if (!file)
-			{
-			//@send CLOSE message here
-			errno = STATUS_INSUFFICIENT_MEMORY;
-			break;
-			}
-
-
-		//
-		// Success.  Caller can now start issuing I/O on this stream
-		//
-		file->flags |= STREAM_OPEN;
+		file = f;
+		file->thread_id	= target_thread;
+		file->cookie	= reply_data->cookie;
+		file->flags		= flags | STREAM_OPEN;
 
 
 		} while(0);

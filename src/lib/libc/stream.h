@@ -50,7 +50,7 @@ typedef struct file
 
 
 FILE*
-initialize_stream(thread_id_t thread_id, uintptr_t cookie, uintptr_t flags);
+allocate_stream();
 
 uintptr_t
 parse_stream_mode(const char* mode);
