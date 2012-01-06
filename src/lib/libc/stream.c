@@ -12,6 +12,7 @@
 // stdin
 //
 
+static
 FILE stdin_file =
 	{
 	.buffer			= NULL,
@@ -29,12 +30,13 @@ FILE* stdin = &stdin_file;
 // stdout
 //
 
+static
 FILE stdout_file =
 	{
 	.buffer			= NULL,
 	.buffer_size	= 0,
 	.flags			= STREAM_OPEN,
-	.thread_id		= 1,			//@@@assumes console driver is thread 1
+	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};
 
@@ -46,12 +48,13 @@ FILE* stdout = &stdout_file;
 // stderr
 //
 
+static
 FILE stderr_file =
 	{
 	.buffer			= NULL,
 	.buffer_size	= 0,
 	.flags			= STREAM_OPEN,
-	.thread_id		= 1,			//@@@assumes console driver is thread 1
+	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};
 

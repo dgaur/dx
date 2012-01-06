@@ -268,7 +268,7 @@ handle_make_code(	keyboard_context_sp	keyboard,
 				break; //@nonprinting chars
 
 			// Build a message describing this key event
-			message.u.destination		= 2;//@assume console is thd 2
+			message.u.destination		= 3;//@assume console is thd 3
 			message.type				= MESSAGE_TYPE_KEYBOARD_INPUT;
 			message.id					= MESSAGE_ID_ATOMIC;
 			message.data				= (void_t*)(MAKE_KEYBOARD_DATA(

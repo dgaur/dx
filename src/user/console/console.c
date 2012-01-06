@@ -2,6 +2,7 @@
 // console.c
 //
 
+#include "assert.h"
 #include "dx/delete_message.h"
 #include "dx/receive_message.h"
 #include "dx/send_message.h"
@@ -10,7 +11,30 @@
 #include "stdio.h"
 #include "string.h"
 
+#define VGA_DRIVER		1	//@@@@
+#define KEYBOARD_DRIVER	4	//@@@@
+
+
 static void_t wait_for_messages();
+
+
+static
+status_t
+forward_message(const message_s*	message,
+				thread_id_t			thread_id)
+	{
+	message_s forwarded;
+
+	// Copy the original message contents (type, payload, payload size, etc)
+	assert(message);
+	memcpy(&forwarded, message, sizeof(forwarded));
+
+	// Forward the message to this new recipient
+	forwarded.u.destination = thread_id;
+	status_t status = send_message(&forwarded);
+
+	return(status);
+	}
 
 
 ///
@@ -58,6 +82,22 @@ wait_for_messages()
 		// Dispatch the request as needed
 		switch(message.type)
 			{
+			case MESSAGE_TYPE_WRITE:
+				// Forward the request to the VGA driver
+				forward_message(&message,VGA_DRIVER);
+				break;
+
+
+			case MESSAGE_TYPE_FLUSH:
+				// Receipt of this message implies that all previous I/O
+				// has been processed already
+				//@this should be synchronous to the VGA driver
+				initialize_reply(&message, &reply);
+				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
+				send_message(&reply);
+				break;
+
+
 			case MESSAGE_TYPE_NULL:
 			default:
 				break;
