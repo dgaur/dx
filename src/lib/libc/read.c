@@ -2,11 +2,12 @@
 // read.c
 //
 
+#include "assert.h"
 #include "dx/delete_message.h"
-#include "dx/hal/keyboard_input.h"
-#include "dx/receive_message.h"
+#include "dx/send_and_receive_message.h"
 #include "dx/status.h"
 #include "read.h"
+#include "stdlib.h"
 
 
 ///
@@ -71,8 +72,8 @@ maybe_read(	FILE*	stream,
 /// Read data from an input stream.  No buffering.  Blocks until data arrives,
 /// if necessary
 ///
-/// This is the only input routine that invokes send_message(), to the
-/// appropriate stream driver.  All other input routines should eventually
+/// This is the only input routine that invokes send_and_receive_message(), to
+/// the appropriate stream driver.  All other input routines should eventually
 /// invoke this one.
 ///
 /// This is essentially POSIX read(), albeit with a different signature
@@ -89,47 +90,47 @@ read(	FILE*	stream,
 		size_t	buffer_size)
 	{
 	size_t		bytes_read = 0;
-	message_s	message;
+	message_s	request;
+	message_s	reply;
 	status_t	status;
 
 
-	//@send message to stream driver, waiting for I/O?
-
-
-	//
-	// Wait for data on this stream
-	//
 	for(;;)
 		{
-		status = receive_message(&message, WAIT_FOR_MESSAGE);
+		//@send message to stream driver, waiting for I/O?
+
+
+		//
+		// Wait for data on this stream
+		//
+		initialize_message(&request);
+		request.u.destination	= stream->thread_id;
+		request.type			= MESSAGE_TYPE_READ;
+		request.id				= rand();
+		status = send_and_receive_message(&request, &reply);
 		if (status != STATUS_SUCCESS)
 			{ continue; }
 
-		if (message.type == MESSAGE_TYPE_KEYBOARD_INPUT) //@STREAM_INPUT?
+
+		//
+		// Parse the response
+		//
+		assert(reply.type == MESSAGE_TYPE_READ_COMPLETE);
+		bytes_read = reply.data_size;
+		if (reply.data_size > 0)
 			{
 			char* b = (char*)(buffer);
+			char* d = (char*)(reply.data);
 
-			*b = READ_KEYBOARD_CHARACTER(message.data);
-			bytes_read = sizeof(*b);
-
-			break;
+			*b = *d;
 			}
 
-		//@very incomplete: stream id/handle; END_OF_STREAM; steer unexpected
-		//@input (sockets, etc) to proper queue based on stream id
-
-		// Unexpected message; discard it here
-		delete_message(&message);
+		//
+		// Done
+		//
+		delete_message(&reply);
+		break;
 		}
-
-
-
-	//
-	// Clean up, although this should typically be unnecessary here -- no
-	// external payload
-	//
-	delete_message(&message);
-
 
 	return(bytes_read);
 	}

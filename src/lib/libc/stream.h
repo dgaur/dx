@@ -31,7 +31,6 @@ typedef struct file
 #define STREAM_EOF			0x02	/// Stream is at end-of-file
 #define STREAM_ERROR		0x04	/// Stream has I/O error
 #define STREAM_PUSHBACK		0x08	/// Pushback data is valid
-#define STREAM_ECHO			0x10	/// Automatically echo input
 #define STREAM_BUFFER_NONE	0x00	/// No buffering at all
 #define STREAM_BUFFER_LINE	0x20	/// Line-buffered
 #define STREAM_BUFFER_FULL	0x40	/// Fully-buffered

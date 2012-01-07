@@ -17,8 +17,8 @@ FILE stdin_file =
 	{
 	.buffer			= NULL,
 	.buffer_size	= 0,
-	.flags			= STREAM_OPEN | STREAM_ECHO,
-	.thread_id		= 3,			//@@@assumes keyboard driver is thread 3
+	.flags			= STREAM_OPEN,
+	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};
 

@@ -32,10 +32,6 @@ fgetc(FILE* stream)
 		// Per C99, return the unsigned character, promoted to int
 		result = (int)(character);
 
-		//@where does this belong? not echo'd until read?!
-		if (stream->flags & STREAM_ECHO)
-			{ fputc(character, stdout); }
-
 		} while(0);
 
 	return(result);
