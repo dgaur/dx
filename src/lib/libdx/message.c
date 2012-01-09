@@ -48,8 +48,7 @@ initialize_reply(	const message_s*	message,
 	assert(reply);
 
 	// Reply to the original sender
-	reply->u.source			= message->u.destination;
-	reply->u.destination	= message->u.source;
+	reply->u.destination = message->u.source;
 
 	// Either atomic reply; or explicit wakeup
 	reply->id = message->id;
