@@ -32,7 +32,7 @@ fgets(	char * RESTRICT	buffer,
 		// Read characters until the first newline
 		while(buffer_size > 0)
 			{
-			int c = getchar();	// Type-promotion to catch possible EOF
+			int c = fgetc(stream);	// Type-promotion to catch possible EOF
 
 			if (c == EOF)
 				{ break; }
