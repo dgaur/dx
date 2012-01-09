@@ -119,6 +119,7 @@ read(	FILE*	stream,
 		bytes_read = reply.data_size;
 		if (reply.data_size > 0)
 			{
+			//@assumes only one byte reads
 			char* b = (char*)(buffer);
 			char* d = (char*)(reply.data);
 

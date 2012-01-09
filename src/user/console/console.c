@@ -13,8 +13,8 @@
 #include "stdlib.h"
 #include "string.h"
 
-#define VGA_DRIVER		1	//@@@@
-#define KEYBOARD_DRIVER	4	//@@@@
+#define VGA_DRIVER		1	//@@@@assume VGA driver is thread 1
+#define KEYBOARD_DRIVER	4	//@@@@assume keyboard driver is thread 4
 
 
 static void_t wait_for_messages(console_context_sp console);
@@ -168,7 +168,7 @@ save_input(	console_context_sp	console,
 	char8_t character = READ_KEYBOARD_CHARACTER(message->data);
 
 	// Automatically echo the input, if enabled
-	//@if(automatically_echo)
+	//@if(echo_enabled)
 	echo(character);
 
 	// Save this input for later consumption
@@ -242,7 +242,7 @@ wait_for_messages(console_context_sp console)
 				break;
 
 
-			case MESSAGE_TYPE_KEYBOARD_INPUT: //@STREAM_INPUT?
+			case MESSAGE_TYPE_KEYBOARD_INPUT:
 				save_input(console, &message);
 				break;
 
@@ -260,4 +260,4 @@ wait_for_messages(console_context_sp console)
 	return;
 	}
 
-	
+

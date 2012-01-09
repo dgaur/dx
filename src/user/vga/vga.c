@@ -195,7 +195,7 @@ initialize()
 
 
 		//
-		// Precompute some of the common locations within the console
+		// Precompute some of the common locations within the screen
 		//
 		vga->first_line		= ((uint8_tp)(vga->memory) +
 								VGA_TEXT_FIRST_LINE_OFFSET);
@@ -209,7 +209,7 @@ initialize()
 
 		//
 		// Preassemble a single blank line, for scrolling + clearing the
-		// console.  The color is important here: even though no text is
+		// screen.  The color is important here: even though no text is
 		// displayed, the foreground/background colors determine the
 		// appearance of the cursor when it lands on these locations
 		//
@@ -247,7 +247,7 @@ main()
 		{
 		configure_hardware(vga);
 
-		// Start with a blank/empty console
+		// Start with a blank/empty screen
 		vga_clear(vga);
 
 		wait_for_messages(vga);
@@ -264,7 +264,7 @@ main()
 
 
 ///
-/// Clear the console.  All previous contents are erased.  New output appears
+/// Clear the screen.  All previous contents are erased.  New output appears
 /// at bottom-left corner
 ///
 /// @param vga -- driver context
@@ -281,7 +281,7 @@ vga_clear(vga_context_sp vga)
 		 line += VGA_TEXT_LINE_SIZE)
 		{ memcpy(line, vga->blank_line, sizeof(vga->blank_line)); }
 
-	// Assume that output resumes at the bottom of the console
+	// Assume that output resumes at the bottom of the screen
 	vga->current_offset = (uint16_tp)(vga->last_line);
 
 	return;
@@ -409,10 +409,10 @@ vga_scroll_up(const vga_context_s* vga)
 
 
 ///
-/// Write a text string out to the VGA console
+/// Write a text string out to the screen
 ///
 /// @param vga		-- driver context
-/// @param text		-- the text string to write to the console
+/// @param text		-- the text string to write to the screen
 /// @param length	-- length of the text string, in bytes
 ///
 static
@@ -429,15 +429,15 @@ vga_write(	vga_context_sp	vga,
 
 		if (character != '\n')
 			{
-			// Write this character to the console
+			// Write this character to the screen
 			word = (VGA_TEXT_ATTRIBUTE_WHITE_ON_BLACK << 8) | (character);
 			*vga->current_offset = word;
 
-			// Advance to the next word in the console
+			// Advance to the next word in video RAM
 			vga->current_offset++;
 
 			// Automatically wrap the line, if it exceeds the width of the
-			// console
+			// screen
 			if (vga->current_offset >= (uint16_tp)vga->overflow_line)
 				{
 				vga_scroll_up(vga);
@@ -510,9 +510,9 @@ wait_for_messages(vga_context_sp vga)
 
 			case MESSAGE_TYPE_FLUSH:
 				// Receipt of this message implies that all previous I/O
-				// has been processeed already (although, possibly, not yet
+				// has been processed already (although, possibly, not yet
 				// visible on the screen), so just wake the requestor directly
-				memcpy(&reply, &message, sizeof(message));
+				initialize_reply(&message, &reply);
 				reply.type = MESSAGE_TYPE_FLUSH_COMPLETE;
 				send_message(&reply);
 				break;

@@ -26,10 +26,10 @@ typedef struct vga_context
 	// Is cursor enabled/displayed?
 	bool_t		cursor_enabled;
 
-	// A single, prebuilt blank line, for clearing the console + scrolling
+	// A single, prebuilt blank line, for clearing the screen + scrolling
 	uint8_t		blank_line[ VGA_TEXT_LINE_SIZE ];
 
-	// Precomputed locations within the console
+	// Precomputed locations within the screen
 	uint8_tp	first_line;
 	uint8_tp	second_line;
 	uint8_tp	last_line;
