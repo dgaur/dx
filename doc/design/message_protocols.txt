@@ -1,0 +1,98 @@
+
+MESSAGE PROTOCOLS:
+
+These are the expected formats for various message types.  See
+src/inc/dx/message.h and src/inc/dx/message_types.h.
+
+
+* MESSAGE_TYPE_CLOSE:
+	id:			Meaningful
+	data:		Cookie returned via MESSAGE_TYPE_OPEN
+	data_size:	0
+	reply:		MESSAGE_TYPE_CLOSE_COMPLETE
+	usage:		fclose()
+
+
+* MESSAGE_TYPE_CLOSE_COMPLETE:
+	id:			Meaningful, id of original MESSAGE_TYPE_CLOSE
+	data:		Final status value
+	data_size:	0
+	reply:		None expected
+	usage:		fclose()
+
+
+* MESSAGE_TYPE_LOAD_ADDRESS_SPACE:
+	id:			Atomic
+	address:	Meaningful, should always be specified.
+	data:		pointer to data/code to be loaded into target address space.
+	data_size:	sizeof(*data)
+	reply:		None expected.
+	usage:		Populating an address space with code/data; generally not
+				(directly) useful to user threads.
+
+
+* MESSAGE_TYPE_FLUSH:
+	id:			Meaningful
+	data:		None expected
+	data_size:	0
+	reply:		MESSAGE_TYPE_FLUSH_COMPLETE
+	usage:		fflush()
+
+
+* MESSAGE_TYPE_FLUSH_COMPLETE:
+	id:			Meaningful, id of original MESSAGE_TYPE_FLUSH
+	data:		None expected
+	data_size:	0
+	reply:		None expected
+	usage:		fflush(), reply implies stream/device I/O has been flushed
+
+
+* MESSAGE_TYPE_NULL:
+	id:			Atomic
+	data:		None expected
+	data_size:	0
+	reply:		None expected
+	usage:		empty/catchall message, scheduling
+
+
+* MESSAGE_TYPE_OPEN:
+	id:			Meaningful
+	data:		pointer to struct open_stream_request_s
+	data_size:	sizeof(struct open_stream_request_s)
+	reply:		MESSAGE_TYPE_OPEN_COMPLETE
+	usage:		fopen()
+
+
+* MESSAGE_TYPE_OPEN_COMPLETE:
+	id:			Meaningful, id of original MESSAGE_TYPE_OPEN
+	data:		pointer to struct open_stream_reply_s
+	data_size:	sizeof(struct open_stream_reply_s)
+	reply:		None expected
+	usage:		fopen()
+
+
+* MESSAGE_TYPE_READ:
+	id:			Meaningful
+	data:		None expected
+	data_size:	0
+	reply:		MESSAGE_TYPE_READ_COMPLETE
+	usage:		fread(), fgetc(), getc(), fgets(), etc.
+
+
+* MESSAGE_TYPE_READ_COMPLETE:
+	id:			Meaningful, id of original MESSAGE_TYPE_READ
+	data:		pointer to string/buffer of data
+	data_size:	sizeof(*data)
+	reply:		None expected
+	usage:		fread(), fgetc(), getc(), fgets(), etc.
+
+
+* MESSAGE_TYPE_WRITE:
+	id:			Atomic
+	data:		pointer to string/buffer of data; or single character (VGA
+				driver only)
+	data_size:	sizeof(*data); or zero (VGA driver only)
+	reply:		None expected
+	usage:		fwrite(), fputc(), putc(), fputs(), etc.
+
+
