@@ -92,6 +92,7 @@ thread_c(	const thread_start_fp	thread_kernel_start,
 			const void_tp			thread_user_start,
 			const void_tp			thread_user_stack):
 	blocking_thread(NULL),
+	bonus_message(NULL),
 	capability_mask(thread_capability_mask),
 	deletion_acknowledgement(NULL),
 	address_space(thread_address_space),
@@ -140,6 +141,7 @@ thread_c::
 	TRACE(ALL, "Destroying thread %#x\n", id);
 	ASSERT(*this != __hal->read_current_thread());
 	ASSERT(mailbox.message_queue.is_empty());
+	ASSERT(bonus_message == NULL);
 
 
 	//
@@ -378,6 +380,36 @@ find_blocking_thread() const
 
 
 ///
+/// Retrieve the "bonus" message, if any, previously allocated by
+/// maybe_put_bonus_message().  Typically invoked when this thread wins a
+/// scheduling lottery, since it no longer requires this extra message
+///
+/// @return the bonus message; or NULL if this thread had none
+///
+message_cp thread_c::
+get_bonus_message()
+	{
+	message_cp message = NULL;
+
+	lock.acquire();
+
+	// If this thread has an extra message due to quantum exhaustion, then
+	// return/discard it now
+	if (bonus_message)
+		{
+		TRACE(SCHED|MESSAGE, "Discarding bonus/wakeup message for thread %#x\n",
+			id);
+		message = bonus_message;
+		bonus_message = NULL;
+		}
+
+	lock.release();
+
+	return(message);
+	}
+
+
+///
 /// Retrieve the next message, if any, pending for this thread + return it.
 /// This is the lowest-level messaging logic underneath
 /// io_manager_c::receive_message(), io_manager_c::get_message() and the
@@ -504,7 +536,11 @@ mark_for_deletion(	message_list_cr	leftover_messages,
 		message_cr message = mailbox.message_queue.pop();
 		leftover_messages += message;
 		}
-
+	if (bonus_message)
+		{
+		leftover_messages += *bonus_message;
+		bonus_message = NULL;
+		}
 
 
 	//
@@ -528,16 +564,19 @@ mark_for_deletion(	message_list_cr	leftover_messages,
 ///
 /// Insert a null message into this thread's mailbox, if the mailbox is
 /// currently empty.  If this thread's mailbox is not empty, then do nothing.
+///
 /// This is primarily useful when suspending a thread that has exhausted its
 /// scheduling quantum -- it ensures the thread has at least one message
-/// pending and is therefore still eligible for the scheduling lottery.
+/// pending and is therefore still eligible for the scheduling lottery.  The
+/// message allocated here, if any, should eventually be freed and discarded
+/// via get_bonus_message()
 ///
 /// Should always be invoked by the current thread on itself
 ///
 /// @return the new message; or NULL if no message was added to the mailbox
 ///
 message_cp thread_c::
-maybe_put_null_message()
+maybe_put_bonus_message()
 	{
 	message_cp message = NULL;
 
@@ -565,24 +604,29 @@ maybe_put_null_message()
 		//
 		if (!mailbox.message_queue.is_empty())
 			break;
-
-
-		//
-		// No messages currently pending, so allocate a new one
-		//
-		ASSERT(__null_thread);
-		message = new small_message_c(	*__null_thread,
-										*this,
-										MESSAGE_TYPE_NULL,
-										MESSAGE_ID_ATOMIC);
-		if (!message)
+		if (bonus_message)
 			break;
 
 
 		//
-		// Finally, add this message to the current queue
+		// No messages currently pending, so allocate a new one.  This thread
+		// should never actually read/receive this message; its purpose here is
+		// to aid the scheduling logic.  So the message need not (should not) be
+		// placed in the thread's mailbox
 		//
-		mailbox.message_queue.push(*message);
+		ASSERT(__null_thread);
+		TRACE(SCHED|MESSAGE, "Giving thread %#x a bonus/wakeup message\n", id);
+		bonus_message = message = new small_message_c(	*__null_thread,
+														*this,
+														MESSAGE_TYPE_NULL,
+														MESSAGE_ID_ATOMIC);
+		if (!bonus_message)
+			{
+			// The thread is probably stuck now, unless some other thread
+			// sends it an unsolicited message
+			printf("Unable to allocate bonus/wakeup message for thread %#x\n",
+				id);
+			}
 
 		} while(0);
 
@@ -591,7 +635,8 @@ maybe_put_null_message()
 
 	//
 	// Postcondition: the current thread has at least one unread message
-	// pending in its mailbox
+	// pending: either a normal message in its mailbox, or the extra message
+	// allocated above
 	//
 
 	return(message);

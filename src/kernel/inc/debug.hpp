@@ -36,7 +36,8 @@
 #define NONE	0x00000000		/// Disable TRACE()
 #define TEST	0x00000001		/// Enable TRACE() for kernel unit tests
 #define SYSCALL	0x00000002		/// Enable TRACE() for system calls
-
+#define SCHED	0x00000004		/// Enable TRACE() for scheduling logic
+#define MESSAGE	0x00000008		/// Enable TRACE() for message logic
 
 
 ///

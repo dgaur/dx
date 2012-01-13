@@ -328,7 +328,7 @@ handle_interrupt(interrupt_cr interrupt)
 			if (current_thread != *__null_thread)
 				{
 				__io_manager->lock.acquire();
-				message = current_thread.maybe_put_null_message();
+				message = current_thread.maybe_put_bonus_message();
 				if (message)
 					{
 					__io_manager->pending_messages += *message;
@@ -668,6 +668,15 @@ select_next_thread(thread_cr current_thread)
 			//
 			lottery_count++;
 			next_thread = &(pending_messages.select_random().destination);
+
+
+			//
+			// The "bonus" message, if any, has served its purpose and may be
+			// discarded now that this thread has won the lottery
+			//
+			message_cp bonus_message = next_thread->get_bonus_message();
+			if (bonus_message)
+				{ pending_messages -= *bonus_message; }
 			}
 
 		else

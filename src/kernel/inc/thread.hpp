@@ -12,6 +12,7 @@
 #include "counted_object.hpp"
 #include "dx/capability.h"
 #include "dx/compiler_dependencies.h"
+#include "dx/message_id.h"
 #include "dx/status.h"
 #include "dx/thread_id.h"
 #include "dx/types.h"
@@ -69,8 +70,9 @@ class   thread_c:
 
 
 	private:
-		uint32_t				blocking_message_id;
+		message_id_t			blocking_message_id;
 		thread_cp				blocking_thread;
+		message_cp				bonus_message;
 		capability_mask_t		capability_mask;	//@atomic_int32?
 		message_cp				deletion_acknowledgement;
 		interrupt_spinlock_c	lock;
@@ -147,10 +149,12 @@ class   thread_c:
 		//
 		// Message delivery + receipt
 		//
+		message_cp
+			get_bonus_message();
 		status_t
 			get_message(message_cpp message);
 		message_cp
-			maybe_put_null_message();
+			maybe_put_bonus_message();
 		status_t
 			put_message(message_cr message);
 
