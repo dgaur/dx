@@ -56,13 +56,20 @@ const char * OCTAL_PREFIX		= "0";
 
 
 //
+// Padding strings, either zero's or blanks
+//
+const char * BLANK_PAD	= "                                                   ";
+const char * ZERO_PAD	= "000000000000000000000000000000000000000000000000000";
+
+
+//
 // Modifiers/parameters for use when printing formatted arguments
 //
 typedef struct format_style
 	{
 	unsigned		base;				/// Base for integer conversion
 	unsigned		flags;				/// Mask of FLAG_* bits
-	char			pad_character;		/// Padding character, if any
+	const char*		pad;				/// Padding characters, if any
 	int				precision;			/// Numeric precision
 	const char*		prefix;				/// Prefix for integer representation
 	unsigned		type;				/// Type of the corresponding argument
@@ -110,7 +117,7 @@ parse_format_style(	const char *	format,
 	//
 	style->base				= 0;
 	style->flags			= 0;
-	style->pad_character	= ' ';
+	style->pad				= BLANK_PAD;
 	style->precision		= NO_PRECISION;
 	style->prefix			= NO_PREFIX;
 	style->type				= 0;
@@ -145,7 +152,7 @@ parse_format_style(	const char *	format,
 		else if (*format == '0')
 			{
 			style->flags |= FLAG_PAD;
-			style->pad_character = '0';
+			style->pad = ZERO_PAD;
 			}
 
 		else if (*format == '+')
@@ -389,13 +396,22 @@ print_float_argument(	char *			buffer,
 
 
 	//
-	// Will an explicit decimal point be needed?
+	// Based on the placement of the decimal point:
+	//	- determine if an explicit decimal point is necesssary (e.g, 0.01)
+	//	- determine if the value needs any trailing zero's (e.g, 100)
 	//
 	bool need_decimal_point;
+	int  trailing_zero_length;
 	if (digits_length <= decimal_point)
+		{
 		need_decimal_point = false;
+		trailing_zero_length = (decimal_point - digits_length);
+		}
 	else
+		{
 		need_decimal_point = true;
+		trailing_zero_length = 0;
+		}
 
 
 	//
@@ -414,7 +430,7 @@ print_float_argument(	char *			buffer,
 		// Pad with zero's now, if necessary.  Widen the minimum field width
 		// to account for the required number of leading zeros
 		style->flags |= FLAG_PAD;
-		style->pad_character = '0';
+		style->pad = ZERO_PAD;
 		style->width = max(style->width, digits_length + (-decimal_point) +
 			prefix_length);
 
@@ -428,7 +444,7 @@ print_float_argument(	char *			buffer,
 	// necessary
 	//
 	size_t pad_length = print_pad(buffer, buffer_length, style, prefix_length,
-		digits_length + (need_decimal_point ? 1 : 0));
+		digits_length + (need_decimal_point ? 1 : 0) + trailing_zero_length);
 	buffer += pad_length;
 	buffer_length -= pad_length;
 
@@ -459,6 +475,12 @@ print_float_argument(	char *			buffer,
 		{
 		// No decimal point occurs within digit string, so just copy it directly
 		length = print_text(buffer, buffer_length, digits, digits_length);
+		buffer += length;
+		buffer_length -= length;
+
+		// Append trailing zero's as appropriate
+		length = print_text(buffer, buffer_length, ZERO_PAD,
+			trailing_zero_length);
 		buffer += length;
 		buffer_length -= length;
 		}
@@ -560,13 +582,8 @@ print_pad(	char *			buffer,
 		// Compute the number of padding characters required
 		size_t	pad_length = style->width - prefix_length - text_length;
 
-		// Generate the actual pad text
-		char pad[ pad_length + 1 ];
-		memset(pad, style->pad_character, pad_length);
-		pad[pad_length] = 0;
-
 		// Insert the actual pad characters
-		length = print_text(buffer, buffer_length, pad, pad_length);
+		length = print_text(buffer, buffer_length, style->pad, pad_length);
 		}
 
 	return(length);

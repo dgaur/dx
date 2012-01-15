@@ -143,6 +143,10 @@ test_snprintf()
 	snprintf(buf, sizeof(buf), "%%");
 	STRING_MATCH(buf, "%");
 
+	//@this is a good/valid test, but requires better %g support in vsnprintf()
+	//@snprintf(buf, sizeof(buf), "%.14g", 100.0);
+	//@STRING_MATCH(buf, "100");
+
 	snprintf(buf, sizeof(buf), "%.1f", 2.0);
 	STRING_MATCH(buf, "2.0");
 
