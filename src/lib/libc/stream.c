@@ -18,6 +18,7 @@ FILE stdin_file =
 	.buffer			= NULL,
 	.buffer_size	= 0,
 	.flags			= STREAM_OPEN,
+	.input_message	= NULL,
 	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};
@@ -36,6 +37,7 @@ FILE stdout_file =
 	.buffer			= NULL,
 	.buffer_size	= 0,
 	.flags			= STREAM_OPEN,
+	.input_message	= NULL,
 	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};
@@ -54,6 +56,7 @@ FILE stderr_file =
 	.buffer			= NULL,
 	.buffer_size	= 0,
 	.flags			= STREAM_OPEN,
+	.input_message	= NULL,
 	.thread_id		= 2,			//@@@assumes console driver is thread 2
 	.pushback		= EOF
 	};

@@ -2,7 +2,7 @@
 // fflush.c
 //
 
-#include "stdio.h"
+#include "stdlib.h"
 #include "stream.h"
 #include "dx/delete_message.h"
 #include "dx/message.h"
@@ -20,6 +20,26 @@ fflush(FILE *stream)
 
 	if (stream)
 		{
+		//
+		// Discard any buffered input data
+		//
+		if (stream->input_message)
+			{
+			delete_message(stream->input_message);
+			free(stream->input_message);
+			stream->buffer			= NULL;
+			stream->buffer_size		= 0;
+			stream->input_message	= NULL;
+			}
+
+
+		//@flush any data in stream->output_buffer
+
+
+		//
+		// For output streams, flush all buffered data through the underlying
+		// driver
+		//
 		request.u.destination		= stream->thread_id;
 		request.type				= MESSAGE_TYPE_FLUSH;
 		request.id					= 0;
@@ -27,9 +47,6 @@ fflush(FILE *stream)
 		request.data_size			= 0;
 		request.destination_address	= NULL;
 
-		//@flush any data in stream->buffer
-
-		// Wait for the underlying stream driver to flush the stream
 		status = send_and_receive_message(&request, &reply);
 		if (status == STATUS_SUCCESS)
 			{ delete_message(&reply); }

@@ -5,6 +5,7 @@
 #ifndef _STREAM_H
 #define _STREAM_H
 
+#include "dx/message.h"
 #include "dx/thread_id.h"
 #include "stdint.h"
 #include "stdio.h"
@@ -17,10 +18,11 @@ typedef struct file
 	{
 	char*			buffer;
 	size_t			buffer_size;
-	uintptr_t		cookie;
+	uintptr_t		cookie;			/// opaque I/O thread context
 	uintptr_t		flags;
-	unsigned char	pushback;	// last character pushed back via ungetc()
-	thread_id_t		thread_id;	// thread that handles the I/O on this stream
+	message_sp		input_message;
+	unsigned char	pushback;		/// last character pushed back via ungetc()
+	thread_id_t		thread_id;		/// thread handling the I/O on this stream
 	} FILE;
 
 

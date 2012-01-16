@@ -15,6 +15,7 @@ setvbuf(FILE * RESTRICT stream,
 		int mode,
 		size_t size)
 	{
+	//@this is only meaningful for output streams
 	return(-ENOSYS);
 	}
 

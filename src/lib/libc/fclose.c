@@ -42,9 +42,6 @@ fclose(FILE* stream)
 		fflush(stream);
 
 
-		//@free(stream->buffer)?
-
-
 		//
 		// No further I/O is possible now
 		//

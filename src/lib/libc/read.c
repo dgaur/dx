@@ -8,6 +8,11 @@
 #include "dx/status.h"
 #include "read.h"
 #include "stdlib.h"
+#include "string.h"
+
+
+message_sp read(FILE* stream);
+
 
 
 ///
@@ -18,7 +23,8 @@
 /// @param buffer		-- the buffer in which to place incoming data
 /// @param buffer_size	-- sizeof(buffer)
 ///
-/// @return number of bytes read
+/// @return number of bytes read, possibly zero.  Caller must use feof(),
+/// ferror(), etc, to determine the proper interpretation.
 ///
 size_t
 maybe_read(	FILE*	stream,
@@ -54,13 +60,49 @@ maybe_read(	FILE*	stream,
 			break;
 			}
 
-		//@std C buffering here; consume any buffered input before invoking
-		//@read() again; should buffer to stream->buffer, stream->buffer_size,
-		//@not directly into caller's buffer, etc
 
-		bytes_read = read(stream, buffer, buffer_size);
+		//
+		// If necessary, read + cache another block of data on this stream
+		//
+		if (stream->buffer_size == 0)
+			{
+			// Discard any leftover (already-consumed) data
+			stream->buffer = NULL;
 
-		//@advance file ptr, set EOF, errors, etc?
+			// Fetch more data from the underlying driver
+			message_sp message = read(stream); //@buffer_size as hint to driver?
+			if (!message)
+				{
+				stream->flags |= STREAM_ERROR;
+				break;
+				}
+
+			// This message contains the next block of buffered data, if any
+			stream->buffer			= message->data;
+			stream->buffer_size		= message->data_size;
+
+			if (message->data_size == 0)
+				{
+				//@does this always imply EOF?
+				stream->flags |= STREAM_EOF;
+				break;
+				}
+			}
+
+
+		//
+		// Consume another chunk of the buffered data
+		//
+		assert(stream->buffer);
+		assert(stream->buffer_size > 0);
+
+		// Copy these bytes to the caller's buffer
+		bytes_read = min(buffer_size, stream->buffer_size);
+		memcpy(buffer, stream->buffer, bytes_read);
+
+		// These bytes have been consumed from the buffered data
+		stream->buffer += bytes_read;
+		stream->buffer_size -= bytes_read;
 
 		} while(0);
 
@@ -76,63 +118,61 @@ maybe_read(	FILE*	stream,
 /// the appropriate stream driver.  All other input routines should eventually
 /// invoke this one.
 ///
-/// This is essentially POSIX read(), albeit with a different signature
+/// @param stream -- the input stream
 ///
-/// @param stream		-- the input stream
-/// @param buffer		-- the buffer in which to place incoming data
-/// @param buffer_size	-- sizeof(buffer)
+/// @return a message from the underlying stream driver, possibly (probably)
+/// containing a new block of stream data; caller can consume the payload data
+/// as necessary
 ///
-/// @return number of bytes read
-///
-size_t
-read(	FILE*	stream,
-		void*	buffer,
-		size_t	buffer_size)
+message_sp
+read(FILE* stream)
 	{
-	size_t		bytes_read = 0;
 	message_s	request;
-	message_s	reply;
 	status_t	status;
 
 
 	for(;;)
 		{
+		//
+		// Prepare to receive a new block of data from the underlying stream
+		// driver; the incoming message acts as the stream buffer for this
+		// thread
+		//
+		if (stream->input_message)
+			{
+			// Discard any previously-mapped message buffer
+			delete_message(stream->input_message);
+			}
+		else
+			{
+			// Allocate the internal message structure
+			stream->input_message = malloc(sizeof(*stream->input_message));
+			if (!stream->input_message)
+				{ break; }
+			}
+
+
 		//@send message to stream driver, waiting for I/O?
 
 
 		//
-		// Wait for data on this stream
+		// Read the next block of data on this stream; block here until it
+		// arrives
 		//
 		initialize_message(&request);
 		request.u.destination	= stream->thread_id;
 		request.type			= MESSAGE_TYPE_READ;
 		request.id				= rand();
-		status = send_and_receive_message(&request, &reply);
-		if (status != STATUS_SUCCESS)
-			{ continue; }
-
-
-		//
-		// Parse the response
-		//
-		assert(reply.type == MESSAGE_TYPE_READ_COMPLETE);
-		bytes_read = reply.data_size;
-		if (reply.data_size > 0)
+		assert(stream->input_message);
+		status = send_and_receive_message(&request, stream->input_message);
+		if (status == STATUS_SUCCESS)
 			{
-			//@assumes only one byte reads
-			char* b = (char*)(buffer);
-			char* d = (char*)(reply.data);
-
-			*b = *d;
+			assert(	stream->input_message.type == MESSAGE_TYPE_READ_COMPLETE ||
+					stream->input_message.type == MESSAGE_TYPE_ABORT);
+			break;
 			}
-
-		//
-		// Done
-		//
-		delete_message(&reply);
-		break;
 		}
 
-	return(bytes_read);
+	return(stream->input_message);
 	}
 
