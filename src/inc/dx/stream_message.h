@@ -46,5 +46,16 @@ typedef open_stream_reply_s *	open_stream_reply_sp;
 typedef open_stream_reply_sp *	open_stream_reply_spp;
 
 
+///
+/// Message payload for reading streams via fread(), fgets(), fgetc(), etc
+///
+typedef struct read_stream_request
+	{
+	uintptr_t	cookie;
+	size_t		size;
+	} read_stream_request_s;
+
+typedef read_stream_request_s *		read_stream_request_sp;
+typedef read_stream_request_sp *	read_stream_request_spp;
 
 #endif

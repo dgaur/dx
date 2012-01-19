@@ -6,12 +6,13 @@
 #include "dx/delete_message.h"
 #include "dx/send_and_receive_message.h"
 #include "dx/status.h"
+#include "dx/stream_message.h"
 #include "read.h"
 #include "stdlib.h"
 #include "string.h"
 
 
-message_sp read(FILE* stream);
+message_sp read(FILE* stream, size_t buffer_size);
 
 
 
@@ -70,7 +71,7 @@ maybe_read(	FILE*	stream,
 			stream->buffer = NULL;
 
 			// Fetch more data from the underlying driver
-			message_sp message = read(stream); //@buffer_size as hint to driver?
+			message_sp message = read(stream, buffer_size);
 			if (!message)
 				{
 				stream->flags |= STREAM_ERROR;
@@ -119,16 +120,28 @@ maybe_read(	FILE*	stream,
 /// invoke this one.
 ///
 /// @param stream -- the input stream
+/// @param size   -- size of caller's input buffer, in bytes, mostly as a hint
+///                  to the stream driver
 ///
 /// @return a message from the underlying stream driver, possibly (probably)
 /// containing a new block of stream data; caller can consume the payload data
 /// as necessary
 ///
 message_sp
-read(FILE* stream)
+read(FILE* stream, size_t size)
 	{
-	message_s	request;
-	status_t	status;
+	message_s				request;
+	status_t				status;
+	read_stream_request_s	payload;
+
+
+	//
+	// Initialize the message payload: the context returned from fopen(); and
+	// the size of the caller's initial read request
+	//
+	assert(stream);
+	payload.cookie	= stream->cookie;
+	payload.size	= size;
 
 
 	for(;;)
@@ -150,6 +163,7 @@ read(FILE* stream)
 			if (!stream->input_message)
 				{ break; }
 			}
+		assert(stream->input_message);
 
 
 		//@send message to stream driver, waiting for I/O?
@@ -163,7 +177,8 @@ read(FILE* stream)
 		request.u.destination	= stream->thread_id;
 		request.type			= MESSAGE_TYPE_READ;
 		request.id				= rand();
-		assert(stream->input_message);
+		request.data			= &payload;
+		request.data_size		= sizeof(payload);
 		status = send_and_receive_message(&request, stream->input_message);
 		if (status == STATUS_SUCCESS)
 			{

@@ -135,6 +135,10 @@ read_input(	console_context_sp	console,
 	{
 	// Assume that only one thread is able to read input at a time
 	assert(!console->read_pending);
+
+	// Ignore the caller's context or buffer size; just give it whatever data
+	// is available.  In general, this should only be a handful of keystrokes,
+	// anyway, if that
 	initialize_reply(message, &console->read_reply);
 
 	if (console->keyboard_buffer_size > 0)
@@ -238,11 +242,13 @@ wait_for_messages(console_context_sp console)
 
 
 			case MESSAGE_TYPE_READ:
+				// Deliver any buffered keyboard input to the calling thread
 				read_input(console, &message);
 				break;
 
 
 			case MESSAGE_TYPE_KEYBOARD_INPUT:
+				// Save the keyboard input for later consumption
 				save_input(console, &message);
 				break;
 

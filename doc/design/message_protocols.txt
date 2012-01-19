@@ -73,8 +73,8 @@ src/inc/dx/message.h and src/inc/dx/message_types.h.
 
 * MESSAGE_TYPE_READ:
 	id:			Meaningful
-	data:		None expected
-	data_size:	0
+	data:		pointer to struct read_stream_request_s
+	data_size:	sizeof(read_stream_request_s)
 	reply:		MESSAGE_TYPE_READ_COMPLETE
 	usage:		fread(), fgetc(), getc(), fgets(), etc.
 
