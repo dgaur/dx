@@ -52,7 +52,7 @@ typedef open_stream_reply_sp *	open_stream_reply_spp;
 typedef struct read_stream_request
 	{
 	uintptr_t	cookie;
-	size_t		size;
+	size_t		size_hint;
 	} read_stream_request_s;
 
 typedef read_stream_request_s *		read_stream_request_sp;

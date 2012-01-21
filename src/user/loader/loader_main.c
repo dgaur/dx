@@ -6,6 +6,7 @@
 #include "dx/capability.h"
 #include "dx/create_process.h"
 #include "dx/delete_message.h"
+#include "dx/hal/memory.h"
 #include "dx/libtar.h"
 #include "dx/receive_message.h"
 #include "dx/send_message.h"
@@ -39,8 +40,7 @@ typedef directory_entry_sp *   directory_entry_spp;
 typedef struct open_file
 	{
 	const directory_entry_s*	entry;
-	uint8_tp					data;
-	size_t						data_offset;	//@fpos_t?
+	size_t						file_offset;	//@fpos_t?
 	uintptr_t					flags;
 	thread_id_t					thread;
 	} open_file_s;
@@ -320,8 +320,7 @@ open_file(	loader_context_sp	context,
 		if (!file)
 			{ reply_data.status = STATUS_INSUFFICIENT_MEMORY; break; }
 		file->entry			= entry;
-		file->data			= entry->tar.file;
-		file->data_offset	= 0;
+		file->file_offset	= 0;
 		file->flags			= request_data->flags;
 		file->thread		= request->u.source;
 
@@ -355,6 +354,123 @@ open_file(	loader_context_sp	context,
 	reply.data_size = sizeof(reply_data);
 	send_message(&reply);
 
+
+	return;
+	}
+
+
+///
+/// Read a portion of a file.  This is typically invoked due to a
+/// MESSAGE_TYPE_READ request, which itself is usually triggered by some sort
+/// if input routine: fgets(), fread(), fgetc(), etc.  Attempt to read enough
+/// of the file to satisfy the caller's request.
+///
+/// @param context	-- the loader context
+/// @param request	-- the request message
+///
+static
+void
+read_file(	loader_context_sp	context,
+			const message_s*	request)
+	{
+	void_tp		data		= NULL;
+	size_t		data_size	= 0;
+	message_s	reply;
+	status_t	status		= STATUS_INVALID_DATA;
+
+
+	do
+		{
+		//
+		// Expected protocol here is:
+		//	* request->type is MESSAGE_TYPE_READ
+		//	* request->id is meaningful, not atomic
+		//	* request->data points to read_stream_request_s
+		//
+		assert(request->id != MESSAGE_ID_ATOMIC);
+		read_stream_request_sp payload =(read_stream_request_sp)(request->data);
+		if (request->data_size < sizeof(*payload))
+			{ status = STATUS_INVALID_DATA; break; }
+
+
+		//
+		// Locate the input stream, if possible
+		//
+		uintptr_t slot = payload->cookie;
+		if (slot >= OPEN_FILE_COUNT_MAX)
+			{ status = STATUS_INVALID_DATA; break; }
+
+		open_file_sp file = context->open_file[ slot ];
+		if (!file)
+			{ status = STATUS_INVALID_DATA; break; }
+
+
+		//
+		// Does this thread actually own this stream?
+		//
+		//@@@this assumes the thread that calls fopen() also calls fread(),
+		//@@@maybe not true in multithreaded client
+		if (file->thread != request->u.source)
+			{ status = STATUS_ACCESS_DENIED; break; }
+
+
+		//
+		// Validate I/O permissions
+		//
+		if ( !(file->flags & STREAM_READ) )
+			{ status = STATUS_ACCESS_DENIED; break; }
+
+
+		//
+		// Has the caller already consumed the entire file?
+		//
+		assert(file->entry->tar.file_size >= file->file_offset);
+		size_t bytes_remaining = file->entry->tar.file_size - file->file_offset;
+		if (bytes_remaining == 0)
+			{ status = STATUS_END_OF_FILE; break; }
+
+
+		//
+		// Retrieve the data for this stream.  For performance + efficiency
+		// purposes, try to send page-aligned and page-sized blocks of data to
+		// the caller when possible
+		//
+		size_t size = payload->size_hint;
+		data		= file->entry->tar.file + file->file_offset;
+		data_size	= min(bytes_remaining,
+						size + PAGE_SIZE - PAGE_OFFSET(data + size));
+		assert(data_size > 0);
+		assert(data_size >= size);
+
+
+		//
+		// Advance the file pointer, so that the caller can continue
+		// reading the file data as appropriate
+		//
+		file->file_offset += data_size;
+
+		} while(0);
+
+
+	//
+	// Always send a response here, even on error, since the caller is likely
+	// blocked on the reply.  Expected protocol here is:
+	//	* reply->type is MESSAGE_TYPE_READ_COMPLETE
+	//	* reply->id is meaningful, wakes requestor thread
+	//
+	// If successful:
+	//	* reply->data points to the stream data
+	//	* reply->data_size is sizeof(reply->data)
+	//
+	// If error:
+	//	* reply->data contains error code
+	//	* reply->data_size is zero
+	//
+	initialize_reply(request, &reply);
+	reply.type		= MESSAGE_TYPE_READ_COMPLETE;
+	reply.data		= (data_size > 0) ? data : (void_tp)(uintptr_t)(status);
+	reply.data_size	= data_size;
+	send_message(&reply);
 
 	return;
 	}
@@ -500,6 +616,10 @@ wait_for_messages(loader_context_sp context)
 
 			case MESSAGE_TYPE_OPEN:
 				open_file(context, &message);
+				break;
+
+			case MESSAGE_TYPE_READ:
+				read_file(context, &message);
 				break;
 
 			case MESSAGE_TYPE_UNMOUNT_FILESYSTEM:

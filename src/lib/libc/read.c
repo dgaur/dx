@@ -12,7 +12,7 @@
 #include "string.h"
 
 
-message_sp read(FILE* stream, size_t buffer_size);
+static message_sp read(FILE* stream, size_t buffer_size);
 
 
 
@@ -73,10 +73,7 @@ maybe_read(	FILE*	stream,
 			// Fetch more data from the underlying driver
 			message_sp message = read(stream, buffer_size);
 			if (!message)
-				{
-				stream->flags |= STREAM_ERROR;
-				break;
-				}
+				{ stream->flags |= STREAM_ERROR; break; }
 
 			// This message contains the next block of buffered data, if any
 			stream->buffer			= message->data;
@@ -84,8 +81,14 @@ maybe_read(	FILE*	stream,
 
 			if (message->data_size == 0)
 				{
-				//@does this always imply EOF?
-				stream->flags |= STREAM_EOF;
+				// No data available; either EOF or I/O error
+				status_t status = (status_t)(uintptr_t)(message->data);
+				if (status == STATUS_END_OF_FILE)
+					stream->flags |= STREAM_EOF;
+				else
+					stream->flags |= STREAM_ERROR;
+
+				// Regardless, the request has failed, so bail out here
 				break;
 				}
 			}
@@ -119,16 +122,17 @@ maybe_read(	FILE*	stream,
 /// the appropriate stream driver.  All other input routines should eventually
 /// invoke this one.
 ///
-/// @param stream -- the input stream
-/// @param size   -- size of caller's input buffer, in bytes, mostly as a hint
-///                  to the stream driver
+/// @param stream    -- the input stream
+/// @param size_hint -- size of caller's input buffer, in bytes, mostly as a
+///						hint to the stream driver
 ///
 /// @return a message from the underlying stream driver, possibly (probably)
 /// containing a new block of stream data; caller can consume the payload data
 /// as necessary
 ///
+static
 message_sp
-read(FILE* stream, size_t size)
+read(FILE* stream, size_t size_hint)
 	{
 	message_s				request;
 	status_t				status;
@@ -140,8 +144,8 @@ read(FILE* stream, size_t size)
 	// the size of the caller's initial read request
 	//
 	assert(stream);
-	payload.cookie	= stream->cookie;
-	payload.size	= size;
+	payload.cookie		= stream->cookie;
+	payload.size_hint	= size_hint;
 
 
 	for(;;)
@@ -182,8 +186,8 @@ read(FILE* stream, size_t size)
 		status = send_and_receive_message(&request, stream->input_message);
 		if (status == STATUS_SUCCESS)
 			{
-			assert(	stream->input_message.type == MESSAGE_TYPE_READ_COMPLETE ||
-					stream->input_message.type == MESSAGE_TYPE_ABORT);
+			assert(	stream->input_message->type == MESSAGE_TYPE_READ_COMPLETE ||
+					stream->input_message->type == MESSAGE_TYPE_ABORT);
 			break;
 			}
 		}
