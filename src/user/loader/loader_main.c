@@ -501,14 +501,14 @@ start_daemons(const loader_context_s* context)
 		{
 		// Skip over directories, special files, empty files, etc
 		if (entry->tar.file_size == 0)
-			{ continue; }
+			{ entry = entry->next; continue; }
 		if (entry->tar.header->type != TAR_TYPE_REGULAR_FILE0 &&
 			entry->tar.header->type != TAR_TYPE_REGULAR_FILE1)
-			{ continue; }
+			{ entry = entry->next; continue; }
 
 		// Only launch the boot-time daemons; ignore other executables for now
 		if (memcmp(entry->tar.header->name, "/boot", 5) != 0)
-			{ continue; }
+			{ entry = entry->next; continue; }
 
 		// This is one of the boot-time daemons, so start it now
 		status_t status = create_process_from_image(entry->tar.file,
