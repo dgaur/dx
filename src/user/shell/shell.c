@@ -18,81 +18,6 @@
 static int syscall_read_kernel_stats(lua_State* lua);
 
 
-static
-const
-char8_t* shell_code =
-	"															\
-	function help()												\
-		print('help        -- Show this help message')			\
-		print('stats       -- Show kernel stats')				\
-		print('version     -- Show the current system version')	\
-		return 0												\
-	end															\
-																\
-	function prompt()											\
-		io.write('$ ')											\
-	end															\
-																\
-	function stats()											\
-		local s = dx.read_kernel_stats()						\
-																\
-		print('Memory:')										\
-		print('    total physical ' .. s.total_memory_size .. ' (MB)') \
-		print('    paged physical ' .. s.paged_memory_size .. ' (MB)') \
-		print('    paged regions  ' .. s.paged_region_count)	\
-		print('    address spaces ' .. s.address_space_count)	\
-		print('    page faults    ' .. s.page_fault_count)		\
-		print('    COW faults     ' .. s.cow_fault_count)		\
-		print()													\
-																\
-		print('Messaging:')										\
-		print('    total          ' .. s.message_count)			\
-		print('    pending        ' .. s.pending_count)			\
-		print('    incomplete     ' .. s.incomplete_count)		\
-		print('    tx error       ' .. s.send_error_count)		\
-		print('    rx error       ' .. s.receive_error_count)	\
-		print()													\
-																\
-		print('Scheduling:')									\
-		print('    lottery        ' .. s.lottery_count)			\
-		print('    idle           '	.. s.idle_count)			\
-		print('    direct         ' .. s.direct_handoff_count)	\
-		print()													\
-																\
-		print('Threads:')										\
-		print('    total          ' .. s.thread_count)			\
-		print()													\
-																\
-		return 0												\
-	end															\
-																\
-	function version()											\
-		local v = string.format('dx v%s (%s)',					\
-			dx.version, dx.build_type)							\
-		print(v)												\
-		return 0												\
-	end															\
-																\
-	banner = string.format('dx v%s (%s) boot shell',			\
-		dx.version, dx.build_type)								\
-	print(banner)												\
-	local handler = { help=help, stats=stats, version=version }	\
-																\
-	while(1) do													\
-		prompt()												\
-		command = io.read()										\
-		h = handler[command]									\
-		if h then												\
-			h()													\
-		elseif (#command > 0) then								\
-			print('Unknown command \"' .. command .. '\"')		\
-		end														\
-	end															\
-																\
-	return 0													\
-	";
-
-
 ///
 /// Store an integral value in a lua table, for later consumption by lua code
 ///
@@ -190,22 +115,6 @@ main()
 
 
 		//
-		// Load the source
-		//
-		int error = luaL_loadbuffer(lua, shell_code, strlen(shell_code),
-			"shell");
-		if (error)
-			{
-			printf("Unable to load buffer: %s\n",
-				lua_tostring(lua, TOP_OF_STACK));
-			lua_pop(lua, 1);  // Pop the error message
-
-			status = STATUS_INVALID_IMAGE;
-			break;
-			}
-
-
-		//
 		// Create an additional context (lua table) for exporting constants and
 		// callbacks into the lua environment.  This allows lua code to
 		// access dx system calls and other platform-specific functionality
@@ -215,6 +124,21 @@ main()
 		export_string(lua, "version", DX_VERSION);
 		export_string(lua, "build_type", DX_BUILD_TYPE);
 		lua_setglobal(lua, "dx");
+
+
+		//
+		// Load the source file (script)
+		//
+		int error = luaL_loadfile(lua, "/bin/shell.lua");
+		if (error)
+			{
+			printf("Unable to load script: %s\n",
+				lua_tostring(lua, TOP_OF_STACK));
+			lua_pop(lua, 1);  // Pop the error message
+
+			status = STATUS_INVALID_IMAGE;
+			break;
+			}
 
 
 		//

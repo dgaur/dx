@@ -124,6 +124,7 @@ close_file(	loader_context_sp	context,
 		context->open_file_count--;
 		context->open_file[ slot ] = NULL;
 		free(file);
+		status = STATUS_SUCCESS;
 
 		} while(0);
 

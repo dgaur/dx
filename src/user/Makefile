@@ -31,6 +31,7 @@ include $(CHILD_MAKEFILES)
 #
 # The user-mode ramdisk
 #
+RAMDISK_BIN_TREE	:= bin
 RAMDISK_BOOT_TREE	:= boot
 RAMDISK_FILE		:= ramdisk.tgz
 RAMDISK_LISTING		:= ramdisk.lst
@@ -42,6 +43,11 @@ RAMDISK_LISTING		:= ramdisk.lst
 .PHONY: all
 all: $(RAMDISK_FILE) $(RAMDISK_LISTING)
 
+
+#
+# User (lua) scripts
+#
+USER_BINS := $(wildcard $(RAMDISK_BIN_TREE)/*.lua)
 
 
 #
@@ -69,12 +75,13 @@ $(USER_DIRS):
 #	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
 #	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
 #
-$(RAMDISK_FILE): $(USER_EXES)
+$(RAMDISK_FILE): $(USER_EXES) $(USER_BINS)
 	@echo Building $@ ...
 	@mkdir -p $(RAMDISK_BOOT_TREE)
-	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $^)
+	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $(USER_EXES))
 	@$(TAR) chzf $@ \
-		$(foreach file, $(notdir $^), $(RAMDISK_BOOT_TREE)/$(file)) \
+		$(foreach file, $(notdir $(USER_EXES)), $(RAMDISK_BOOT_TREE)/$(file)) \
+		$(foreach file, $(notdir $(USER_BINS)), $(RAMDISK_BIN_TREE)/$(file)) \
 		--transform="s,^,/,"
 
 
