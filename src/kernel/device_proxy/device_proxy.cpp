@@ -224,7 +224,7 @@ map_memory(	thread_cr					current_thread,
 	{
 	address_space_cr	current_address_space	= current_thread.address_space;
 	void_tp				mapped_address			= NULL;
-	uint32_t			page_count				= PAGE_COUNT(syscall->data2);
+	uint32_t			page_count				= PAGE_COUNT(0,syscall->data2);
 	physical_address_t	physical_address[page_count];
 	status_t			status;
 
@@ -480,7 +480,9 @@ unmap_memory(	thread_cr					current_thread,
 				volatile syscall_data_s*	syscall)
 	{
 	address_space_cr	current_address_space	= current_thread.address_space;
-	uint32_t			page_count				= PAGE_COUNT(syscall->data2);
+	void_tp				mapped_address			= void_tp(syscall->data0);
+	uint32_t			page_count				= PAGE_COUNT(mapped_address,
+													syscall->data2);
 	status_t			status;
 
 	ASSERT(syscall->data1 == DEVICE_TYPE_MEMORY);
@@ -490,7 +492,6 @@ unmap_memory(	thread_cr					current_thread,
 		//
 		// Validate the device location
 		//
-		void_tp mapped_address = void_tp(syscall->data0);
 		if (!mapped_address ||
 			!is_aligned(mapped_address, PAGE_SIZE) ||
 			!__memory_manager->is_user_address(mapped_address) ||

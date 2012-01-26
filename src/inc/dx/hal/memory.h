@@ -8,10 +8,7 @@
 #define _HAL_MEMORY_H
 
 
-//
-// Cache line on x86 is 32 bytes @@is this true on newer processors?
-//
-#define CACHE_LINE_SIZE		32
+#define CACHE_LINE_SIZE		32	//@@@not constant
 
 
 //
@@ -51,17 +48,26 @@
 
 
 ///
-/// Given a buffer of size s (s = sizeof(buffer)), compute the smallest number
-/// of pages spanned by the buffer.  This assumes that the base of the buffer
-/// is page-aligned; otherwise, the returned count may be one page short.
+/// Given a buffer b of size s (bytes), compute the number of pages spanned by
+/// the buffer.
 ///
-/// PAGE_COUNT(0)			=> 0
-/// PAGE_COUNT(1)			=> 1
-/// PAGE_COUNT(PAGE_SIZE-1)	=> 1
-/// PAGE_COUNT(PAGE_SIZE)	=> 1
-/// PAGE_COUNT(PAGE_SIZE+1)	=> 2
+/// The buffer b is not required to be page-aligned; and is not required to
+/// span an integral number of pages.  In those cases, the number of pages may
+/// be rounded up to account for any fractional page(s) consumed by the buffer.
 ///
-#define PAGE_COUNT(s)	((s / PAGE_SIZE) + (s % PAGE_SIZE ? 1 : 0))
+/// PAGE_COUNT(0,0)				=> 0
+/// PAGE_COUNT(0,1)				=> 1
+/// PAGE_COUNT(0,PAGE_SIZE-1)	=> 1
+/// PAGE_COUNT(0,PAGE_SIZE)		=> 1
+/// PAGE_COUNT(0,PAGE_SIZE+1)	=> 2
+/// PAGE_COUNT(PAGE_SIZE,1)		=> 1
+/// PAGE_COUNT(PAGE_SIZE,2)		=> 1
+/// PAGE_COUNT(PAGE_SIZE-1,1)	=> 1
+/// PAGE_COUNT(PAGE_SIZE-1,2)	=> 2
+///
+#define PAGE_COUNT(b,s) \
+	((PAGE_ALIGN((uintptr_t)(b)+(s)) - PAGE_BASE((uintptr_t)(b)))/\
+		(PAGE_SIZE))
 
 
 

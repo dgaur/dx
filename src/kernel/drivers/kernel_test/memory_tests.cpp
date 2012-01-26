@@ -132,6 +132,35 @@ run_frame_tests()
 
 
 ///
+/// Exercise the basic memory/size calculation methods
+///
+static
+void_t
+run_memory_calculation_tests()
+	{
+	ASSERT(PAGE_ALIGN(0)			== 0);
+	ASSERT(PAGE_ALIGN(1)			== PAGE_SIZE);
+	ASSERT(PAGE_ALIGN(PAGE_SIZE)	== PAGE_SIZE);
+	ASSERT(PAGE_ALIGN(PAGE_SIZE-1)	== PAGE_SIZE);
+
+	ASSERT(PAGE_BASE(0)			== 0);
+	ASSERT(PAGE_BASE(1)			== 0);
+	ASSERT(PAGE_BASE(PAGE_SIZE)	== PAGE_SIZE);
+
+	ASSERT(PAGE_COUNT(0,0) == 0);
+
+	ASSERT(PAGE_COUNT(0,PAGE_SIZE-1)	== 1);
+	ASSERT(PAGE_COUNT(0,PAGE_SIZE)		== 1);
+	ASSERT(PAGE_COUNT(0,PAGE_SIZE+1)	== 2);
+
+	ASSERT(PAGE_COUNT(PAGE_SIZE-1, 1)	== 1);
+	ASSERT(PAGE_COUNT(PAGE_SIZE-1, 2)	== 2);
+
+	return;
+	}
+
+
+///
 /// Exercise the basic page directory/table methods
 ///
 static
@@ -213,6 +242,7 @@ run_memory_tests()
 	run_address_space_tests();
 	run_block_tests();
 	run_frame_tests();
+	run_memory_calculation_tests();
 	run_page_directory_tests();
 	run_pool_tests();
 	//@DMA memory, mapping/unmapping, etc

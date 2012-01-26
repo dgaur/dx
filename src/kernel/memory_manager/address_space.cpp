@@ -718,7 +718,7 @@ expand(	const void_tp		first_new_page,
 		//
 		// Must provide a valid size for expansion
 		//
-		frame_count = PAGE_COUNT(size);
+		frame_count = PAGE_COUNT(0, size);
 		if (frame_count == 0 || frame_count > EXPAND_ADDRESS_SPACE_PAGE_COUNT)
 			{
 			TRACE(ALL, "Cannot expand, frame count %d\n", frame_count);
@@ -978,7 +978,7 @@ share_frame(const void_tp			address,
 			shared_frame_list_cr	frame_list)
 	{
 	uint8_tp	page		= uint8_tp(address);
-	uint32_t	page_count	= PAGE_COUNT(size);
+	uint32_t	page_count	= PAGE_COUNT(address, size);
 	status_t	status		= STATUS_SUCCESS;
 
 	lock.acquire();
@@ -1147,7 +1147,7 @@ unshare_frame(	const void_tp	address,
 				size_t			size)
 	{
 	uint8_tp	page		= uint8_tp(address);
-	uint32_t	page_count	= PAGE_COUNT(size);
+	uint32_t	page_count	= PAGE_COUNT(address, size);
 
 	lock.acquire();
 

@@ -158,9 +158,9 @@ deliver_payload()
 
 		// The recipient's payload appears at the same offset as the sender's
 		receiver_payload = uint8_tp(page) + PAGE_OFFSET(sender_payload);
-		TRACE(ALL,"Delivering large payload to thread %#x at auto target %p "
-			"(page %p)\n",
-			thread.id, receiver_payload, page);
+		TRACE(ALL, "Delivering large payload (%db) to thread %#x "
+			"at auto target %p (page %p)\n",
+			payload_size, thread.id, receiver_payload, page);
 		}
 	else
 		{
@@ -168,9 +168,9 @@ deliver_payload()
 		// sender's payload
 		ASSERT(PAGE_OFFSET(sender_payload) == PAGE_OFFSET(receiver_payload));
 		page = void_tp(PAGE_BASE(receiver_payload));
-		TRACE(ALL,
-			"Delivering large payload to thread %#x at explicit target %p\n",
-			thread.id, receiver_payload);
+		TRACE(ALL, "Delivering large payload (%db) to thread %#x "
+			"at explicit target %p\n",
+			payload_size, thread.id, receiver_payload);
 		}
 
 
