@@ -5,6 +5,12 @@
 
 * PENDING-RELEASE:
 
+* Version 0.1.1, released 2012-01-26:
+	Rudimentary file-system support; initial support for reading files from
+	ramdisk.  User shell is now a standalone lua script.  Various associated
+	bug fixes.
+
+
 * Version 0.1.0, released 2011-12-11:
 	Initial lua integration.  No changes in externally-visible functionality,
 	but liblua is now viable and the user shell is built with lua.
