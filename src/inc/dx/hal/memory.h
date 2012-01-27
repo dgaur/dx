@@ -55,7 +55,8 @@
 /// span an integral number of pages.  In those cases, the number of pages may
 /// be rounded up to account for any fractional page(s) consumed by the buffer.
 ///
-/// PAGE_COUNT(0,0)				=> 0
+/// In general, the buffer size should be non-zero.
+///
 /// PAGE_COUNT(0,1)				=> 1
 /// PAGE_COUNT(0,PAGE_SIZE-1)	=> 1
 /// PAGE_COUNT(0,PAGE_SIZE)		=> 1
