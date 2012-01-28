@@ -5,7 +5,7 @@
 include ../Makefile.lib
 
 
-USER_START_FILE		:= $(notdir $(LINK_USER_START))
+USER_START_FILE		:= $(notdir $(LINK_START_FILE))
 USER_START_OBJECTS	:= setup_main.o start.o 
 
 

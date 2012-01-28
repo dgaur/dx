@@ -27,8 +27,13 @@ LIBM_DIR		:= $(subst /,,$(dir $(LIBM)))
 LIBTAR			:= $(subst $(DX_SRC_LIB_DIR)/,,$(LINK_LIBTAR))
 LIBTAR_DIR		:= $(subst /,,$(dir $(LIBTAR)))
 
+LIBSTART		:= $(subst $(DX_SRC_LIB_DIR)/,,$(LINK_START_FILE))
+LIBSTART_DIR	:= $(subst /,,$(dir $(LIBSTART)))
 
-ALL_LIBS		:= $(LIBC) $(LIBDX) $(LIBGDTOA)  $(LIBLUA) $(LIBM) $(LIBTAR)
+
+ALL_LIBS		:= $(LIBC) $(LIBDX) $(LIBGDTOA)  $(LIBLUA) $(LIBM) $(LIBSTART) \
+					$(LIBTAR)
+
 EXTERNAL_LIBS	:= $(LIBGDTOA) $(LIBLUA) $(LIBM)	# Third-party sources
 
 LIB_DIRS		:=	$(LIBC_DIR) \
@@ -36,6 +41,7 @@ LIB_DIRS		:=	$(LIBC_DIR) \
 					$(LIBGDTOA_DIR) \
 					$(LIBLUA_DIR) \
 					$(LIBM_DIR) \
+					$(LIBSTART_DIR) \
 					$(LIBTAR_DIR)
 
 
@@ -99,6 +105,14 @@ $(LIBM_DIR): fdlibm53.tar.gz fdlibm53.patch
 	@cd $@ && $(PATCH) -p1 < ../fdlibm53.patch
 
 $(LIBM): $(LIBM_DIR)
+	@$(MAKE) -C $<
+
+
+#
+# Object file for initializing executables.  Must be linked into every user
+# executable
+#
+$(LIBSTART): $(LIBSTART_DIR)
 	@$(MAKE) -C $<
 
 
