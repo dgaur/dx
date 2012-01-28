@@ -25,7 +25,9 @@ static status_t			send_environment_block(
 							thread_id_t			thread,
 							address_space_id_t address_space,
 							const uint8_t*		heap,
-							size_t				heap_size);
+							size_t				heap_size,
+							unsigned			argc,
+							const char**		argv);
 
 static status_t			send_heap(	address_space_id_t	address_space,
 									const uint8_t*		heap,
@@ -52,7 +54,8 @@ static status_t			send_stack(	address_space_id_t	address_space,
 /// @param default_capability_mask
 ///						-- default bitmask of capabilities assigned to all
 ///						   threads in this address space
-///
+/// @param argc			-- number of arguments in argv, passed to main()
+/// @param argv			-- traditional argv, passed to main()
 ///
 /// @return STATUS_SUCCESS if the process is successfully started.
 ///
@@ -61,15 +64,14 @@ static status_t			send_stack(	address_space_id_t	address_space,
 status_t
 create_process_from_image(	const uint8_t*		image,
 							size_t				image_size,
-							capability_mask_t	default_capability_mask)
+							capability_mask_t	default_capability_mask,
+							unsigned			argc,
+							const char**		argv)
 	{
 	address_space_id_t	address_space;
 	void_tp				entry_point;
-	elf_header_sp		header;
 	uint8_tp			heap;
-	size_t				heap_size;
 	uint8_tp			stack;
-	size_t				stack_size;
 	status_t			status;
 	thread_id_t			thread;
 
@@ -90,7 +92,7 @@ create_process_from_image(	const uint8_t*		image,
 		// Attempt to ensure the image is valid before creating the address
 		// space container or initial thread
 		//
-		header = read_elf_header(image);
+		elf_header_sp header = read_elf_header(image);
 		if (!header)
 			{
 			status = STATUS_INVALID_IMAGE;
@@ -146,7 +148,7 @@ create_process_from_image(	const uint8_t*		image,
 		//
 		// Install the (user mode) stack for the new thread
 		//
-		stack_size = 4 * PAGE_SIZE;	//@allow the caller to specify?
+		size_t stack_size = 4 * PAGE_SIZE;	//@allow the caller to specify?
 		status = send_stack(address_space, stack, stack_size);
 		if (status != STATUS_SUCCESS)
 			break;
@@ -157,7 +159,7 @@ create_process_from_image(	const uint8_t*		image,
 		//
 		//@malloc() needs > 1 page for init?
 		//@lualibs need > 8 pages, and >4 at run-time
-		heap_size = 24 * PAGE_SIZE;	//@allow the caller to specify?
+		size_t heap_size = 24 * PAGE_SIZE;	//@allow the caller to specify?
 		status = send_heap(address_space, heap, heap_size);
 		if (status != STATUS_SUCCESS)
 			break;
@@ -167,7 +169,7 @@ create_process_from_image(	const uint8_t*		image,
 		// Create and send the environment block for this address space
 		//
 		status = send_environment_block(thread, address_space, heap,
-			heap_size);
+			heap_size, argc, argv);
 		if (status != STATUS_SUCCESS)
 			break;
 
@@ -328,7 +330,8 @@ send_bss(	address_space_id_t			address_space,
 /// @param address_space	-- id of the new address space
 /// @param heap				-- base address of the heap
 /// @param heap_size		-- size, in bytes, of the initial heap
-/// @@@@argc, argv, heap, etc
+/// @param argc				-- number of arguments in argv, passed to main()
+/// @param argv				-- traditional argv, passed to main()
 ///
 /// @return STATUS_SUCCESS on success; nonzero otherwise
 ///
@@ -337,29 +340,72 @@ status_t
 send_environment_block(	thread_id_t			thread,
 						address_space_id_t	address_space,
 						const uint8_t*		heap,
-						size_t				heap_size)
+						size_t				heap_size,
+						unsigned			argc,
+						const char**		argv)
 	{
-	void_t*							buffer;
+	void_t*							buffer = NULL;
 	address_space_environment_sp	environment;
-	status_t						status;
+	status_t						status = STATUS_SUCCESS;
 
-	buffer = malloc(sizeof(*environment) + PAGE_SIZE - 1);
-	if (buffer)
+	do
 		{
-		message_s message;
+		//
+		// Allocate and align the environment block so that it may be
+		// delivered correctly
+		//
+		buffer = malloc(sizeof(*environment) + PAGE_SIZE - 1);
+		if (!buffer)
+			{ status = STATUS_INSUFFICIENT_MEMORY; break; }
 
-		// Align the environment block so that it may be delivered correctly
 		environment = (address_space_environment_sp)(PAGE_ALIGN(buffer));
 
+
+		//
 		// Initialize the environment block
+		//
 		memset(environment, 0, sizeof(*environment));
 		environment->address_space_id	= address_space;
 		environment->heap_base			= (uint8_t*)heap;
 		environment->heap_current		= (uint8_t*)heap;
 		environment->heap_limit			= (uint8_t*)heap + heap_size;
-		//@argc, argv, etc
 
+
+		//
+		// Initialize the arguments/parameters, if any, to the main() thread;
+		// pack the arguments into the argv buffer and let the initial thread
+		// in this new address space unpack them
+		//
+		if (argc > ARGV_COUNT_MAX)
+			{ status = STATUS_INSUFFICIENT_MEMORY; break; }
+		environment->argc = argc;
+
+		char* offset	= environment->argv_buffer;
+		const char* end	= offset + ARGV_BUFFER_SIZE - 1;
+		while(argc > 0)
+			{
+			// Ensure this argument + its terminator will fit in the argv buffer
+			size_t length = strlen(*argv) + 1;
+			if (offset + length > end)
+				{ status = STATUS_INSUFFICIENT_MEMORY; break; }
+
+			// Pack this next argument into the buffer
+			memcpy(offset, *argv, length);
+
+			// Skip ahead to the next argument, if any
+			argc--;
+			argv++;
+			offset += length;
+			}
+
+		if (status != STATUS_SUCCESS)
+			{ break; }
+
+
+		//
 		// Initialize the message
+		//
+		message_s message;
 		message.u.destination			= thread;
 		message.type					= MESSAGE_TYPE_LOAD_ADDRESS_SPACE;
 		message.id						= MESSAGE_ID_ATOMIC;
@@ -367,15 +413,21 @@ send_environment_block(	thread_id_t			thread,
 		message.data_size				= sizeof(*environment);
 		message.destination_address		= (void_tp)USER_ENVIRONMENT_BLOCK;
 
-		// Send the block to the new thread
+
+		//
+		// Finally send the environment block to the new thread
+		//
 		status = send_message(&message);
 
-		free(buffer);
-		}
-	else
-		{
-		status = STATUS_INSUFFICIENT_MEMORY;
-		}
+		} while(0);
+
+
+	//
+	// Clean up
+	//
+	if (buffer)
+		{ free(buffer); }
+
 
 	return(status);
 	}

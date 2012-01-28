@@ -514,7 +514,9 @@ start_daemons(const loader_context_s* context)
 		// This is one of the boot-time daemons, so start it now
 		status_t status = create_process_from_image(entry->tar.file,
 													entry->tar.file_size,
-													CAPABILITY_ALL);
+													CAPABILITY_ALL,
+													0,
+													NULL);
 		if (status != STATUS_SUCCESS)
 			{
 			// This is typically fatal, but useful for debugging
