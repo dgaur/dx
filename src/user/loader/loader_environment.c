@@ -49,8 +49,6 @@ initialize_environment()
 		memset(environment, 0, sizeof(environment));
 
 		//@env->addr_space_id = X;
-		//@env->argc = 0
-		//@env->argv = NULL;
 		//@pid? ppid?
 		//@else?
 

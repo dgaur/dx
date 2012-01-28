@@ -2,6 +2,8 @@
 // setup_main.c
 //
 
+#include "assert.h"
+#include "dx/address_space_environment.h"
 #include "dx/types.h"
 #include "stdlib.h"
 #include "string.h"
@@ -12,8 +14,38 @@
 //
 extern
 int
-main();
+main(int argc, char** argv);
 
+
+
+///
+/// Unpack the argv_buffer and recreate the individual argv pointers
+///
+static
+void_t
+initialize_argv()
+	{
+	address_space_environment_sp environment = find_environment_block();
+
+	char **argv  = environment->argv;
+	char *offset = environment->argv_buffer;
+
+	// Recreate the argv pointers into the argv_buffer
+	int i;
+	assert(environment->argc < ARGV_COUNT_MAX);
+	for (i = 0; i < environment->argc; i++)
+		{
+		// Unpack the next argument
+		*argv = offset;
+
+		// Skip ahead to the next argument, if any
+		size_t length = strlen(*argv) + 1;
+		offset += length;
+		argv++;
+		}
+
+	return;
+	}
 
 
 ///
@@ -45,20 +77,20 @@ initialize_bss()
 void_t
 setup_main()
 	{
-	int status;
+	address_space_environment_sp environment = find_environment_block();
 
 
 	//
 	// Initialize the runtime environment for this address space
 	//
 	initialize_bss();
+	initialize_argv();
 
-	//@read argv, argc from env block
 
 	//
 	// Invoke the user-defined main() entry point
 	//
-	status = main(); //@argc, argv, env
+	int status = main(environment->argc, environment->argv);
 
 
 	//
