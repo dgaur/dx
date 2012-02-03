@@ -5,6 +5,8 @@
 //
 
 #include "dx/libtar.h"
+#include "string.h"
+
 
 
 ///
@@ -60,9 +62,8 @@ tar_is_exhausted(const uint8_t* image)
 	{
 	tar_header_sp header = (tar_header_sp)(image);
 
-	// A zero-length record marks the end of the .tar image.  No more .tar
-	// entries beyond this point
-	return (!header || read_file_size(header) == 0);
+	// Assume an entry with no name marks the end of the .tar
+	return (!header || strlen(header->name) == 0);
 	}
 
 
@@ -95,18 +96,18 @@ tar_read(const uint8_t* image, tar_entry_sp entry)
 
 
 		//
-		// Each TAR file should end with two full blocks of zero's.  If the
-		// size of this entry is zero, then assume this is the end of the
+		// Each TAR file should end with two full blocks of zero's.  If this
+		// entry has no name (is all zero), then assume this is the end of the
 		// image.
 		//
-		size_t file_size = read_file_size(header);
-		if (file_size == 0)
+		if (strlen(header->name) == 0)
 			{ break; }
 
 
 		//
 		// Locate the .tar entry for the next iteration
 		//
+		size_t file_size = read_file_size(header);
 		uint32_t block_count = calculate_block_count(file_size);
 		next = file + (block_count * TAR_BLOCK_SIZE);
 
