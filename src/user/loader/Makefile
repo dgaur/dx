@@ -2,8 +2,18 @@
 # Makefile
 #
 
-include Makefile.inc
 include ../Makefile.user
+
+
+LOADER_DIR		:= loader
+LOADER_BIN		:= loader.bin
+LOADER_EXE		:= loader.exe
+LOADER_OBJECTS	:= loader.o loader_environment.o loader_main.o
+LOADER_PRIORITY	:= S00
+
+LOADER_DISASM	:= $(LOADER_BIN).disasm
+
+LINK_EXTRA_LIBS := $(LINK_LIBTAR)
 
 
 .PHONY: all
@@ -98,6 +108,12 @@ $(LOADER_DISASM): $(LOADER_BIN)
 	@$(OBJDUMP) $(OBJDUMP_FLAGS) -D -b binary -m i386 \
 		--adjust-vma=$(LOADER_TEXT) $< > $@
 
+
+
+.PHONY: install
+install: $(LOADER_BIN) $(LOADER_DISASM)
+	@mkdir -p $(RAMDISK_DIR)/boot
+	@cp -a $< $(RAMDISK_DIR)/boot/$(LOADER_PRIORITY)$<
 
 
 #

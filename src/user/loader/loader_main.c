@@ -487,17 +487,20 @@ static
 void_t
 start_daemons(const loader_context_s* context)
 	{
+	#define DAEMON_COUNT 16
+	const directory_entry_s* daemon[ DAEMON_COUNT ];
+	memset(daemon, 0, sizeof(daemon));
+
+
 	//
-	// First entry is the loader itself (i.e., this code).  Skip over it, since
-	// obviously it's already running
+	// Walk through the ramdisk and locate the various drivers and boot-time
+	// daemons.  The first ramdisk entry is the loader itself (i.e., this code);
+	// so skip it, since obviously it's already running
 	//
+	const char*	prefix			= "/boot/S";
+	size_t		prefix_length	= strlen(prefix);
+
 	const directory_entry_s* entry = context->ramdisk_entries->next;
-
-
-	//
-	// Walk through the rest of the ramdisk and launch the various drivers
-	// and boot-time daemons
-	//
 	while(entry)
 		{
 		// Skip over directories, special files, empty files, etc
@@ -507,13 +510,32 @@ start_daemons(const loader_context_s* context)
 			entry->tar.header->type != TAR_TYPE_REGULAR_FILE1)
 			{ entry = entry->next; continue; }
 
-		// Only launch the boot-time daemons; ignore other executables for now
-		if (memcmp(entry->tar.header->name, "/boot", 5) != 0)
+		// Only need the boot-time daemons; ignore other executables for now
+		if (memcmp(entry->tar.header->name, prefix, prefix_length) != 0)
 			{ entry = entry->next; continue; }
 
-		// This is one of the boot-time daemons, so start it now
-		status_t status = create_process_from_image(entry->tar.file,
-													entry->tar.file_size,
+		// Determine where this driver/daemon fits in the launch sequence
+		unsigned index = atoi(&entry->tar.header->name[ prefix_length ]);
+		if (index < DAEMON_COUNT)
+			daemon[ index ] = entry;
+
+		entry = entry->next;
+		}
+
+
+	//
+	// Now launch all of the drivers + daemons, in order.  Again, skip the
+	// first daemon, which should be the boot-loader
+	//
+	unsigned i;
+	for(i = 1; i < DAEMON_COUNT; i++)
+		{
+		if (daemon[i] == NULL)
+			continue;
+
+		// Launch this next boot daemon/driver
+		status_t status = create_process_from_image(daemon[i]->tar.file,
+													daemon[i]->tar.file_size,
 													CAPABILITY_ALL,
 													0,
 													NULL);
@@ -522,8 +544,6 @@ start_daemons(const loader_context_s* context)
 			// This is typically fatal, but useful for debugging
 			printf("Warning: loader unable to start daemon: %d\n", (int)status);
 			}
-
-		entry = entry->next;
 		}
 
 	return;

@@ -11,78 +11,51 @@ include Makefile.user
 
 
 #
-# The various user-mode components (subtrees) that may be built here
-#
-# @@The order is important here: the kernel expects find the user
-# loader in the first entry; and the order also determines assignment of
-# thread ids@@
-#
-USER_DIRS	:= loader vga console shell keyboard
-
-
-#
-# Generate the list of files that should be included in the ramdisk
-#
-USER_EXES		:=
-CHILD_MAKEFILES	:= $(foreach DIR, $(USER_DIRS), $(DIR)/Makefile.inc)
-include $(CHILD_MAKEFILES)
-
-
-#
 # The user-mode ramdisk
 #
-RAMDISK_BIN_TREE	:= bin
-RAMDISK_BOOT_TREE	:= boot
+RAMDISK_DIR			:= ramdisk
 RAMDISK_FILE		:= ramdisk.tgz
 RAMDISK_LISTING		:= ramdisk.lst
+RAMDISK_SKELETON	:= skeleton
 
 
 #
-# The ramdisk should collect all of the necessary user binaries
+# By default, collect all of the necessary user scripts + binaries into a single
+# ramdisk image
 #
 .PHONY: all
 all: $(RAMDISK_FILE) $(RAMDISK_LISTING)
 
 
 #
-# User (lua) scripts
+# Create the initial ramdisk tree
 #
-USER_BINS := $(wildcard $(RAMDISK_BIN_TREE)/*.lua)
+$(RAMDISK_DIR):
+	@mkdir -p $@
 
 
 #
-# Build the executables individually.  Always try to rebuild these when
-# collecting the ramdisk, since the dependencies are unknown here
+# The various user-mode components (subtrees) that may be built here;
+# automatically install them into the ramdisk tree
 #
-.PHONY: $(USER_EXES)
-$(USER_EXES):
-	@$(MAKE) -C $(dir $@) all
+USER_DIRS	:= loader vga console shell keyboard
 
-
-#
-# Build the child subdirectories individually
-#
 .PHONY: $(USER_DIRS)
-$(USER_DIRS):
-	@$(MAKE) -C $@ all
-
+$(USER_DIRS): $(RAMDISK_DIR)
+	@$(MAKE) -C $@ install RAMDISK_DIR=$(realpath $(RAMDISK_DIR))
 
 
 #
-# Pack the various boot-time daemons into a tarball; this becomes the
-# boot-time ramdisk.
-#	- locate the various daemons in their respective subdirectories
-#	- create a symbolic link under $(RAMDISK_BOOT_TREE) to each daemon
-#	- collect $(RAMDISK_BOOT_TREE) into a simple tarball
+# Pack the various daemons, drivers and other user executables into a tarball;
+# this becomes the boot-time ramdisk.  Ensure that the loader is installed as
+# the first entry, so that the kernel can locate it at boot-time
 #
-$(RAMDISK_FILE): $(USER_EXES) $(USER_BINS)
+$(RAMDISK_FILE): $(RAMDISK_DIR) $(RAMDISK_SKELETON) $(USER_DIRS)
 	@echo Building $@ ...
-	@mkdir -p $(RAMDISK_BOOT_TREE)
-	@ln -s -f -t $(RAMDISK_BOOT_TREE) $(addprefix ../, $(USER_EXES))
-	@$(TAR) chzf $@ \
-		$(foreach file, $(notdir $(USER_EXES)), $(RAMDISK_BOOT_TREE)/$(file)) \
-		$(foreach file, $(notdir $(USER_BINS)), $(RAMDISK_BIN_TREE)/$(file)) \
-		--transform="s,^,/,"
+	@cp -a $(RAMDISK_SKELETON)/* $(RAMDISK_DIR)
+	@$(TAR) chzf $@ --transform="s,^$(RAMDISK_DIR),," \
+		$(wildcard $(RAMDISK_DIR)/boot/S00*) \
+		$(RAMDISK_DIR)
 
 
 #
@@ -99,7 +72,7 @@ $(RAMDISK_LISTING): $(RAMDISK_FILE)
 .PHONY: clean
 clean:
 	@echo Cleaning user tree ...
-	@rm -rf $(RAMDISK_BOOT_TREE)
+	@rm -rf $(RAMDISK_DIR)
 	@rm -f $(RAMDISK_FILE)
 	@rm -f $(RAMDISK_LISTING)
 	@for dir in $(USER_DIRS); do \
