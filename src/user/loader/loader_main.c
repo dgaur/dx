@@ -487,6 +487,8 @@ static
 void_t
 start_daemons(const loader_context_s* context)
 	{
+	status_t status;
+
 	#define DAEMON_COUNT 16
 	const directory_entry_s* daemon[ DAEMON_COUNT ];
 	memset(daemon, 0, sizeof(daemon));
@@ -494,8 +496,8 @@ start_daemons(const loader_context_s* context)
 
 	//
 	// Walk through the ramdisk and locate the various drivers and boot-time
-	// daemons.  The first ramdisk entry is the loader itself (i.e., this code);
-	// so skip it, since obviously it's already running
+	// daemons/servers.  The first ramdisk entry is the loader itself (i.e.,
+	// this code); so skip it, since obviously it's already running
 	//
 	const char*	prefix			= "/boot/S";
 	size_t		prefix_length	= strlen(prefix);
@@ -534,11 +536,11 @@ start_daemons(const loader_context_s* context)
 			continue;
 
 		// Launch this next boot daemon/driver
-		status_t status = create_process_from_image(daemon[i]->tar.file,
-													daemon[i]->tar.file_size,
-													CAPABILITY_ALL,
-													0,
-													NULL);
+		status = create_process_from_image(	daemon[i]->tar.file,
+											daemon[i]->tar.file_size,
+											CAPABILITY_ALL,
+											0,
+											NULL);
 		if (status != STATUS_SUCCESS)
 			{
 			// This is typically fatal, but useful for debugging
@@ -546,6 +548,26 @@ start_daemons(const loader_context_s* context)
 			}
 		}
 
+
+
+	//
+	// Lastly, drop the user into the default shell
+	//
+	const directory_entry_s* lua = find_file(context, "/bin/lua.exe");
+	if (lua)
+		{
+		status = create_process_from_image(	lua->tar.file,
+											lua->tar.file_size,
+											CAPABILITY_ALL,
+											0,
+											NULL);
+		if (status != STATUS_SUCCESS)
+			{ printf("Unable to start shell: %d\n", (int)status); }
+		}
+	else
+		{ printf("Unable to locate lua interpreter\n"); }
+
+		
 	return;
 	}
 

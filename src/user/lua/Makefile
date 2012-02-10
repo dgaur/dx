@@ -5,10 +5,9 @@
 include ../Makefile.user
 
 
-LOCAL_DIR		:= shell
-LOCAL_EXE		:= shell.exe
-LOCAL_OBJECTS	:= shell.o
-LOCAL_PRIORITY	:= S03
+LOCAL_DIR		:= lua
+LOCAL_EXE		:= lua.exe
+LOCAL_OBJECTS	:= lua.o
 
 
 LINK_EXTRA_LIBS	+= $(LINK_LIBLUA) $(LINK_LIBM)
@@ -28,8 +27,8 @@ CC_INCLUDES += -I$(dir $(LINK_LIBLUA))
 
 .PHONY: install
 install: $(LOCAL_EXE)
-	@mkdir -p $(RAMDISK_DIR)/boot
-	@cp -a $< $(RAMDISK_DIR)/boot/$(LOCAL_PRIORITY)$<
+	@mkdir -p $(RAMDISK_DIR)/bin
+	@cp -a $< $(RAMDISK_DIR)/bin/$<
 
 
 #

@@ -38,7 +38,7 @@ $(RAMDISK_DIR):
 # The various user-mode components (subtrees) that may be built here;
 # automatically install them into the ramdisk tree
 #
-USER_DIRS	:= loader vga console shell keyboard
+USER_DIRS	:= loader vga console keyboard lua
 
 .PHONY: $(USER_DIRS)
 $(USER_DIRS): $(RAMDISK_DIR)

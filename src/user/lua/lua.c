@@ -1,5 +1,5 @@
 //
-// shell.c
+// lua.c
 //
 
 #include "dx/read_kernel_stats.h"
