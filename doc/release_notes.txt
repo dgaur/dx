@@ -5,6 +5,11 @@
 
 * PENDING-RELEASE:
 
+* Version 0.1.2, released 2012-02-11:
+	Rearranged the ramdisk layout and boot sequence.  Moving toward separate
+	"interpreter + script" model.
+
+
 * Version 0.1.1, released 2012-01-26:
 	Rudimentary file-system support; initial support for reading files from
 	ramdisk.  User shell is now a standalone lua script.  Various associated
