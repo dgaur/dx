@@ -19,7 +19,6 @@ status_t
 create_process_from_image(	const uint8_t*		image,
 							size_t				image_size,
 							capability_mask_t	default_capability_mask,
-							unsigned			argc,
 							const char**		argv);
 							//@default stack_size?
 

@@ -26,7 +26,6 @@ static status_t			send_environment_block(
 							address_space_id_t address_space,
 							const uint8_t*		heap,
 							size_t				heap_size,
-							unsigned			argc,
 							const char**		argv);
 
 static status_t			send_heap(	address_space_id_t	address_space,
@@ -54,8 +53,8 @@ static status_t			send_stack(	address_space_id_t	address_space,
 /// @param default_capability_mask
 ///						-- default bitmask of capabilities assigned to all
 ///						   threads in this address space
-/// @param argc			-- number of arguments in argv, passed to main()
-/// @param argv			-- traditional argv, passed to main()
+/// @param argv			-- traditional argv, passed to main(), terminated
+///							with NULL entry
 ///
 /// @return STATUS_SUCCESS if the process is successfully started.
 ///
@@ -65,7 +64,6 @@ status_t
 create_process_from_image(	const uint8_t*		image,
 							size_t				image_size,
 							capability_mask_t	default_capability_mask,
-							unsigned			argc,
 							const char**		argv)
 	{
 	address_space_id_t	address_space;
@@ -169,7 +167,7 @@ create_process_from_image(	const uint8_t*		image,
 		// Create and send the environment block for this address space
 		//
 		status = send_environment_block(thread, address_space, heap,
-			heap_size, argc, argv);
+			heap_size, argv);
 		if (status != STATUS_SUCCESS)
 			break;
 
@@ -330,8 +328,8 @@ send_bss(	address_space_id_t			address_space,
 /// @param address_space	-- id of the new address space
 /// @param heap				-- base address of the heap
 /// @param heap_size		-- size, in bytes, of the initial heap
-/// @param argc				-- number of arguments in argv, passed to main()
-/// @param argv				-- traditional argv, passed to main()
+/// @param argv				-- traditional argv, passed to main(), terminated
+///								with NULL entry
 ///
 /// @return STATUS_SUCCESS on success; nonzero otherwise
 ///
@@ -341,7 +339,6 @@ send_environment_block(	thread_id_t			thread,
 						address_space_id_t	address_space,
 						const uint8_t*		heap,
 						size_t				heap_size,
-						unsigned			argc,
 						const char**		argv)
 	{
 	void_t*							buffer = NULL;
@@ -376,13 +373,10 @@ send_environment_block(	thread_id_t			thread,
 		// pack the arguments into the argv buffer and let the initial thread
 		// in this new address space unpack them
 		//
-		if (argc > ARGV_COUNT_MAX)
-			{ status = STATUS_INSUFFICIENT_MEMORY; break; }
-		environment->argc = argc;
+		char*		offset	= environment->argv_buffer;
+		const char*	end		= offset + ARGV_BUFFER_SIZE - 1;
 
-		char* offset	= environment->argv_buffer;
-		const char* end	= offset + ARGV_BUFFER_SIZE - 1;
-		while(argc > 0)
+		for( ; argv && *argv; argv++)
 			{
 			// Ensure this argument + its terminator will fit in the argv buffer
 			size_t length = strlen(*argv) + 1;
@@ -393,9 +387,12 @@ send_environment_block(	thread_id_t			thread,
 			memcpy(offset, *argv, length);
 
 			// Skip ahead to the next argument, if any
-			argc--;
-			argv++;
+			environment->argc++;
 			offset += length;
+
+			// Exhausted argv[]?
+			if (environment->argc >= ARGV_COUNT_MAX)
+				{ status = STATUS_INSUFFICIENT_MEMORY; break; }
 			}
 
 		if (status != STATUS_SUCCESS)

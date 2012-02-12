@@ -539,7 +539,6 @@ start_daemons(const loader_context_s* context)
 		status = create_process_from_image(	daemon[i]->tar.file,
 											daemon[i]->tar.file_size,
 											CAPABILITY_ALL,
-											0,
 											NULL);
 		if (status != STATUS_SUCCESS)
 			{
@@ -561,7 +560,6 @@ start_daemons(const loader_context_s* context)
 		status = create_process_from_image(	lua->tar.file,
 											lua->tar.file_size,
 											CAPABILITY_ALL,
-											2,
 											argv);
 		if (status != STATUS_SUCCESS)
 			{ printf("Unable to start shell: %d\n", (int)status); }
