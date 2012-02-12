@@ -89,13 +89,27 @@ export_callback(lua_State* lua, const char* key, lua_CFunction callback)
 /// Main entry point
 ///
 int
-main()
+main(int argc, char** argv)
 	{
 	lua_State*	lua		= NULL;
+	const char*	script;
 	status_t	status	= STATUS_INVALID_IMAGE;
+
 
 	do
 		{
+		//
+		// Parse any arguments
+		//
+		if (argc < 2)
+			{
+			printf("Usage: %s <input-file>\n", argv[0]);
+			status = STATUS_INVALID_DATA;
+			break;
+			}
+		script = argv[1];
+
+
 		//
 		// Initialize the luajit engine
 		//
@@ -129,7 +143,7 @@ main()
 		//
 		// Load the source file (script)
 		//
-		int error = luaL_loadfile(lua, "/bin/shell.lua");
+		int error = luaL_loadfile(lua, script);
 		if (error)
 			{
 			printf("Unable to load script: %s\n",

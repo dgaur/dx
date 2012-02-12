@@ -553,21 +553,23 @@ start_daemons(const loader_context_s* context)
 	//
 	// Lastly, drop the user into the default shell
 	//
-	const directory_entry_s* lua = find_file(context, "/bin/lua.exe");
+	const char* lua_bin = "/bin/lua.exe";
+	const directory_entry_s* lua = find_file(context, lua_bin);
 	if (lua)
 		{
+		const char* argv[] = { lua_bin, "/bin/shell.lua", NULL };
 		status = create_process_from_image(	lua->tar.file,
 											lua->tar.file_size,
 											CAPABILITY_ALL,
-											0,
-											NULL);
+											2,
+											argv);
 		if (status != STATUS_SUCCESS)
 			{ printf("Unable to start shell: %d\n", (int)status); }
 		}
 	else
 		{ printf("Unable to locate lua interpreter\n"); }
 
-		
+
 	return;
 	}
 
