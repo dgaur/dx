@@ -13,8 +13,8 @@
 //
 // Current version number
 //
-#define DX_VERSION         "0.1.2"
-#define DX_RELEASE_DATE    "2012-02-11"
+#define DX_VERSION         "post-0.1.2"
+#define DX_RELEASE_DATE    "unreleased"
 
 
 
